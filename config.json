@@ -1,0 +1,6 @@
+{
+  "webserver": {
+    "host": "localhost",
+    "port": 2017
+  }
+}

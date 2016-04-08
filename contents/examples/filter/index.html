@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <title>WebRTC 연구실 - getUserMedia</title>
+    <meta name="description" content="WebRTC에 대한 정보 공유 (getUserMedia)">
+    <meta name="author" content="codeJS">
+    <meta name="viewport" content="width=device-width; initial-scale=1.0">
+    <link href="/img/logo-webrtc.png" type="image/png" rel="icon">
+    <link href="/css/style.css" type="text/css" rel="stylesheet">
+    <link href="css/filter.css" type="text/css" rel="stylesheet">
+  </head>
+
+  <body>
+    <header>
+      <h1>WebRTC 연구실 - 비디오에 필터 적용하기</h1>
+    </header>
+    
+    <div id="content">
+      <div class="wrap-640">
+        <video autoplay></video>
+        <p>비디오 화면을 클릭하면 CSS필터가 적용됩니다.</p>
+        <button id="start">Start</button>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        <a href="http://www.codejs.co.kr">&copy; Copyright by codeJS</a>
+      </p>
+    </footer>
+    
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script>
+      $(function() {
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;          
+        var $video = $('video')
+          , idx = 0
+          , filters = ['grayscale', 'sepia', 'blur', 'brightness',
+                       'contrast', 'hue-rotate', 'hue-rotate2',
+                       'hue-rotate3', 'saturate', 'invert', ''];
+
+        function getUserMedia() {
+          navigator.getUserMedia({
+            audio: true, 
+            video: true
+          }, function(stream) {
+            $video.attr('src', URL.createObjectURL(stream));
+            $video[0].onloadedmetadata = function(e) {
+              console.log('onloadedmetadata', e);
+              $video[0].play();
+            };
+            
+            /* 스피치 인식.
+            var recognition = new webkitSpeechRecognition();
+            recognition.onresult = function(event) { 
+              console.log('recognition', event); 
+            };
+            recognition.start();
+            */
+            
+          }, function(err) {
+            console.log('getUserMedia', err);
+            alert(err.message);
+          });
+        }
+        
+        function changeFilter(e) {
+          var el = e.target;
+          el.className = '';
+          var effect = filters[idx++ % filters.length]; // loop through filters.
+          if (effect) {
+            el.classList.add(effect);
+          }
+        }
+        
+        // initialize
+        $('video').click(changeFilter);
+        $('#start').click(getUserMedia);
+      });
+    </script>
+  </body>
+</html>
