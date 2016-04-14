@@ -12,6 +12,13 @@ p { margin: 5px 0 10px; }
 a { color: #000; text-decoration: none; }
 a:hover { text-decoration: underline; }
 footer { margin: 30px 0; text-align: center; }
+pre { margin-top: 0 !important; }
+code { 
+	background: #F7F7F7 !important; border: solid 1px #bbb;
+	border-radius: 3px 
+}
+
+.align-center { text-align: center; }
 #content {
 	padding: 80px 30px; min-height: 300px; 
 	border-bottom: solid 1px #ebebeb; 
@@ -23,6 +30,7 @@ footer { margin: 30px 0; text-align: center; }
 .wrap { width: 280px; margin: 0 auto; }
 .wrap-480 { width: 480px; margin: 0 auto; }
 .wrap-640 { width: 640px; margin: 0 auto; }
+.wrap-800 { width: 800px; margin: 0 auto; }
 .btn {
   padding: 6px 25px; color: #000; font-size: 16px; 
   border: solid 1px #000; background: #fff; border-radius: 6px; 
