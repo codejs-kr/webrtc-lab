@@ -1,10 +1,6 @@
 @charset "utf-8";
 
-video {
-  width: 100%;
-  background: rgba(255,255,255,0.5);
-  border: 2px solid #ccc;
-}
+video { width: 100%; }
 .blur {
   -webkit-filter: blur(3px);
   -moz-filter: blur(3px);

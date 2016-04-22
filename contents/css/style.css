@@ -15,7 +15,7 @@ footer { margin: 30px 0; text-align: center; }
 pre { margin-top: 0 !important; }
 code { 
 	background: #F7F7F7 !important; border: solid 1px #bbb;
-	border-radius: 3px 
+	border-radius: 3px; font-size: 0.9em;
 }
 
 .align-center { text-align: center; }
@@ -27,10 +27,13 @@ code {
 	height: 170px; 
 	background: #fff url(../img/logo-webrtc.png) no-repeat center top; 
 }
-.wrap { width: 280px; margin: 0 auto; }
-.wrap-480 { width: 480px; margin: 0 auto; }
-.wrap-640 { width: 640px; margin: 0 auto; }
-.wrap-800 { width: 800px; margin: 0 auto; }
+.wrap { width: 720px; margin: 0 auto; }
+.wrap-240 { width: 240px; margin: 0 auto; }
+.wrap-340 { width: 340px; margin: 0 auto; }
+.two-peace div { float: left; width: 48%; }
+.two-peace div:first-child { margin-right: 15px; }
+.two-peace:after { display: block; content: ""; clear: both; }
+
 .btn {
   padding: 6px 25px; color: #000; font-size: 16px; 
   border: solid 1px #000; background: #fff; border-radius: 6px; 
@@ -55,3 +58,5 @@ button:hover { background-color: #cf402f; }
 button[disabled] { color: #ccc; }
 button[disabled]:hover { background-color: #d84a38; }
 video { margin: 0 0 20px 0; width: 100%; background: #222; }
+canvas { margin-bottom: 20px; }
+.not-yet * { color: #bbb; }
