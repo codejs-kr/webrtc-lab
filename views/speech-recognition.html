@@ -1,137 +1,39 @@
 <% include global/header.html %>
+<link rel="stylesheet" type="text/css" href="/examples/speech-recognition/speech.css" />
 
-<style>
-  #result {
-    margin-bottom: 20px; padding: 10px 20px; height: 150px;  
-    border: solid 1px #000; border-radius: 6px;
-  }
-</style>
+<!--
+	맥북 노트북 거리별 인식 테스트 (11층 소회의실, 참석인원 1인)
+	조용한 환경에서 보통의 목소리 크기로 글을 읽어봄
+	
+	1m 이내, 인식률 최대 80%이상
+	1.2m 이내, 인식률 약 60~70% 
+	1.5m 초과, 인식률 약 10% 문자 인식 거의 못함
+-->
 
 <div id="content">
+	<span id="icon-music">♬</span>
+	
   <div class="wrap">
-    <p>[Start] 버튼을 누른 후 마이크에 이야기를 해보세요.</p>
+    <p>아래 버튼을 누른 후 마이크에 이야기를 해보세요. (마이크와 가까울수록 인식률이 좋습니다)</p>
     <div id="result">
       <span class="final" id="final_span"></span> 
       <span class="interim" id="interim_span"></span>
     </div>
-    <button id="start">Start</button>
+    <button id="btn-mic" class="off">마이크 <span></span></button>
+    
+    <audio id="audio" src="/examples/speech-recognition/ending.mp3"></audio>
+    <!--
+		<div>
+		  <button onclick="document.getElementById('audio').play()">Play the Audio</button>
+		  <button onclick="document.getElementById('audio').pause()">Pause the Audio</button>
+		  <button onclick="document.getElementById('audio').volume+=0.2">Increase Volume</button>
+		  <button onclick="document.getElementById('audio').volume-=0.2">Decrease Volume</button>
+		</div>
+		-->
   </div>
 </div>
 
-<script>
-  $(function() {
-    if (typeof webkitSpeechRecognition != 'function') {
-      alert('크롬에서만 동작 합니다.');
-      return false;
-    }
-    
-    var recognition = new webkitSpeechRecognition();
-    var isRecognizing = false;
-    var ignore_onend = false;
-    var final_transcript = '';
-    
-    recognition.continuous = true;
-    recognition.interimResults = true;
-    
-    recognition.onstart = function() {
-      console.log('onstart', arguments);
-      isRecognizing = true;
-    };
-  
-    recognition.onend = function() {
-      console.log('onend', arguments);
-      isRecognizing = false;
-      
-      if (ignore_onend) {
-        return false;
-      }
-      
-      // do end process
-      if (!final_transcript) {
-        console.log('empty final_transcript');
-        return false;
-      }
-      
-      if (window.getSelection) {
-        window.getSelection().removeAllRanges();
-        var range = document.createRange();
-        range.selectNode(document.getElementById('final_span'));
-        window.getSelection().addRange(range);
-      }
-    };
-  
-    recognition.onresult = function(event) {
-      console.log('onresult', event);
-      
-      var interim_transcript = '';
-      if (typeof(event.results) == 'undefined') {
-        recognition.onend = null;
-        recognition.stop();
-        return;
-      }
-      
-      for (var i = event.resultIndex; i < event.results.length; ++i) {
-        if (event.results[i].isFinal) {
-          final_transcript += event.results[i][0].transcript;
-        } else {
-          interim_transcript += event.results[i][0].transcript;
-        }
-      }
-      
-      final_transcript = capitalize(final_transcript);
-      final_span.innerHTML = linebreak(final_transcript);
-      interim_span.innerHTML = linebreak(interim_transcript);
-      
-      console.log('final_transcript', final_transcript);
-      console.log('interim_transcript', interim_transcript);
-    };
-  
-    recognition.onerror = function(event) {
-      console.log('onerror', event);
-
-      if (event.error == 'no-speech') {
-        ignore_onend = true;
-      } else if (event.error == 'audio-capture') {
-        ignore_onend = true;
-      } else if (event.error == 'not-allowed') {
-        ignore_onend = true;
-      }
-    };
-    
-    var two_line = /\n\n/g;
-    var one_line = /\n/g;
-    var first_char = /\S/;
-    
-    function linebreak(s) {
-      return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
-    }
-    
-    function capitalize(s) {
-      return s.replace(first_char, function(m) { 
-        return m.toUpperCase(); 
-      });
-    }
-    
-    function start(event) {
-      if (isRecognizing) {
-        recognition.stop();
-        return;
-      }
-      recognition.lang = 'ko-KR';
-      recognition.start();
-      ignore_onend = false;
-      
-      final_transcript = '';
-      final_span.innerHTML = '';
-      interim_span.innerHTML = '';
-    }
-    
-    /**
-     * init 
-     */ 
-    $('#start').click(start);
-  });
-</script>
+<script src="/examples/speech-recognition/speech.js"></script>
 
 <% include global/footer.html %>
 
