@@ -20,7 +20,7 @@ code {
 
 .align-center { text-align: center; }
 #content {
-	padding: 80px 30px; min-height: 300px; 
+	padding: 80px 30px; min-height: 350px; 
 	border-bottom: solid 1px #ebebeb; 
 }
 #logo-webrtc {

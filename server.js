@@ -16,8 +16,8 @@ app.get('/intro', function(req, res) {
 	res.render('intro.html', {
     title: "- WebRTC 소개"
   });
-}).get('/getUserMedia', function(req, res) {
-	res.render('getUserMedia.html', {
+}).get('/get-user-media', function(req, res) {
+	res.render('get-user-media.html', {
     title: "- 마이크 & 캠 접근하기"
   });
 }).get('/filter', function(req, res) {
@@ -31,6 +31,10 @@ app.get('/intro', function(req, res) {
 }).get('/conference', function(req, res) {
 	res.render('conference.html', {
     title: "- 1:1 화상회의 만들기"
+  });
+}).get('/speech-recognition', function(req, res) {
+  res.render('speech-recognition.html', {
+    title: "- 음성 인식"
   });
 });
 
