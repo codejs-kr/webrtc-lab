@@ -6,8 +6,8 @@ $(function() {
   
   var recognition = new webkitSpeechRecognition();
   var isRecognizing = false;
-  var ignore_onend = false;
-  var final_transcript = '';
+  var ignoreOnend = false;
+  var finalTranscript = '';
  	var audio = document.getElementById('audio');
   var $btnMic = $('#btn-mic');
  	var $result = $('#result');
@@ -27,21 +27,21 @@ $(function() {
     console.log('onend', arguments);
     isRecognizing = false;
     
-    if (ignore_onend) {
+    if (ignoreOnend) {
       return false;
     }
     
     // do end process
     $btnMic.attr('class', 'off');
-    if (!final_transcript) {
-      console.log('empty final_transcript');
+    if (!finalTranscript) {
+      console.log('empty finalTranscript');
       return false;
     }
     
     if (window.getSelection) {
       window.getSelection().removeAllRanges();
       var range = document.createRange();
-      range.selectNode(document.getElementById('final_span'));
+      range.selectNode(document.getElementById('final-span'));
       window.getSelection().addRange(range);
     }
     
@@ -59,19 +59,19 @@ $(function() {
     
     for (var i = event.resultIndex; i < event.results.length; ++i) {
       if (event.results[i].isFinal) {
-        final_transcript += event.results[i][0].transcript;
+        finalTranscript += event.results[i][0].transcript;
       } else {
         interim_transcript += event.results[i][0].transcript;
       }
     }
     
-    final_transcript = capitalize(final_transcript);
-    final_span.innerHTML = linebreak(final_transcript);
+    finalTranscript = capitalize(finalTranscript);
+    final_span.innerHTML = linebreak(finalTranscript);
     interim_span.innerHTML = linebreak(interim_transcript);
     
-    console.log('final_transcript', final_transcript);
+    console.log('finalTranscript', finalTranscript);
     console.log('interim_transcript', interim_transcript);
-    
+
     fireCommand(interim_transcript);
   };
   
@@ -79,7 +79,6 @@ $(function() {
    * changeColor
    * 
    */
-  
   /*
 	  .red 		{ background: red; }
 		.blue 	{ background: blue; }
@@ -91,7 +90,6 @@ $(function() {
 		.white 	{ background: white; }
 		.black  { background: black; }
  	*/
- 	
   function fireCommand(string) {
   	if (string.endsWith('레드')) {
   		$result.attr('class', 'red');
@@ -123,6 +121,8 @@ $(function() {
   		audio.volume += 0.2;
   	} else if (string.endsWith('볼륨 다운') || string.endsWith('볼륨다운')) {
   		audio.volume -= 0.2;
+  	} else if (string.endsWith('읽어 봐') || string.endsWith('읽어봐')) {
+  	  textToSpeech($('#final_span').text() || '전 음성 인식된 글자를 읽습니다.');
   	}
   }
 
@@ -130,11 +130,11 @@ $(function() {
     console.log('onerror', event);
 
     if (event.error == 'no-speech') {
-      ignore_onend = true;
+      ignoreOnend = true;
     } else if (event.error == 'audio-capture') {
-      ignore_onend = true;
+      ignoreOnend = true;
     } else if (event.error == 'not-allowed') {
-      ignore_onend = true;
+      ignoreOnend = true;
     }
     
     $btnMic.attr('class', 'off');
@@ -161,15 +161,60 @@ $(function() {
     }
     recognition.lang = 'ko-KR';
     recognition.start();
-    ignore_onend = false;
+    ignoreOnend = false;
     
-    final_transcript = '';
+    finalTranscript = '';
     final_span.innerHTML = '';
     interim_span.innerHTML = '';
+    
+  }
+  
+  /**
+   * textToSpeech
+   * 지원: 크롬, 사파리, 오페라, 엣지
+   */
+  function textToSpeech(text) {
+    console.log('textToSpeech', arguments);
+    
+    /*
+    var u = new SpeechSynthesisUtterance();
+    u.text = 'Hello world';
+    u.lang = 'en-US';
+    u.rate = 1.2;
+    u.onend = function(event) {
+      log('Finished in ' + event.elapsedTime + ' seconds.');
+    };
+    speechSynthesis.speak(u);
+    */
+    
+    // simple version
+    speechSynthesis.speak(new SpeechSynthesisUtterance(text));
+  }
+  
+  /**
+   * requestServer
+   * key - AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg 
+   */
+  function requestServer() {
+    $.ajax({
+      method: 'post',
+      url: 'https://www.google.com/speech-api/v2/recognize?output=json&lang=en-us&key=AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg',
+      data: '/examples/speech-recognition/hello.wav',
+      contentType: 'audio/l16; rate=16000;', // 'audio/x-flac; rate=44100;',
+      success: function(data) {
+        
+      },
+      error: function(xhr) {
+        
+      }
+    });
   }
   
   /**
    * init 
    */ 
   $btnMic.click(start);
+  $('#btn-tts').click(function() {
+    textToSpeech($('#final_span').text() || '전 음성 인식된 글자를 읽습니다.');
+  });
 });

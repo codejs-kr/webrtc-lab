@@ -28,7 +28,7 @@ code {
 	background: #fff url(../img/logo-webrtc.png) no-repeat center top; 
 }
 .wrap { width: 720px; margin: 0 auto; }
-.wrap-240 { width: 240px; margin: 0 auto; }
+.wrap-250 { width: 250px; margin: 0 auto; }
 .wrap-340 { width: 340px; margin: 0 auto; }
 .two-peace div { float: left; width: 48%; }
 .two-peace div:first-child { margin-right: 15px; }
