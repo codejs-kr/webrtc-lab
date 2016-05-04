@@ -5,7 +5,8 @@
   "description": "Fun Webrtc",
   "dependencies": {
   	"express": "4.13.4",
-  	"ejs": "2.4.1"
+  	"ejs": "2.4.1",
+  	"socket.io": "1.4.6"
   },
   "engine": {
 		"node": "0.12.x"

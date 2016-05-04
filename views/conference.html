@@ -1,19 +1,24 @@
 <% include global/header.html %>
-<link href="/examples/filter/filter.css" rel="stylesheet" type="text/css">
+<link href="/examples/conference/main.css" rel="stylesheet" type="text/css">
 
 <div id="content">
   <div class="wrap">
-    <video autoplay></video>
-    <p>1:1 영상회의를 시작할 수 있습니다.</p>
-    <button id="start">Start</button>
+    <section id="join-wrap">
+      <input type="text" id="your-name" placeholder="Your name" />
+      <button id="start-broadcasting">Start</button>
+    </section>
+    <p id="token-wrap"><a href="#" id="unique-token">Share this room link</a></p>
+
+    <!-- list of all available conferencing rooms -->
+    <div id="room-list"></div>
+
+    <!-- local/remote videos container -->
+    <div id="video-wrap"></div>
   </div>
 </div>
 
-<script>
-  $(function() {
-    
-  });
-</script>
-
+<script src="//cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="/examples/conference/PeerConnection.js"></script>
+<script src="/examples/conference/main.js"></script>
 <% include global/footer.html %>
 
