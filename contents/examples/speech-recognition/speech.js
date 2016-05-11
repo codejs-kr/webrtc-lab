@@ -50,7 +50,7 @@ $(function() {
   recognition.onresult = function(event) {
     console.log('onresult', event);
     
-    var interim_transcript = '';
+    var interimTranscript = '';
     if (typeof(event.results) == 'undefined') {
       recognition.onend = null;
       recognition.stop();
@@ -61,18 +61,18 @@ $(function() {
       if (event.results[i].isFinal) {
         finalTranscript += event.results[i][0].transcript;
       } else {
-        interim_transcript += event.results[i][0].transcript;
+        interimTranscript += event.results[i][0].transcript;
       }
     }
     
     finalTranscript = capitalize(finalTranscript);
     final_span.innerHTML = linebreak(finalTranscript);
-    interim_span.innerHTML = linebreak(interim_transcript);
+    interim_span.innerHTML = linebreak(interimTranscript);
     
     console.log('finalTranscript', finalTranscript);
-    console.log('interim_transcript', interim_transcript);
+    console.log('interimTranscript', interimTranscript);
 
-    fireCommand(interim_transcript);
+    fireCommand(interimTranscript);
   };
   
   /**
