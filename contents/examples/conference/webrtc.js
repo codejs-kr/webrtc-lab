@@ -9,11 +9,17 @@
 $(function() {
   console.log('Loaded webrtc');
 
+  // cross browsing
+  var RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+  var RTCSessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
+  var RTCIceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
+  navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
+
   var socket = io();
   var channel = 'K62QFPG0-DC';
   var userID = Math.round(Math.random() * 999999999) + 999999999;
   var isOffer = location.hash.match('offer');
-  var myStream = null;
+  var localStream = null;
   var peer = null; // offer or answer peer
   var iceServers = {
     'iceServers': [{
@@ -36,6 +42,10 @@ $(function() {
     }
   };
 
+  // DOM
+  var $body = $('body');
+  var $videoWrap = $('#video-wrap');
+
   /**
   * getUserMedia
   */
@@ -46,8 +56,9 @@ $(function() {
       audio: true,
       video: true
     }, function(stream) {
-      myStream = stream;
-      $("body").append('<video width="320" height="240" muted="muted" autoplay="true" src="' + URL.createObjectURL(myStream) + '"></video>');
+      localStream = stream;
+      $videoWrap.append('<video id="local-video" muted="muted" autoplay="true" src="' + URL.createObjectURL(localStream) + '"></video>');
+      $body.addClass('wait');
 
       if (isOffer) {
         alert('오퍼');
@@ -55,7 +66,7 @@ $(function() {
         createOffer();
       }
     }, function() {
-      console.error('Error in my stream');
+      console.error('Error getUserMedia');
     });
   }
 
@@ -66,7 +77,7 @@ $(function() {
   function createOffer() {
     console.log('createOffer', arguments);
 
-    peer.addStream(myStream); // addStream 제외시 recvonly로 SDP 생성됨
+    peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
     peer.createOffer(function(SDP) {
       peer.setLocalDescription(SDP);
       console.log("Sending offer description", SDP);
@@ -86,7 +97,7 @@ $(function() {
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
 
-    peer.addStream(myStream);
+    peer.addStream(localStream);
     peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
       peer.createAnswer(function(SDP) {
         peer.setLocalDescription(SDP);
@@ -126,12 +137,18 @@ $(function() {
 
     peer.onaddstream = function(event) {
       console.log("Adding remote strem", event);
-      $("body").append('<video id="remote-video" width="320" height="240" autoplay="true" src="' + URL.createObjectURL(event.stream) + '"></video>');
+
+      $videoWrap.append('<video id="remote-video" autoplay="true" src="' + URL.createObjectURL(event.stream) + '"></video>');
+      $body.removeClass('wait').addClass('connected');
     };
 
     peer.onremovestream = function(event) {
       console.log("Removing remote stream", event);
     };
+  }
+
+  function onSdpError() {
+    console.log('onSdpError', arguments);
   }
 
   function send(data) {
@@ -166,10 +183,6 @@ $(function() {
 
       peer.addIceCandidate(candidate);
     }
-  }
-
-  function onSdpError() {
-    console.log('onSdpError', arguments);
   }
 
   function initialize() {

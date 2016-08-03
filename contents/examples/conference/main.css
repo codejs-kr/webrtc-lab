@@ -1,11 +1,9 @@
 @charset "utf-8";
 
-.wrap { 
-	position: relative; font-size: 1.2em; text-align: center;
-}
-input[type="text"] { 
+.wrap { position: relative; font-size: 1.2em; text-align: center; }
+input[type="text"] {
 	padding: 6px 10px; width: 120px; height: 30px;
-	border: solid 1px #bbb; font-size: 1.3em;  
+	border: solid 1px #bbb; font-size: 1.3em;
 }
 #your-name { width: 250px; }
 .wrap button { vertical-align: top; min-width: 80px; }
@@ -13,30 +11,17 @@ input[type="text"] {
 .room { vertical-align: top; }
 .room button { margin-top: 14px; }
 
-body.wait .wrap, 
-body.connected .wrap { margin-top: 0 !important; }
-body.wait #join-wrap,
-body.connected #join-wrap { display: none; }
-body.connected #room-list { display: none; }
-body.connected .local-pc { 
-	width: 150px !important; position: absolute; 
-	top: 2px; left: 2px !important; border: solid 1px #fff; z-index: 2; 
-}
-
-video { 
+video {
 	background: #222; margin: 0 0 20px 0; width: 100%; border: solid 1px #fff; z-index: 1;
 	transition: all .6s ease-out;
 	-webkit-transition: all .6s ease-out;
 	-moz-transition: all .6s ease-out;
-	-ms-transition: all .6s ease-out;    
 }
 
-video.local-pc {
+video#local-video {
 	transform: scale(0.8, 0.8);
 	-webkit-transform: scale(0.8, 0.8);
 	-moz-transform: scale(1, 1);
-	-o-transform: scale(1, 1);
-	-ms-transform: scale(1, 1);
 }
 
 video.effect {
@@ -45,6 +30,15 @@ video.effect {
 	-moz-transform: scale(1, 1);
 	-o-transform: scale(1, 1);
 	-ms-transform: scale(1, 1);
+}
+
+body.wait .wrap,
+body.connected .wrap { margin-top: 0 !important; }
+body.wait #join-wrap,
+body.connected #join-wrap { display: none; }
+body.connected #local-video {
+	width: 150px !important; position: absolute;
+	top: 2px; left: 2px !important; border: solid 1px #fff; z-index: 2;
 }
 
 /* room */
