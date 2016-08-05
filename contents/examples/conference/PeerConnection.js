@@ -5,31 +5,31 @@
 (function() {
   var isFirefox = !!navigator.mozGetUserMedia;
   var isChrome = !!navigator.webkitGetUserMedia;
-  
+
   // 자체 셋팅 서버
   // 알서포트 / 턴, 스턴 14.63.229.166 Port : 3478, 3479
   var STUN = {
     url: 'stun:st3.remotemeeting.com'
   };
-  
+
   // turn:rsupport@turn.toybox7.net:3478?transport=tcp
   var TURN = {
     url: 'turn:14.63.229.166:3478',
     credential: 'rsupport',
     username : 'rsupport'
   };
-  
+
   var iceServers = {
     iceServers : [STUN, TURN]
   };
 
   console.log('STUN', STUN);
   console.log('TURN', TURN);
-  
+
   /**
    * 1. setLocalDescription(SDP)
    * 2. onicecandidate -> send to Callee
-   * 3. setRemoteDescription(SDP) 
+   * 3. setRemoteDescription(SDP)
    * 4. onicecandidate -> send to Caller
    * 5. 상대 candidate 정보를 받아서 addIceCandidate() 시도
    */
@@ -52,13 +52,13 @@
       this.MediaStream = stream;
     };
   };
-  
+
   /**
    * Signaler(window.PeerConnection, i, "message")
    */
   function Signaler(root, socketURL, socketEvent) {
     console.log('Signaler', arguments);
-    
+
     var self = this; // Signaler {}
 
     root.startBroadcasting = function() {
@@ -70,7 +70,7 @@
           userID: root.userID,
           broadcasting: true
         });
-        
+
         (!self.participantFound && !self.stopBroadcasting) && setTimeout(transmit, 3000);
       })();
     };
@@ -82,11 +82,11 @@
         to: userID
       });
     };
-    
+
     // if someone shared SDP
     this.onsdp = function(message) {
       //console.log('확인 onsdp', message);
-      
+
       var sdp = message.sdp;
 
       if (sdp.type == 'offer') {
@@ -111,17 +111,17 @@
     // if someone shared ICE
     this.onice = function(message) {
       //console.log('확인 onice', message)
-      
+
       var peer = root.peers[message.userID];
       if (peer) {
         peer.addIceCandidate(message.candidate);
- 
+
         for (var i = 0; i < candidates.length; i++) {
           peer.addIceCandidate(candidates[i]);
         }
         candidates = [];
       } else {
-        candidates.push(candidates);        
+        candidates.push(candidates);
       }
     };
 
@@ -134,14 +134,14 @@
           to : root.participant
         });
       },
-      onicecandidate : function(candidate) {
+      onicecandidate: function(candidate) {
         socket.send({
           userID : root.userID,
           candidate : candidate,
           to : root.participant
         });
       },
-      onStreamAdded : function(stream) {
+      onStreamAdded: function(stream) {
         console.debug('onStreamAdded', '>>>>>>', stream);
 
         stream.onended = function() {
@@ -198,13 +198,13 @@
 
     window.onkeyup = function(e) {
       if (e.keyCode == 116) {
-        root.close();        
+        root.close();
       }
     };
 
     function onmessage(message) {
       console.log('onmessage', message);
-      
+
       root.participant = message.userID;
 
       // for pretty logging
@@ -213,7 +213,7 @@
         if (value && value.sdp) {
           console.log(value.sdp.type, '---', value.sdp.sdp);
           return '';
-        } else {          
+        } else {
           return value;
         }
       }, '---'));
@@ -239,7 +239,7 @@
           root.acceptRequest(message.userID);
       }
 
-      
+
       // if someone is broadcasting himself!
       if (message.broadcasting && root.onUserFound) {
         root.onUserFound(message.userID);
@@ -252,7 +252,7 @@
 
     var socket = socketURL;
     socket.on(socketEvent, function(data) {
-      onmessage(data.data); 
+      onmessage(data.data);
     });
   }
 
@@ -261,16 +261,28 @@
   var RTCIceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
 
   navigator.getUserMedia = navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
-  
+
   var optionalArgument = {
     optional : [{
       DtlsSrtpKeyAgreement: true
     }]
   };
   console.log('optionalArgument', optionalArgument);
-  
-  var offerAnswerConstraints = {
-    optional: [],
+
+  var offerConstraints = {
+    optional: [{
+      enableDataChannels: true
+    }],
+    mandatory: {
+      OfferToReceiveAudio: true,
+      OfferToReceiveVideo: true
+    }
+  };
+
+  var answerConstraints = {
+    optional: [{
+      enableDataChannels: true
+    }],
     mandatory: {
       OfferToReceiveAudio: true,
       OfferToReceiveVideo: true
@@ -287,37 +299,47 @@
   var Offer = {
     createOffer : function(config) {
       console.log('createOffer', arguments);
-      
+
       var peer = new RTCPeerConnection(iceServers, optionalArgument);
       //console.info('createOffer RTCPeerConnection', peer);
 
       if (config.MediaStream) {
-        peer.addStream(config.MediaStream);        
+        peer.addStream(config.MediaStream);
       }
-      
+
       peer.onaddstream = function(event) {
         config.onStreamAdded(event.stream);
       };
-      
+
       /*
        * onIceCandidate() createPeerConnection()에서 성공적으로
-       * RTCPeerConnection이 생성되었을 떄 호출되는 onIceCandidate() 콜백은 candidates에 관해 '획득한' 정보를 전달합니다: 
+       * RTCPeerConnection이 생성되었을 떄 호출되는 onIceCandidate() 콜백은 candidates에 관해 '획득한' 정보를 전달합니다:
        */
       var myData;
       peer.onicecandidate = function(event) {
         console.log('onicecandidate', event.candidate);
-        
+
         // RTCPeerConnection.onicecandidate() 로 정보를 받아와서 Socket Send 하기 위해서 config.onicecandidate() 로 전달
         if (event.candidate) {
-          config.onicecandidate(event.candidate);          
+          config.onicecandidate(event.candidate);
         }
+      };
+
+      var dataChannel = peer.createDataChannel("Mydata");
+      dataChannel.onopen = function(event) {
+        console.log('dataChannel.onopen');
+        dataChannel.send('sending a message');
+      };
+
+      dataChannel.onmessage = function(event) {
+        console.log('dataChannel.onmessage', event.data);
       };
 
       peer.createOffer(function(sdp) {
         console.info('setLocalDescription SDP', sdp);
         peer.setLocalDescription(sdp);
         config.onsdp(sdp);
-      }, onSdpError, offerAnswerConstraints);
+      }, onSdpError, offerConstraints);
 
       this.peer = peer;
 
@@ -330,7 +352,7 @@
     addIceCandidate : function(candidate) {
       console.log('콜리가전달한데이터 addIceCandidate', candidate);
       //console.log('addIceCandidate this', this);
-      
+
       this.peer.addIceCandidate(new RTCIceCandidate({
         sdpMLineIndex : candidate.sdpMLineIndex,
         candidate : candidate.candidate
@@ -347,25 +369,37 @@
       console.info('createAnswer RTCPeerConnection', peer);
 
       if (config.MediaStream) {
-        peer.addStream(config.MediaStream);        
+        peer.addStream(config.MediaStream);
       }
-        
+
       peer.onaddstream = function(event) {
         config.onStreamAdded(event.stream);
       };
 
       peer.onicecandidate = function(event) {
         if (event.candidate) {
-          config.onicecandidate(event.candidate);          
+          config.onicecandidate(event.candidate);
         }
       };
+
+      /*
+      var dataChannel = peer.createDataChannel("Mydata");
+      dataChannel.onopen = function(event) {
+        console.log('dataChannel.onopen');
+        dataChannel.send('sending a message');
+      };
+
+      dataChannel.onmessage = function(event) {
+        console.log('데이터 채널 메시지', event.data);
+      };
+      */
 
       peer.setRemoteDescription(new RTCSessionDescription(config.sdp));
       peer.createAnswer(function(sdp) {
         console.info('createAnswer SDP', sdp);
         peer.setLocalDescription(sdp);
         config.onsdp(sdp);
-      }, onSdpError, offerAnswerConstraints);
+      }, onSdpError, answerConstraints);
 
       this.peer = peer;
 
@@ -393,11 +427,11 @@
       hints = {
         audio : true,
         video : true
-      };      
+      };
     }
-    
+
     if (!onsuccess) {
-      throw 'Second argument is mandatory. navigator.getUserMedia(hints,onsuccess,onfailure)';      
+      throw 'Second argument is mandatory. navigator.getUserMedia(hints,onsuccess,onfailure)';
     }
 
     navigator.getMedia(hints, _onsuccess, _onfailure);
@@ -408,11 +442,11 @@
 
     function _onfailure(e) {
       if (onfailure) {
-        onfailure(e);        
+        onfailure(e);
       } else {
-        alert(e.name); 
-        throw Error('getUserMedia failed: ' + JSON.stringify(e, null, '\t'));       
+        alert(e.name);
+        throw Error('getUserMedia failed: ' + JSON.stringify(e, null, '\t'));
       }
     }
   };
-})(); 
+})();
