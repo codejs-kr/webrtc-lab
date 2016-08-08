@@ -6,22 +6,17 @@ input[type="text"] {
 	border: solid 1px #bbb; font-size: 1.3em;
 }
 #your-name { width: 250px; }
+#token-wrap { margin: 10px 0; }
 .wrap button { vertical-align: top; min-width: 80px; }
-.wrap p { margin: 10px 0; }
-.room { vertical-align: top; }
-.room button { margin-top: 14px; }
+.room-info { vertical-align: top; }
+.room-info button { margin-top: 14px; }
 
 video {
-	background: #222; margin: 0 0 20px 0; width: 100%; border: solid 1px #fff; z-index: 1;
+	margin: 0 0 20px 0; width: 100%; z-index: 1;
+	background: #222; border: solid 1px #fff;
 	transition: all .6s ease-out;
 	-webkit-transition: all .6s ease-out;
 	-moz-transition: all .6s ease-out;
-}
-
-video#local-video {
-	transform: scale(0.8, 0.8);
-	-webkit-transform: scale(0.8, 0.8);
-	-moz-transform: scale(1, 1);
 }
 
 video.effect {
@@ -34,12 +29,17 @@ video.effect {
 
 body.wait .wrap,
 body.connected .wrap { margin-top: 0 !important; }
+
 body.wait #join-wrap,
-body.connected #join-wrap { display: none; }
+body.connected #join-wrap,
+body.connected #room-list { display: none; }
+
 body.connected #local-video {
 	width: 150px !important; position: absolute;
 	top: 2px; left: 2px !important; border: solid 1px #fff; z-index: 2;
 }
+
+.room #room-list { display: none; }
 
 /* room */
 #video-wrap { position: relative; margin: 0 auto; }

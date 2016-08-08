@@ -121,10 +121,10 @@ $(function() {
       //console.log('onUserFound', arguments);
 
       $roomList.html([
-        '<p class="room">',
+        '<div class="room-info">',
           '[' + userID + '] 님이 기다리고 있어요. 참여 하실래요?<br/>',
           '<button id="' + userID + '">Join</button>',
-        '</p>'].join('\n'));
+        '</div>'].join('\n'));
 
       var $joinButton = $roomList.find('button');
 

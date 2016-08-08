@@ -10,15 +10,15 @@ $(function() {
   console.log('Loaded webrtc');
 
   // cross browsing
-  var RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-  var RTCSessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
-  var RTCIceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
   navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
+  var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+  var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
+  var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
 
   var socket = io();
-  var channel = 'K62QFPG0-DC';
+  var channel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
   var userID = Math.round(Math.random() * 999999999) + 999999999;
-  var isOffer = location.hash.match('offer');
+  var isOffer = null;
   var localStream = null;
   var peer = null; // offer or answer peer
   var iceServers = {
@@ -44,7 +44,10 @@ $(function() {
 
   // DOM
   var $body = $('body');
+  var $roomList = $('#room-list')
   var $videoWrap = $('#video-wrap');
+  var $uniqueToken = $('#unique-token');
+  var $joinWrap = $('#join-wrap')
 
   /**
   * getUserMedia
@@ -52,16 +55,17 @@ $(function() {
   function getUserMedia() {
     console.log('getUserMedia');
 
-    navigator.webkitGetUserMedia({
+    navigator.getUserMedia({
       audio: true,
       video: true
     }, function(stream) {
       localStream = stream;
       $videoWrap.append('<video id="local-video" muted="muted" autoplay="true" src="' + URL.createObjectURL(localStream) + '"></video>');
-      $body.addClass('wait');
+      $body.addClass('room wait');
+
+      $('#token-wrap').slideDown(1000);
 
       if (isOffer) {
-        alert('오퍼');
         createPeerConnection();
         createOffer();
       }
@@ -108,6 +112,8 @@ $(function() {
           sdp: SDP
         });
       }, onSdpError, mediaConstraints);
+    }, function() {
+      console.log('setRemoteDescription', arguments);
     });
   }
 
@@ -158,6 +164,7 @@ $(function() {
 
   function onmessage(data) {
     console.log('onmessage', data);
+
     var msg = data;
     var sdp = msg.sdp || null;
 
@@ -182,16 +189,93 @@ $(function() {
       });
 
       peer.addIceCandidate(candidate);
+    } else {
+      //console.log()
     }
   }
 
-  function initialize() {
-    getUserMedia();
+  /**
+   * setRoomToken
+   */
+  function setRoomToken() {
+    //console.log('setRoomToken', arguments);
 
-    socket.emit('joinRoom', channel, userID);
-    socket.on('message', function(data) {
-      onmessage(data);
+    if (location.hash.length > 2) {
+      $uniqueToken.length && $uniqueToken.attr('href', location.href);
+    } else {
+      location.hash = '#' + (Math.random() * new Date().getTime()).toString(32).toUpperCase().replace(/\./g, '-');
+    }
+  }
+
+  function setClipboard() {
+    //console.log('setClipboard', arguments);
+
+    $uniqueToken.click(function(){
+      var link = location.href;
+      if (window.clipboardData){
+        window.clipboardData.setData('text', link);
+        $.message('Copy to Clipboard successful.');
+      }
+      else {
+        window.prompt("Copy to clipboard: Ctrl+C, Enter", link); // Copy to clipboard: Ctrl+C, Enter
+      }
     });
   }
+
+  Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+      if (obj.hasOwnProperty(key)) {
+        size++;
+      }
+    }
+    return size;
+  };
+
+  function onFoundUser() {
+    $roomList.html([
+      '<div class="room-info">',
+        '[' + userID + '] 님이 기다리고 있어요. 참여 하실래요?<br/>',
+        '<button id="' + userID + '">Join</button>',
+      '</div>'].join('\n'));
+
+    var $joinButton = $roomList.find('button');
+    $joinButton.click(function() {
+      isOffer = true;
+      getUserMedia();
+      $(this).attr('disabled', true);
+    });
+
+    $joinWrap.slideUp(1000);
+    $('#token-wrap').slideUp(1000);
+  }
+
+  function initialize() {
+    $('#start').click(function() {
+      $(this).attr('disabled', true);
+      getUserMedia();
+    });
+
+    $('#your-name').change(function() {
+      userID = $(this).val();
+    });
+
+    setRoomToken();
+    setClipboard();
+
+  }
   initialize();
+
+  socket.emit('joinRoom', channel, userID);
+  socket.on('joinRoom', function(channel, nickName, userList) {
+    console.log('joinRoom', arguments);
+
+    if (Object.size(userList) > 1) {
+      onFoundUser();
+    }
+  });
+
+  socket.on('message', function(data) {
+    onmessage(data);
+  });
 });
