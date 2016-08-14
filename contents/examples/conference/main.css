@@ -1,15 +1,17 @@
 @charset "utf-8";
 
-.wrap { position: relative; font-size: 1.2em; text-align: center; }
+.wrap {
+	margin-top: 30px;
+	position: relative; font-size: 1.2em; text-align: center;
+}
+.wrap p { font-size: 1.25em; }
 input[type="text"] {
 	padding: 6px 10px; width: 120px; height: 30px;
 	border: solid 1px #bbb; font-size: 1.3em;
 }
-#your-name { width: 250px; }
-#token-wrap { margin: 10px 0; }
-.wrap button { vertical-align: top; min-width: 80px; }
+#share-wrap { display: none; margin: 10px 0; }
+.wrap button { margin-top: 20px; vertical-align: top; min-width: 80px; }
 .room-info { vertical-align: top; }
-.room-info button { margin-top: 14px; }
 
 video {
 	margin: 0 0 20px 0; width: 100%; z-index: 1;
@@ -39,8 +41,9 @@ body.connected #local-video {
 	top: 2px; left: 2px !important; border: solid 1px #fff; z-index: 2;
 }
 
-.room #room-list { display: none; }
-
 /* room */
+.room #share-wrap { display: block; }
+.room #room-list { display: none; }
+.room #content { padding-top: 30px; }
 #video-wrap { position: relative; margin: 0 auto; }
 #local { width: 340px; height: 220px; border: solid 1px #fff; position: absolute; top: 4%; right: 2%; }

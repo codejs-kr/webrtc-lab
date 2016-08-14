@@ -15,9 +15,10 @@ $(function() {
   var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
   var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
 
+  // for logic
   var socket = io();
-  var channel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
-  var userID = Math.round(Math.random() * 999999999) + 999999999;
+  var roomId = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
+  var userId = Math.round(Math.random() * 999999999) + 999999999;
   var isOffer = null;
   var localStream = null;
   var peer = null; // offer or answer peer
@@ -86,7 +87,7 @@ $(function() {
       peer.setLocalDescription(SDP);
       console.log("Sending offer description", SDP);
       send({
-        sender: userID,
+        sender: userId,
         to: 'all',
         sdp: SDP
       });
@@ -107,30 +108,30 @@ $(function() {
         peer.setLocalDescription(SDP);
         console.log("Sending answer to peer.", SDP);
         send({
-          sender: userID,
+          sender: userId,
           to: 'all',
           sdp: SDP
         });
       }, onSdpError, mediaConstraints);
     }, function() {
-      console.log('setRemoteDescription', arguments);
+      console.error('setRemoteDescription', arguments);
     });
   }
 
   /**
   * createPeerConnection
-  * offer, answer 공통 메서드
+  * offer, answer 공통 함수로 peer를 생성하고 관련 이벤트를 바인딩 한다.
   */
   function createPeerConnection() {
-    console.log('createPeerConnection');
+    console.log('createPeerConnection', arguments);
 
-    peer = new webkitRTCPeerConnection(iceServers, peerConnectionOptions);
-    console.log('peer', peer);
+    peer = new RTCPeerConnection(iceServers, peerConnectionOptions);
+    console.log('new Peer', peer);
 
     peer.onicecandidate = function(event) {
       if (event.candidate) {
         send({
-          userID: userID,
+          userId: userId,
           to: 'all',
           label: event.candidate.sdpMLineIndex,
           id: event.candidate.sdpMid,
@@ -157,8 +158,13 @@ $(function() {
     console.log('onSdpError', arguments);
   }
 
+  /*
+  * below for signaling
+  */
   function send(data) {
     console.log('send', data);
+    
+    data.roomId = roomId;
     socket.send(data);
   }
 
@@ -235,12 +241,12 @@ $(function() {
   function onFoundUser() {
     $roomList.html([
       '<div class="room-info">',
-        '[' + userID + '] 님이 기다리고 있어요. 참여 하실래요?<br/>',
-        '<button id="' + userID + '">Join</button>',
+        '<p>당신을 기다리고 있어요. 참여 하실래요?</p>',
+        '<button id="join">Join</button>',
       '</div>'].join('\n'));
 
-    var $joinButton = $roomList.find('button');
-    $joinButton.click(function() {
+    var $btnJoin = $('#join');
+    $btnJoin.click(function() {
       isOffer = true;
       getUserMedia();
       $(this).attr('disabled', true);
@@ -251,29 +257,28 @@ $(function() {
   }
 
   function initialize() {
-    $('#start').click(function() {
-      $(this).attr('disabled', true);
-      getUserMedia();
-    });
-
-    $('#your-name').change(function() {
-      userID = $(this).val();
-    });
-
     setRoomToken();
     setClipboard();
 
+    $('#start').click(function() {
+      getUserMedia();
+    });
   }
   initialize();
 
-  socket.emit('joinRoom', channel, userID);
-  socket.on('joinRoom', function(channel, nickName, userList) {
+  socket.emit('joinRoom', roomId, userId);
+  socket.on('joinRoom', function(roomId, userList) {
     console.log('joinRoom', arguments);
 
     if (Object.size(userList) > 1) {
       onFoundUser();
     }
   });
+  socket.on('leaveRoom', function(userId) {
+    console.log('leaveRoom', arguments);
+    alert('leaveRoom : ' + userId);
+  });
+
 
   socket.on('message', function(data) {
     onmessage(data);
