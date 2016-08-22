@@ -1,17 +1,17 @@
-<% include global/header.html %>
-<link href="/examples/filter/main.css" rel="stylesheet" type="text/css">
+<% include ../../partials/header %>
+<link href="main.css" rel="stylesheet" type="text/css">
 
 <div id="content">
   <div class="wrap">
     <video autoplay></video>
     <p>비디오 화면을 클릭하면 CSS필터가 적용됩니다.</p>
     <button id="start">Start</button>
-    
+
     <pre>
       <code class="highlight">$(function() {
-  navigator.getUserMedia = navigator.getUserMedia || 
-  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;   
-  	       
+  navigator.getUserMedia = navigator.getUserMedia ||
+  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
   var $video = $('video')
     , idx = 0
     , filters = ['grayscale', 'sepia', 'blur', 'brightness',
@@ -20,7 +20,7 @@
 
   function getUserMedia() {
     navigator.getUserMedia({
-      audio: true, 
+      audio: true,
       video: true
     }, function(stream) {
       $video.attr('src', URL.createObjectURL(stream));
@@ -33,7 +33,7 @@
       alert(err.message);
     });
   }
-  
+
   function changeFilter(e) {
     var el = e.target;
     el.className = '';
@@ -42,19 +42,19 @@
       el.classList.add(effect);
     }
   }
-  
+
   // initialize
   $('video').click(changeFilter);
   $('#start').click(getUserMedia);
 });</code>
    	</pre>
-   	
+
   </div>
 </div>
 
 <script>
   $(function() {
-    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;          
+    navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
     var $video = $('video')
       , idx = 0
       , filters = ['grayscale', 'sepia', 'blur', 'brightness',
@@ -63,7 +63,7 @@
 
     function getUserMedia() {
       navigator.getUserMedia({
-        audio: true, 
+        audio: true,
         video: true
       }, function(stream) {
         $video.attr('src', URL.createObjectURL(stream));
@@ -71,21 +71,21 @@
           console.log('onloadedmetadata', e);
           $video[0].play();
         };
-        
+
         /* 스피치 인식.
         var recognition = new webkitSpeechRecognition();
-        recognition.onresult = function(event) { 
-          console.log('recognition', event); 
+        recognition.onresult = function(event) {
+          console.log('recognition', event);
         };
         recognition.start();
         */
-        
+
       }, function(err) {
         console.log('getUserMedia', err);
         alert(err.message);
       });
     }
-    
+
     function changeFilter(e) {
       var el = e.target;
       el.className = '';
@@ -94,12 +94,11 @@
         el.classList.add(effect);
       }
     }
-    
+
     // initialize
     $('video').click(changeFilter);
     $('#start').click(getUserMedia);
   });
 </script>
 
-<% include global/footer.html %>
-
+<% include ../../partials/footer %>

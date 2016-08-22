@@ -8,7 +8,6 @@
 
 /*
 TODO
- - 나가기시 에니메이션 자연스럽게 처리
  - 참석자, 나가기 사람 알림?
  - 파폭 처리
  - hasWebCam 분기
@@ -25,7 +24,7 @@ $(function() {
   // for logic
   var socket = io();
   var roomId = null;
-  var userId = Math.round(Math.random() * 999999999) + 999999999;
+  var userId = Math.round(Math.random() * 999999) + 999999;
   var remoteUserId = null;
   var isOffer = null;
   var localStream = null;

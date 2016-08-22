@@ -7,44 +7,45 @@ var	http = require('http').Server(app);
 var	io = require('socket.io')(http);
 
 app.set('views', __dirname + '/views');
-app.engine('html', require('ejs').renderFile);
+app.engine('ejs', require('ejs').renderFile);
 app.use(express.static(__dirname + '/contents'));
+app.use(express.static(__dirname + '/views/examples'));
 
 /**
  * ROUTE
  */
 app.get('/', function(req, res) {
-	res.render('index.html', {
+	res.render('index.ejs', {
 		title: ""
 	});
 });
 
 app.get('/intro', function(req, res) {
-	res.render('intro.html', {
+	res.render('intro.ejs', {
     title: "- WebRTC 소개"
   });
 }).get('/get-user-media', function(req, res) {
-	res.render('get-user-media.html', {
+	res.render('examples/get-user-media/index.ejs', {
     title: "- 마이크 & 캠 접근하기"
   });
 }).get('/filter', function(req, res) {
-	res.render('filter.html', {
+	res.render('examples/filter/index.ejs', {
     title: "- 비디오에 필터 적용하기"
   });
 }).get('/capture', function(req, res) {
-	res.render('capture.html', {
+	res.render('examples/capture/index.ejs', {
     title: "- 비디오를 이미지로 캡쳐하기"
   });
 }).get('/conference', function(req, res) {
-	res.render('conference.html', {
+	res.render('examples/conference/index.ejs', {
     title: "- 1:1 화상회의 만들기"
   });
 }).get('/data-channel', function(req, res) {
-	res.render('data-channel.html', {
+	res.render('examples/data-channel/index.ejs', {
     title: "- 파일 & 데이터 전송하기"
   });
 }).get('/speech-recognition', function(req, res) {
-  res.render('speech-recognition.html', {
+  res.render('examples/speech-recognition/index.ejs', {
     title: "- 음성 인식"
   });
 });
