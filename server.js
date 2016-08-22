@@ -116,8 +116,8 @@ io.on('connection', function(socket) {
     console.log('a user disconnected', socket.id);
 		var roomId = findRoomBySocketId(socket.id);
 		if (roomId) {
-			delete rooms[roomId][socket.id]; // 유저 제거
-			socket.broadcast.to(roomId).emit('leaveRoom', socket.id); // 자신 제외 룸안의 유저
+			socket.broadcast.to(roomId).emit('leaveRoom', rooms[roomId][socket.id]); // 자신 제외 룸안의 유저ID 전달
+			delete rooms[roomId][socket.id]; // 해당 유저 제거
 		}
   });
 });

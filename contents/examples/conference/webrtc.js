@@ -6,6 +6,13 @@
 4. offer는 응답 받은 SDP와 candidate를 Set한다.
 */
 
+/*
+TODO
+ - 나가기시 에니메이션 자연스럽게 처리
+ - 참석자, 나가기 사람 알림?
+ - 파폭 처리
+ - hasWebCam 분기
+*/
 $(function() {
   console.log('Loaded webrtc');
 
@@ -17,8 +24,9 @@ $(function() {
 
   // for logic
   var socket = io();
-  var roomId = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
+  var roomId = null;
   var userId = Math.round(Math.random() * 999999999) + 999999999;
+  var remoteUserId = null;
   var isOffer = null;
   var localStream = null;
   var peer = null; // offer or answer peer
@@ -163,7 +171,7 @@ $(function() {
   */
   function send(data) {
     console.log('send', data);
-    
+
     data.roomId = roomId;
     socket.send(data);
   }
@@ -173,6 +181,10 @@ $(function() {
 
     var msg = data;
     var sdp = msg.sdp || null;
+
+    if (!remoteUserId) {
+      remoteUserId = data.userId;
+    }
 
     // 접속자가 보내온 offer처리
     if (sdp) {
@@ -228,16 +240,6 @@ $(function() {
     });
   }
 
-  Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        size++;
-      }
-    }
-    return size;
-  };
-
   function onFoundUser() {
     $roomList.html([
       '<div class="room-info">',
@@ -256,9 +258,18 @@ $(function() {
     $('#token-wrap').slideUp(1000);
   }
 
+  function onLeave(userId) {
+    if (remoteUserId == userId) {
+      $('#remote-video').remove();
+      $body.removeClass('connected').addClass('wait');
+      remoteUserId = null;
+    }
+  }
+
   function initialize() {
     setRoomToken();
     setClipboard();
+    roomId = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
 
     $('#start').click(function() {
       getUserMedia();
@@ -274,13 +285,23 @@ $(function() {
       onFoundUser();
     }
   });
+
   socket.on('leaveRoom', function(userId) {
     console.log('leaveRoom', arguments);
-    alert('leaveRoom : ' + userId);
+    onLeave(userId);
   });
-
 
   socket.on('message', function(data) {
     onmessage(data);
   });
 });
+
+Object.size = function(obj) {
+  var size = 0, key;
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      size++;
+    }
+  }
+  return size;
+};
