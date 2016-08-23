@@ -1,8 +1,8 @@
 {
   "author": "dodortus",
   "name": "webrtc-lab",
-  "version": "0.0.1",
-  "description": "Fun Webrtc",
+  "version": "0.8.0",
+  "description": "Webrtc simple examples",
   "dependencies": {
   	"express": "4.13.4",
   	"ejs": "2.4.1",

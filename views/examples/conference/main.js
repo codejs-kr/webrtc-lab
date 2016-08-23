@@ -1,4 +1,11 @@
 /*!
+ *
+ * WebRTC Lab
+ * @author dodortus (codejs.co.kr / dodortus@gmail.com)
+ *
+ */
+
+/*!
 간략한 시나리오.
 1. offer가 SDP와 candidate전송
 2. answer는 offer가 보낸 SDP와 cadidate를 Set한다.

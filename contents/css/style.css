@@ -1,4 +1,10 @@
 @charset "utf-8";
+/*!
+ *
+ * WebRTC Lab
+ * @author dodortus (codejs.co.kr / dodortus@gmail.com)
+ *
+ */
 
 body, p { margin: 0; padding: 0; font-size: 16px; }
 body { padding: 16px; background: #fff; }
@@ -13,19 +19,19 @@ a { color: #000; text-decoration: none; }
 a:hover { text-decoration: underline; }
 footer { margin: 30px 0; text-align: center; }
 pre { margin-top: 0 !important; }
-code { 
+code {
 	background: #F7F7F7 !important; border: solid 1px #bbb;
 	border-radius: 3px; font-size: 0.9em;
 }
 
 .align-center { text-align: center; }
 #content {
-	padding: 80px 30px; min-height: 350px; 
-	border-bottom: solid 1px #ebebeb; 
+	padding: 80px 30px; min-height: 350px;
+	border-bottom: solid 1px #ebebeb;
 }
 #logo-webrtc {
-	height: 170px; 
-	background: #fff url(../img/logo-webrtc.png) no-repeat center top; 
+	height: 170px;
+	background: #fff url(../img/logo-webrtc.png) no-repeat center top;
 }
 .wrap { width: 720px; margin: 0 auto; }
 .wrap-250 { width: 250px; margin: 0 auto; }
@@ -35,8 +41,8 @@ code {
 .two-peace:after { display: block; content: ""; clear: both; }
 
 .btn {
-  padding: 6px 25px; color: #000; font-size: 16px; 
-  border: solid 1px #000; background: #fff; border-radius: 6px; 
+  padding: 6px 25px; color: #000; font-size: 16px;
+  border: solid 1px #000; background: #fff; border-radius: 6px;
 }
 .btn:hover { background: #000; color: #fff; }
 

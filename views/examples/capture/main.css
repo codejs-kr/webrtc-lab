@@ -1,4 +1,10 @@
 @charset "utf-8";
+/*!
+ *
+ * WebRTC Lab
+ * @author dodortus (codejs.co.kr / dodortus@gmail.com)
+ *
+ */
 
 video,
 canvas { border: solid 1px #000; }
