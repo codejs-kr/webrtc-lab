@@ -5,6 +5,7 @@ var	config = require('./config.json');
 	// for socket server
 var	http = require('http').Server(app);
 var	io = require('socket.io')(http);
+var port = process.env.PORT || config.webserver.port;
 
 app.set('views', __dirname + '/views');
 app.engine('ejs', require('ejs').renderFile);
@@ -124,6 +125,6 @@ io.on('connection', function(socket) {
 });
 
 // server listen start
-http.listen(config.webserver.port, function() {
-  console.log('WebRTC Lab server running at ' + config.webserver.host + ':' + config.webserver.port);
+http.listen(port, function() {
+  console.log('WebRTC Lab server running at ' + config.webserver.host + ':' + port);
 });
