@@ -66,3 +66,4 @@ button[disabled]:hover { background-color: #d84a38; }
 video { margin: 0 0 20px 0; width: 100%; background: #222; }
 canvas { margin-bottom: 20px; }
 .not-yet * { color: #bbb; }
+.alert-message { color: #f00; font-size: 1em; }
