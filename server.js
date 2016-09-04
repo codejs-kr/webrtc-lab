@@ -19,9 +19,7 @@ app.get('/', function(req, res) {
 	res.render('index.ejs', {
 		title: ""
 	});
-});
-
-app.get('/intro', function(req, res) {
+}).get('/intro', function(req, res) {
 	res.render('intro.ejs', {
     title: "- WebRTC 소개"
   });

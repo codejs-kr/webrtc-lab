@@ -1,0 +1,515 @@
+// Bright theme for Shower HTML presentation engine: github.com/shower/shower
+// Copyright © 2010–2013 Vadim Makeev, pepelsbey.net
+// Licensed under MIT license: github.com/shower/shower/wiki/MIT-License
+
+@import 'defaults';
+@import 'fonts';
+@import 'reset';
+
+body {
+	counter-reset:slide;
+	font:24px/2 'Open Sans', sans-serif;
+	}
+a {
+	text-decoration:none;
+	}
+
+// Caption
+// -------------------------------
+.caption {
+	display:none;
+	margin:0 0 60px;
+	padding:0 50px 0 0;
+	color:#555;
+	h1 {
+		font:50px 'Open Sans Light', sans-serif;
+		}
+	a {
+		color:$color;
+		&:hover {
+			border-bottom:0.1em solid;
+			}
+		}
+	}
+
+// Badge
+// -------------------------------
+.badge {
+	position:absolute;
+	top:0;
+	right:0;
+	display:none;
+	overflow:hidden;
+	visibility:hidden;
+	width:11em;
+	height:11em;
+	line-height:2.5;
+	font-size:15px;
+	}
+	.badge a {
+		position:absolute;
+		bottom:50%;
+		right:-50%;
+		left:-50%;
+		visibility:visible;
+		background:$color;
+		color:#FFF;
+		text-align:center;
+		@include transform-origin(50% 100%);
+		@include transform(rotate(45deg) translateY(-1em));
+		}
+
+// Slide
+// -------------------------------
+.slide {
+	position:relative;
+	width:$width;
+	height:$height;
+	background:#FFF;
+	color:#000;
+	-webkit-print-color-adjust:exact;
+	-webkit-text-size-adjust:none;
+	-moz-text-size-adjust:none;
+	-ms-text-size-adjust:none;
+	// Number
+	&:after {
+		position:absolute;
+		right:0;
+		bottom:45px;
+		left:0;
+		color:#AAA;
+		counter-increment:slide;
+		content:counter(slide);
+		text-align:center;
+		line-height:1;
+		}
+	// Inner
+	> div {
+		position:absolute;
+		top:0;
+		left:0;
+		overflow:hidden;
+		padding:$top $right 0 $left;
+		width:$width - $left - $right;
+		height:$height - $top;
+		}
+	// Debug
+	.debug & {
+		background-image:url(../images/grid-#{$ratio}.svg);
+		}
+	}
+
+// Elements
+// -------------------------------
+.slide {
+	// Header
+	h2 {
+		margin:0 0 58px;
+		font:48px/1 'Open Sans Light', sans-serif;
+		}
+	// Text
+	p {
+		margin:0 0 48px;
+		}
+	a {
+		border-bottom:0.1em solid;
+		color:$color;
+		}
+	b, strong {
+		font-weight:bold;
+		}
+	i, em {
+		font-style:italic;
+		}
+	kbd, code, samp {
+		padding:2px 7px;
+		background:rgba(#000, 0.1);
+		@include tab-size(4);
+		line-height:1;
+		font-family:'Anka Coder', monospace;
+		}
+	// Quote
+	blockquote {
+		font-style:italic;
+		&:before {
+			position:absolute;
+			margin:-50px 0 0 -100px;
+			color:#DDD;
+			content:'\201C';
+			line-height:1;
+			font-size:200px;
+			}
+		& + figcaption {
+			margin:-48px 0 48px;
+			font-style:italic;
+			font-weight:bold;
+			}
+		}
+	// Lists
+	ol, ul {
+		margin:0 0 48px;
+		counter-reset:list;
+		li {
+			text-indent:-2em;
+			&:before {
+				display:inline-block;
+				width:2em;
+				color:#AAA;
+				text-align:right;
+				}
+			}
+		ol,
+		ul {
+			margin:0 0 0 2em;
+			}
+		}
+	ul > li:before {
+		content:'\2022\00A0\00A0\2009';
+		}
+	ul > li:lang(ru):before {
+		content:'\2014\00A0\2009';
+		}
+	ol > li:before {
+		counter-increment:list;
+		content:counter(list)'.\00A0\2009';
+		}
+	// Code
+	pre {
+		margin:0 0 45px;
+		padding:3px 0 0;
+		counter-reset:code;
+		white-space:normal;
+		code {
+			display:block;
+			padding:0;
+			background:none;
+			white-space:pre;
+			line-height:2;
+			&:before {
+				position:absolute;
+				margin-left:-50px;
+				color:#AAA;
+				counter-increment:code;
+				content:counter(code, decimal-leading-zero)'.';
+				}
+			&:only-child:before {
+				content:'';
+				}
+			}
+		// Mark
+		mark {
+			background:none;
+			color:$color;
+			font-style:normal;
+			&.important {
+				padding:3px 7px 0;
+				background:$color;
+				color:#FFF;
+				}
+			&.comment {
+				color:#AAA;
+				}
+			}
+		}
+	// Table
+	table {
+		margin:0 0 50px;
+		width:100%;
+		border-collapse:collapse;
+		border-spacing:0;
+		th, td {
+			background:url($dot) 0 100% repeat-x;
+			}
+		th {
+			text-align:left;
+			font-weight:bold;
+			}
+		&.striped {
+			tr:nth-child(even) {
+				background:mix($color, #FFF, 8%);
+				}
+			}
+		}
+	// Cover Shout
+	&.cover,
+	&.shout {
+		z-index:1;
+		&:after {
+			content:'';
+			}
+		}
+	// Cover
+	&.cover {
+		background:#000;
+		@mixin cover {
+			img, svg, video,
+			object, canvas {
+				@content;
+				}
+			}
+		@include cover {
+			position:absolute;
+			top:0;
+			left:0;
+			z-index:-1;
+			}
+		&.w {
+			@include cover {
+				top:50%;
+				width:100%;
+				@include transform(translateY(-50%));
+				}
+			}
+		&.h {
+			@include cover {
+				left:50%;
+				height:100%;
+				@include transform(translateX(-50%));
+				}
+			}
+		&.w.h {
+			@include cover {
+				top:0;
+				left:0;
+				@include transform(none);
+				}
+			}
+		}
+	// Shout
+	&.shout {
+		background:$color;
+		h2 {
+			position:absolute;
+			top:50%;
+			left:128px;
+			right:96px;
+			color:#FFF;
+			font-size:100px;
+			@include transform(translateY(-50%));
+			}
+		}
+	// Place
+	.place {
+		position:absolute;
+		top:50%;
+		left:50%;
+		@include transform(translate(-50%, -50%));
+		&.t.l, &.t.r, &.b.r, &.b.l {
+			@include transform(none);
+			}
+		&.t, &.b {
+			@include transform(translate(-50%, 0));
+			}
+		&.l, &.r {
+			@include transform(translate(0, -50%));
+			}
+		&.t, &.t.l, &.t.r {
+			top:0;
+			}
+		&.r {
+			right:0;
+			left:auto;
+			}
+		&.b, &.b.r, &.b.l {
+			top:auto;
+			bottom:0;
+			}
+		&.l {
+			left:0;
+			}
+		}
+	// Notes
+	footer {
+		position:absolute;
+		left:0;
+		right:0;
+		bottom:-$height;
+		z-index:1;
+		display:none;
+		padding:20px $right 20px $left;
+		background:#fafac4;
+		box-shadow:0 0 0 2px rgba(#000, 0.05);
+		@include transition(bottom 0.3s)
+		}
+	&:hover footer {
+		bottom:0;
+		}
+	}
+
+// Screen
+@media screen {
+	// List
+	.list {
+		position:absolute;
+		clip:rect(0, auto, auto, 0); // Having fun with IE10
+		padding:50px 0 50px 50px;
+		background:#E2E2E2 url(../images/mesh.png) 50% 0;
+		text-align:center;
+		@include retina {
+			background-image:url(../images/mesh@2x.png);
+			background-size:256px;
+			}
+		// Outfit
+		.caption,
+		.badge {
+			display:block;
+			}
+		// Slide
+		.slide {
+			// Gap between slides
+			$gap:50px;
+			position:relative;
+			top:$height/2 - $gap;
+			display:inline-block;
+			margin:($gap - $height/2) ($gap - $width/2) 0 0;
+			text-align:left;
+			@include transform-origin(0 0);
+			@include transform(scale(0.5));
+			@media (max-width:$break) {
+				top:$height/2 + $height/4 - $gap;
+				margin:($gap - ($height/2 + $height/4)) ($gap - ($width/2 + $width/4)) 0 0;
+				@include transform(scale(0.25));
+				}
+			// Frame
+			&:before {
+				position:absolute;
+				top:0;
+				left:0;
+				z-index:-1;
+				width:$width/2;
+				height:$height/2;
+				box-shadow:0 0 0 1px #DDD;
+				content:'';
+				@include transform-origin(0 0);
+				@include transform(scale(2));
+				@media (max-width:$break) {
+					width:$width/4;
+					height:$height/4;
+					@include transform(scale(4));
+					}
+				}
+			// Number
+			&:after {
+				top:100%;
+				bottom:auto;
+				padding-top:50px;
+				@media (max-width:$break) {
+					width:$width/2;
+					@include transform-origin(0 0);
+					@include transform(scale(2));
+					}
+				}
+			// Hover
+			&:hover:before {
+				box-shadow:
+					0 0 0 1px #EEE,
+					0 0 0 12px rgba(#FFF, 0.5);
+				}
+			// Current
+			&:target {
+				&:before {
+					box-shadow:
+						0 0 10px 0 darken($color, 5%),
+						0 0 0 12px $color;
+					}
+				&:after {
+					color:$color;
+					}
+				}
+			// Inner
+			> div {
+				&:before {
+					position:absolute;
+					top:0;
+					right:0;
+					bottom:0;
+					left:0;
+					z-index:2;
+					content:'';
+					}
+				}
+			// Cover Shout
+			&.cover,
+			&.shout {
+				&:after {
+					content:counter(slide);
+					}
+				}
+			// Notes
+			footer {
+				display:block;
+				}
+			}
+		}
+	// Full
+	.full {
+		position:absolute;
+		top:50%;
+		left:50%;
+		overflow:hidden;
+		margin:(-$height/2) 0 0 (-$width/2);
+		width:$width;
+		height:$height;
+		background:#000;
+		// Slide
+		.slide {
+			position:absolute;
+			top:0;
+			left:0;
+			margin-left:150%;
+			// Next
+			.next {
+				visibility:hidden;
+				&.active {
+					visibility:visible;
+					}
+				}
+			// Current
+			&:target {
+				margin:0;
+				}
+			// Shout
+			&.shout {
+				&.right, &.up {
+					h2 {
+						opacity:0;
+						@include transition(all 0.4s ease-out);
+						}
+					&:target h2 {
+						opacity:1;
+						@include transform(translateX(0) translateY(-50%));
+						}
+					}
+				&.right h2 {
+					@include transform(translateX(-100%) translateY(-50%));
+					}
+				&.up h2 {
+					@include transform(translateX(0) translateY(100%));
+					}
+				}
+			}
+		// Progress
+		.progress {
+			position:absolute;
+			right:0;
+			bottom:0;
+			left:0;
+			z-index:1;
+			div {
+				position:absolute;
+				left:0;
+				bottom:0;
+				width:0;
+				height:8px;
+				background:$color;
+				@include transition(width 0.2s linear);
+				}
+			}
+		}
+	}
+
+// Print
+@page {
+	margin:0;
+	size:$width $height;
+	}
