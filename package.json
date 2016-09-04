@@ -1,8 +1,13 @@
 {
-  "author": "dodortus",
   "name": "webrtc-lab",
-  "version": "0.8.0",
   "description": "Webrtc simple examples",
+  "version": "0.8.1",
+  "author": "dodortus",
+  "license": "MIT",
+  "keywords": [
+    "webrtc",
+    "javascript"
+  ],
   "dependencies": {
   	"express": "4.13.4",
   	"ejs": "2.4.1",
