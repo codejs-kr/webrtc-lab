@@ -1,0 +1,13 @@
+@charset "utf-8";
+/*!
+ *
+ * WebRTC Lab
+ * @author dodortus (codejs.co.kr / dodortus@gmail.com)
+ *
+ */
+
+video,
+canvas { border: solid 1px #000; }
+img { width: 170px; margin: 0 5px; }
+
+#output strong { display: block; margin-bottom: 5px; }

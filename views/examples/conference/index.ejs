@@ -1,0 +1,22 @@
+<% include ../../partials/header %>
+<link href="main.css" rel="stylesheet" type="text/css">
+
+<div id="content">
+  <div class="wrap">
+    <section id="share-wrap">
+      <a href="#" id="unique-token">Share this room link</a>
+    </section>
+    <section id="join-wrap">
+      <p>영상회의를 시작하시겠습니까?</p>
+      <button id="start">Start</button>
+    </section>
+    <section id="room-list"></section>
+
+    <!-- local/remote videos container -->
+    <section id="video-wrap"></section>
+  </div>
+</div>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="main.js"></script>
+<% include ../../partials/footer %>

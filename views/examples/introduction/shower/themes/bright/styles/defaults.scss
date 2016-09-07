@@ -1,0 +1,60 @@
+// Bright theme for Shower HTML presentation engine: github.com/shower/shower
+// Copyright © 2010–2013 Vadim Makeev, pepelsbey.net
+// Licensed under MIT license: github.com/shower/shower/wiki/MIT-License
+
+// Colors
+$color:#52A2DF;
+
+// Layout
+$top:100px;     // Top padding above slide content
+$left:128px;    // Left slide content padding
+$right:96px;    // Right slide content padding
+$break:1180px;  // Window width for small thumbnails to appear
+$ratio:'';
+
+// Slide Dimentions
+$width:1024px;
+$height:640px;
+
+// #52A2DF 1px
+$dot:'data:image/gif;base64,R0lGODdhAQABAPAAAFKi3wAAACH/C1hNUCBEYXRhWE1QAz94cAAsAAAAAAEAAQBAAgJEAQA7';
+
+@if $height == 640px {
+	$ratio:'16x10';
+}
+@if $height == 768px {
+	$ratio:'4x3';
+	$top:$top + 16px;
+}
+
+// Mixins
+@mixin retina {
+	@media (-webkit-min-device-pixel-ratio:2), (min-resolution:192dpi) {
+		@content;
+		}
+	}
+@mixin tab-size($n) {
+	-moz-tab-size:$n;
+	-o-tab-size:$n;
+	tab-size:$n;
+	}
+@mixin transform($n) {
+	-webkit-transform:$n;
+	-moz-transform:$n;
+	-ms-transform:$n;
+	-o-transform:$n;
+	transform:$n;
+	}
+@mixin transform-origin($n) {
+	-webkit-transform-origin:$n;
+	-moz-transform-origin:$n;
+	-ms-transform-origin:$n;
+	-o-transform-origin:$n;
+	transform-origin:$n;
+	}
+@mixin transition($n) {
+	-webkit-transition:$n;
+	-moz-transition:$n;
+	-o-transition:$n;
+	transition:$n;
+	}

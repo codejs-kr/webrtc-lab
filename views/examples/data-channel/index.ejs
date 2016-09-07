@@ -1,0 +1,53 @@
+<% include ../../partials/header %>
+<div id="content">
+  <div class="wrap">
+    <button>getUserMedia()</button>
+
+    <pre>
+      <code class="highlight">$(function() {
+  navigator.getUserMedia = navigator.getUserMedia ||
+  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+  $('button').click(function() {
+    // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
+    navigator.getUserMedia({audio:true, video:true}, success, error);
+  });
+
+  function success(stream) {
+    // 비디오 테그에 stream 전달.
+    $('video')[0].src = window.URL.createObjectURL(stream);
+
+    // do something...
+  }
+
+  function error(err) {
+    console.log('error', arguments);
+  }
+});</code>
+   	</pre>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    navigator.getUserMedia = navigator.getUserMedia ||
+    	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+    $('button').click(function() {
+      // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
+      navigator.getUserMedia({audio:true, video:true}, success, error);
+    });
+
+    function success(stream) {
+      // 비디오 테그에 stream 전달.
+      $('video')[0].src = window.URL.createObjectURL(stream);
+
+      // do something...
+    }
+
+    function error(err) {
+      console.log('error', arguments);
+    }
+  });
+</script>
+<% include ../../partials/footer %>

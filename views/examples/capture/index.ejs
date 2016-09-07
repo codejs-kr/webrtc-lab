@@ -1,0 +1,114 @@
+<% include ../../partials/header %>
+<link href="main.css" rel="stylesheet" type="text/css">
+
+<div id="content">
+  <div class="wrap">
+  	<div class="two-peace">
+	  	<div>
+		    <video id="video" width="350" height="260" autoplay></video>
+	  	</div>
+	  	<div>
+		    <canvas id="canvas" width="350" height="260"></canvas>
+	  	</div>
+  	</div>
+    <button id="btn-camera">비디오출력</button>
+    <button id="btn-capture">캡쳐</button>
+    <hr>
+
+	  <div id="output">
+	  	<strong>Capture images</strong>
+	  	<div id="images">
+
+	  	</div>
+	  </div>
+
+    <pre>
+      <code class="highlight">$(function() {
+  navigator.getUserMedia = navigator.getUserMedia ||
+  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+  var video = document.getElementById('video');
+  var canvas = document.getElementById('canvas');
+  var width = 350;
+  var height = 260;
+
+  function success(stream) {
+    $(video).attr('src', URL.createObjectURL(stream));
+  }
+
+  function error(err) {
+    console.log('error', arguments);
+  }
+
+  function capture() {
+    var context = canvas.getContext('2d');
+    canvas.width = width;
+    canvas.height = height;
+    context.drawImage(video, 0, 0, width, height);
+
+    insertImg(canvas.toDataURL('image/png'));
+  }
+
+  function insertImg(imgData) {
+    $('#images').prepend("&lt;img src=" + imgData + " /&gt;");
+  }
+
+  /**
+   * initialize
+   */
+  $('#btn-camera').click(function() {
+    // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
+    navigator.getUserMedia({audio:false, video:true}, success, error);
+  });
+
+  $('#btn-capture').click(capture);
+});
+</code>
+   	</pre>
+  </div>
+</div>
+
+<script>
+  $(function() {
+    navigator.getUserMedia = navigator.getUserMedia ||
+    	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+   	var video = document.getElementById('video')
+   		,	canvas = document.getElementById('canvas')
+   		, width = 350
+   		, height = 260;
+
+    function success(stream) {
+      $(video).attr('src', URL.createObjectURL(stream));
+    }
+
+    function error(err) {
+      console.log('error', arguments);
+    }
+
+    function capture() {
+		  var context = canvas.getContext('2d');
+		  canvas.width = width;
+		  canvas.height = height;
+		  context.drawImage(video, 0, 0, width, height);
+
+		  insertImg(canvas.toDataURL('image/png'));
+		}
+
+    function insertImg(imgData) {
+    	$('#images').prepend("<img src=" + imgData + " />");
+    }
+
+    /**
+     * initialize
+     */
+    $('#btn-camera').click(function() {
+      // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
+      navigator.getUserMedia({audio:false, video:true}, success, error);
+    });
+
+    $('#btn-capture').click(capture);
+  });
+</script>
+
+<% include ../../partials/footer %>
