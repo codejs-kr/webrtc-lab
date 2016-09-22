@@ -22,7 +22,18 @@ $(function() {
     alert('예제는 캠이 있어야 작동합니다.')
   }
 
+  function setHTTPS() {
+    if (location.protocol == 'http:') {
+      location.protocol = "https:";
+    }
+  }
+
   function init() {
+    // https 설정
+    if (!location.href.match('localhost')) {
+      setHTTPS();
+    }
+
     // webrtc 미지원 브라우저 체크
     if (checkPage && !isFirefox && !isChrome && !isOpera) {
       addNotSupportBrowserMsg();

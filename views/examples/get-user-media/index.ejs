@@ -40,14 +40,18 @@
     });
 
     function success(stream) {
+      console.log('success', arguments);
+      
       // 비디오 테그에 stream 전달.
       $('video')[0].src = window.URL.createObjectURL(stream);
 
       // do something...
     }
 
-    function error(err) {
+    function error(error) {
       console.log('error', arguments);
+
+      alert('카메라와 마이크를 허용해주세요');
     }
   });
 </script>
