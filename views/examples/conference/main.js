@@ -6,16 +6,15 @@
  */
 
 /*!
-간략한 시나리오.
-1. offer가 SDP와 candidate전송
-2. answer는 offer가 보낸 SDP와 cadidate를 Set한다.
-3. answer는 응답할 SDP와 candidate를 얻어서 offer한테 전달한다.
-4. offer는 응답 받은 SDP와 candidate를 Set한다.
+  간략한 시나리오.
+  1. offer가 SDP와 candidate전송
+  2. answer는 offer가 보낸 SDP와 cadidate를 Set한다.
+  3. answer는 응답할 SDP와 candidate를 얻어서 offer한테 전달한다.
+  4. offer는 응답 받은 SDP와 candidate를 Set한다.
 */
 
 /*
 TODO
- - 참석자, 나가기 사람 알림?
  - 파폭 처리
  - hasWebCam 분기
 */
@@ -59,10 +58,11 @@ $(function() {
 
   // DOM
   var $body = $('body');
-  var $roomList = $('#room-list')
+  var $roomList = $('#room-list');
   var $videoWrap = $('#video-wrap');
+  var $tokenWrap = $('#token-wrap');
   var $uniqueToken = $('#unique-token');
-  var $joinWrap = $('#join-wrap')
+  var $joinWrap = $('#join-wrap');
 
   /**
   * getUserMedia
@@ -77,8 +77,7 @@ $(function() {
       localStream = stream;
       $videoWrap.append('<video id="local-video" muted="muted" autoplay="true" src="' + URL.createObjectURL(localStream) + '"></video>');
       $body.addClass('room wait');
-
-      $('#token-wrap').slideDown(1000);
+      $tokenWrap.slideDown(1000);
 
       if (isOffer) {
         createPeerConnection();
@@ -168,12 +167,18 @@ $(function() {
     };
   }
 
+  /**
+  * onSdpError
+  */
   function onSdpError() {
     console.log('onSdpError', arguments);
   }
 
-  /*
-  * below for signaling
+  /****************************** Below for signaling ************************/
+
+  /**
+  * send
+  * @param {object} msg data
   */
   function send(data) {
     console.log('send', data);
@@ -182,6 +187,10 @@ $(function() {
     socket.send(data);
   }
 
+  /**
+  * onmessage
+  * @param {object} msg data
+  */
   function onmessage(data) {
     console.log('onmessage', data);
 
@@ -225,12 +234,15 @@ $(function() {
     //console.log('setRoomToken', arguments);
 
     if (location.hash.length > 2) {
-      $uniqueToken.length && $uniqueToken.attr('href', location.href);
+      $uniqueToken.attr('href', location.href);
     } else {
       location.hash = '#' + (Math.random() * new Date().getTime()).toString(32).toUpperCase().replace(/\./g, '-');
     }
   }
 
+  /**
+   * setClipboard
+   */
   function setClipboard() {
     //console.log('setClipboard', arguments);
 
@@ -246,6 +258,9 @@ $(function() {
     });
   }
 
+  /**
+   * onFoundUser
+   */
   function onFoundUser() {
     $roomList.html([
       '<div class="room-info">',
@@ -261,9 +276,13 @@ $(function() {
     });
 
     $joinWrap.slideUp(1000);
-    $('#token-wrap').slideUp(1000);
+    $tokenWrap.slideUp(1000);
   }
 
+  /**
+   * onLeave
+   * @param {string} userId
+   */
   function onLeave(userId) {
     if (remoteUserId == userId) {
       $('#remote-video').remove();
@@ -272,6 +291,9 @@ $(function() {
     }
   }
 
+  /**
+   * initialize
+   */
   function initialize() {
     setRoomToken();
     setClipboard();
@@ -283,10 +305,12 @@ $(function() {
   }
   initialize();
 
+  /**
+   * socket handling
+   */
   socket.emit('joinRoom', roomId, userId);
   socket.on('joinRoom', function(roomId, userList) {
     console.log('joinRoom', arguments);
-
     if (Object.size(userList) > 1) {
       onFoundUser();
     }
