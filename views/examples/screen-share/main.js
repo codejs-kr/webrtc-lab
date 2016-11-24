@@ -36,13 +36,18 @@ $(function() {
   var localStream = null;
   var peer = null; // offer or answer peer
   var iceServers = {
-    'iceServers': [{
-      'url': 'stun:stun.l.google.com:19302'
-    }, {
-      'url': 'turn:107.150.19.220:3478',
-      'credential': 'turnserver',
-      'username': 'subrosa'
-    }]
+    'iceServers': [
+      {'url': 'stun:stun1.l.google.com:19302'},
+      {'url': 'stun:stun2.l.google.com:19302'},
+      {'url': 'stun:stun3.l.google.com:19302'},
+      {'url': 'stun:stun4.l.google.com:19302'},
+      {'url': 'stun:stun.l.google.com:19302'},
+      {
+        'url': 'turn:107.150.19.220:3478',
+        'credential': 'turnserver',
+        'username': 'subrosa'
+      }
+    ]
   };
   var peerConnectionOptions = {
     'optional': [{
