@@ -20,4 +20,4 @@
 	9. 더 많은 자료
 
 ###Demo
-	* https://webrtclab.herokuapp.com/
+	https://webrtclab.herokuapp.com/
