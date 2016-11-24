@@ -17,7 +17,7 @@
   "content_scripts": [ {
     "js": [ "content.js" ],
     "matches": [
-      "*://webrtclab.herokuapp.com/*"
+      "http://localhost:3000/*"
     ]
   }],
   "web_accessible_resources": [
@@ -25,7 +25,7 @@
   ],
   "externally_connectable": {
 	  "matches": [
-	  	"*://webrtclab.herokuapp.com/*"
+	  	"http://localhost:3000/*"
   	]
 	}
 }
