@@ -1,9 +1,13 @@
 var	express = require('express');
 var	app = express();
 var	config = require('./config.json');
+var fs = require('fs');
+var privateKey = fs.readFileSync('fakekeys/privatekey.pem').toString();
+var certificate = fs.readFileSync('fakekeys/certificate.pem').toString();
 
 	// for socket server
 var	http = require('http').Server(app);
+//var https = require('https').Server({key: privateKey, cert: certificate}, app);
 var	io = require('socket.io')(http);
 var port = process.env.PORT || config.webserver.port;
 
@@ -39,8 +43,12 @@ app.get('/', function(req, res) {
 	res.render('examples/conference/index.ejs', {
     title: "- 1:1 화상회의 만들기"
   });
+}).get('/screen-share', function(req, res) {
+	res.render('examples/screen-share/index.ejs', {
+    title: "- 1:1 스크린쉐어 만들기"
+	});
 }).get('/data-channel', function(req, res) {
-	res.render('examples/data-channel/index.ejs', {
+		res.render('examples/data-channel/index.ejs', {
     title: "- 파일 & 데이터 전송하기"
   });
 }).get('/speech-recognition', function(req, res) {
@@ -126,3 +134,8 @@ io.on('connection', function(socket) {
 http.listen(port, function() {
   console.log('WebRTC Lab server running at ' + config.webserver.host + ':' + port);
 });
+
+//
+// https.listen(port, function() {
+// 	console.log('WebRTC Lab server running at ' + config.webserver.host + ':' + port);
+// });
