@@ -97,6 +97,8 @@ $(function() {
 
     peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
     peer.createOffer(function(SDP) {
+      SDP.sdp = SDP.sdp.replace("100 101 107", "107 100 101"); // h264 first
+
       peer.setLocalDescription(SDP);
       console.log("Sending offer description", SDP);
       send({
