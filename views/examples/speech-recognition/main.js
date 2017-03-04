@@ -18,7 +18,6 @@ $(function() {
   var $btnMic = $('#btn-mic');
  	var $result = $('#result');
  	var $iconMusic = $('#icon-music');
-
   recognition.continuous = true;
   recognition.interimResults = true;
 
@@ -37,7 +36,7 @@ $(function() {
       return false;
     }
 
-    // do end process
+    // DO end process
     $btnMic.attr('class', 'off');
     if (!finalTranscript) {
       console.log('empty finalTranscript');
@@ -77,7 +76,6 @@ $(function() {
 
     console.log('finalTranscript', finalTranscript);
     console.log('interimTranscript', interimTranscript);
-
     fireCommand(interimTranscript);
   };
 
@@ -115,7 +113,7 @@ $(function() {
   		$result.attr('class', 'white');
   	} else if (string.endsWith('블랙')) {
   		$result.attr('class', 'black');
-  	} else if (string.endsWith('알람')) {
+  	} else if (string.endsWith('알람') || string.endsWith('알 람')) {
   		alert('알람');
   	} else if (string.endsWith('노래 켜') || string.endsWith('음악 켜')) {
   		audio.play();

@@ -17,8 +17,12 @@
 	display: inline-block; margin: 1px 0 0 5px; width: 10px; height: 10px;
 	border: solid 1px #fff; background: #bbb; border-radius: 50%;
 }
-
 #btn-mic.on span { background: green; }
+#icon-music {
+	display: none;
+	position: absolute; top: -7px; right: 30px; font-size: 80px;
+}
+ul li { font-size: 1em; }
 
 .red 		{ background: red; }
 .blue 	{ background: blue; color: #fff !important; }
@@ -29,10 +33,4 @@
 .gold   { background: gold; }
 .white 	{ background: white; }
 .black  { background: black; color: #fff !important; }
-
-#icon-music {
-	display: none;
-	position: absolute; top: -7px; right: 30px; font-size: 80px;
-}
-
 .visible { display: block !important; }
