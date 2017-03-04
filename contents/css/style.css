@@ -5,13 +5,15 @@
  * @author dodortus (codejs.co.kr / dodortus@gmail.com)
  *
  */
-body, p { margin: 0; padding: 0; font-size: 16px; }
+body, p { margin: 0; padding: 0; font-size: 16px; line-height: 1.4; }
 body { padding: 16px; background: #fff; }
 button { cursor: pointer; }
 h1 {
 	padding: 0 0 0.2em 0; height: 50px; line-height: 50px;
 	font-weight: bold; margin: 0; text-indent: 5px; border-bottom: 1px solid #ccc;
 }
+h3 { margin: 0 0 0.3em 0; }
+ul { margin: 0; }
 ul li { line-height: 1.8; font-size: 1.2em; }
 p { margin: 5px 0 10px; }
 a { color: #000; text-decoration: none; }
