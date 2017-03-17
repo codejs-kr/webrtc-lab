@@ -1,6 +1,6 @@
 /*!
  *
- * WebRTC Lab
+ * WebRTC Lab 
  * @author dodortus (codejs.co.kr / dodortus@gmail.com)
  *
  */
