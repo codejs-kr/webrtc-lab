@@ -72,7 +72,24 @@ $(function() {
 
     navigator.getUserMedia({
       audio: true,
-      video: true
+      video: {
+        mandatory: {
+          // 720p와 360p 해상도 최소 최대를 잡게되면 캡쳐 영역이 가깝게 잡히는 이슈가 있다.
+          // 1920 * 1080 | 1280 * 720 | 858 * 480 | 640 * 360 | 480 * 272 | 320 * 180
+          maxWidth: 1280,
+          maxHeight: 720,
+          minWidth: 1280,
+          minHeight: 720,
+          maxFrameRate: 24,
+          minFrameRate: 18,
+          maxAspectRatio: 1.778,
+          minAspectRatio: 1.777
+        },
+        optional: [
+          {googNoiseReduction: true}, // Likely removes the noise in the captured video stream at the expense of computational effort.
+          {facingMode: "user"}        // Select the front/user facing camera or the rear/environment facing camera if available (on Phone)
+        ]
+      }
     }, function(stream) {
       localStream = stream;
       $videoWrap.append('<video id="local-video" muted="muted" autoplay="true" src="' + URL.createObjectURL(localStream) + '"></video>');
@@ -99,7 +116,8 @@ $(function() {
     peer.createOffer(function(SDP) {
       // url parameter codec=h264
       if (location.search.substr(1).match('h264')) {
-        SDP.sdp = SDP.sdp.replace("100 101 107", "107 100 101");
+        SDP.sdp = SDP.sdp.replace("100 101 107", "107 100 101"); // for chrome < 57
+        SDP.sdp = SDP.sdp.replace("96 98 100", "100 96 98"); // for chrome 57 <
       }
 
       peer.setLocalDescription(SDP);
