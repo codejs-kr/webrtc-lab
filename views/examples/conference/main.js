@@ -314,6 +314,30 @@ $(function() {
     }
   }
 
+  function pauseVideo(callback) {
+    console.log('pauseVideo', arguments);
+    localStream.getVideoTracks()[0].enabled = false;
+    callback && callback();
+  }
+
+  function resumeVideo(callback) {
+    console.log('resumeVideo', arguments);
+    localStream.getVideoTracks()[0].enabled = true;
+    callback && callback();
+  }
+
+  function muteAudio(callback) {
+    console.log('muteAudio', arguments);
+    localStream.getAudioTracks()[0].enabled = false;
+    callback && callback();
+  }
+
+  function unmuteAudio(callback) {
+    console.log('unmuteAudio', arguments);
+    localStream.getAudioTracks()[0].enabled = true;
+    callback && callback();
+  }
+
   /**
    * initialize
    */
@@ -324,6 +348,28 @@ $(function() {
 
     $('#start').click(function() {
       getUserMedia();
+    });
+
+    $('#btn-camera').click(function() {
+      var $this = $(this);
+      $this.toggleClass('active');
+
+      if ($this.hasClass('active')) {
+        pauseVideo();
+      } else {
+        resumeVideo();
+      }
+    });
+
+    $('#btn-mic').click(function() {
+      var $this = $(this);
+      $this.toggleClass('active');
+
+      if ($this.hasClass('active')) {
+        muteAudio();
+      } else {
+        unmuteAudio();
+      }
     });
   }
   initialize();

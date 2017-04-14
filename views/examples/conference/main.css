@@ -44,7 +44,9 @@ body.connected #local-video {
 }
 
 /* room */
-#video-wrap { position: relative; margin: 0 auto; }
+#video-wrap { display: none; position: relative; margin: 0 auto; }
+#video-wrap .buttons { position: absolute; bottom: -50px; }
+.room #video-wrap { display: block; }
 #local { width: 340px; height: 220px; border: solid 1px #fff; position: absolute; top: 4%; right: 2%; }
 #local-video { position: absolute; top: 0; left: 0; }
 
