@@ -36,9 +36,11 @@ $(function() {
   var localStream = null;
   var peer = null; // offer or answer peer
   var iceServers = {
-    'iceServers': [{
-      'url': 'stun:stun.l.google.com:19302'
-    }, {
+    'iceServers': [
+      {'url': 'stun:stun.l.google.com:19302'},
+      {'url': 'stun:stun1.l.google.com:19302'},
+      {'url': 'stun:stun2.l.google.com:19302'},
+      {
       'url': 'turn:107.150.19.220:3478',
       'credential': 'turnserver',
       'username': 'subrosa'
@@ -92,7 +94,8 @@ $(function() {
       }
     }, function(stream) {
       localStream = stream;
-      $videoWrap.append('<video id="local-video" muted="muted" autoplay="true" src="' + URL.createObjectURL(localStream) + '"></video>');
+      $videoWrap.append('<video id="local-video" muted="muted" autoplay="true"></video>');
+      document.querySelector('#local-video').srcObject = localStream;
       $body.addClass('room wait');
       $tokenWrap.slideDown(1000);
 
@@ -181,7 +184,8 @@ $(function() {
     peer.onaddstream = function(event) {
       console.log("Adding remote strem", event);
 
-      $videoWrap.append('<video id="remote-video" autoplay="true" src="' + URL.createObjectURL(event.stream) + '"></video>');
+      $videoWrap.append('<video id="remote-video" autoplay="true"></video>');
+      document.querySelector('#remote-video').srcObject = localStream;
       $body.removeClass('wait').addClass('connected');
     };
 

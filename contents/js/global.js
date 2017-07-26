@@ -6,20 +6,22 @@
  */
 
 $(function() {
+  var browserVersion = DetectRTC.browser.version;
   var isFirefox = DetectRTC.browser.isFirefox;
   var isChrome = DetectRTC.browser.isChrome;
   var isOpera = DetectRTC.browser.isOpera;
+  var isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
   var checkPage = (location.href.match(/conference/) || $('video').length);
   var $commentTarget = $('#content .wrap:eq(0)');
 
   function addNotSupportBrowserMsg() {
     $commentTarget.prepend([
-      "<strong class='alert-message'>WebRTC는 현재 Chrome, Firefox, Opera 브라우저만 지원합니다.</strong>"
+      "<strong class='alert-message'>WebRTC는 현재 Chrome, Firefox, Edge 15이상, Opera 브라우저만 지원합니다.</strong>"
     ].join('\n'));
   }
 
   function addNoCamMsg() {
-    alert('예제는 캠이 있어야 작동합니다.')
+    alert('예제는 캠이 있어야 작동합니다.');
   }
 
   function setHTTPS() {
@@ -35,7 +37,7 @@ $(function() {
     }
 
     // webrtc 미지원 브라우저 체크
-    if (checkPage && !isFirefox && !isChrome && !isOpera) {
+    if (checkPage && !isFirefox && !isChrome && !isOpera && !isEdge) {
       addNotSupportBrowserMsg();
       return false;
     }

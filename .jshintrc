@@ -1,0 +1,7 @@
+{
+  "expr"          : true,
+  "laxcomma"      : true,
+  "globals"       : {
+
+  }
+}
