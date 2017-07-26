@@ -59,7 +59,7 @@ $(function() {
   //   }
   // };
   //
-  // 
+  //
   var peerConnectionOptions = {};
   var mediaConstraints = {};
 
@@ -190,7 +190,7 @@ $(function() {
       console.log("Adding remote strem", event);
 
       $videoWrap.append('<video id="remote-video" autoplay="true"></video>');
-      document.querySelector('#remote-video').srcObject = localStream;
+      document.querySelector('#remote-video').srcObject = event.stream;
       $body.removeClass('wait').addClass('connected');
     };
 
