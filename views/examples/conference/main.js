@@ -46,17 +46,22 @@ $(function() {
       'username': 'subrosa'
     }]
   };
-  var peerConnectionOptions = {
-    'optional': [{
-      'DtlsSrtpKeyAgreement': 'true'
-    }]
-  };
-  var mediaConstraints = {
-    'mandatory': {
-      'OfferToReceiveAudio': true,
-      'OfferToReceiveVideo': true
-    }
-  };
+
+  // var peerConnectionOptions = {
+  //   'optional': [{
+  //     'DtlsSrtpKeyAgreement': 'true'
+  //   }]
+  // };
+  // var mediaConstraints = {
+  //   'mandatory': {
+  //     'OfferToReceiveAudio': true,
+  //     'OfferToReceiveVideo': true
+  //   }
+  // };
+  //
+  // 
+  var peerConnectionOptions = {};
+  var mediaConstraints = {};
 
   // DOM
   var $body = $('body');
