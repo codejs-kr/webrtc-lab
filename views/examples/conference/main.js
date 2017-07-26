@@ -26,6 +26,8 @@ $(function() {
   var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
   var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
   var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
+  var browserVersion = DetectRTC.browser.version;
+  var isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
 
   // for logic
   var socket = io();
@@ -47,21 +49,23 @@ $(function() {
     }]
   };
 
-  // var peerConnectionOptions = {
-  //   'optional': [{
-  //     'DtlsSrtpKeyAgreement': 'true'
-  //   }]
-  // };
-  // var mediaConstraints = {
-  //   'mandatory': {
-  //     'OfferToReceiveAudio': true,
-  //     'OfferToReceiveVideo': true
-  //   }
-  // };
-  //
-  //
-  var peerConnectionOptions = {};
-  var mediaConstraints = {};
+  var peerConnectionOptions = {
+    'optional': [{
+      'DtlsSrtpKeyAgreement': 'true'
+    }]
+  };
+  var mediaConstraints = {
+    'mandatory': {
+      'OfferToReceiveAudio': true,
+      'OfferToReceiveVideo': true
+    }
+  };
+
+  // edge is not supported
+  if (isEdge) {
+    peerConnectionOptions = {};
+    mediaConstraints = {};
+  }
 
   // DOM
   var $body = $('body');
