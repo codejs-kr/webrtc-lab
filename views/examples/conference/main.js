@@ -201,6 +201,20 @@ $(function() {
     peer.onremovestream = function(event) {
       console.log("Removing remote stream", event);
     };
+
+    peer.onnegotiationneeded = function(event) {
+      console.log("onnegotiationneeded", event);
+    };
+
+    peer.onsignalingstatechange = function(event) {
+      console.log("onsignalingstatechange", event);
+    };
+
+    peer.oniceconnectionstatechange = function(event) {
+      console.log("oniceconnectionstatechange",
+      'iceGatheringState: ' + peer.iceGatheringState,
+      '/ iceConnectionState: ' + peer.iceConnectionState);
+    }
   }
 
   /**
