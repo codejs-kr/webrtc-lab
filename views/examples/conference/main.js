@@ -124,7 +124,9 @@ $(function() {
   function createOffer() {
     console.log('createOffer', arguments);
 
-    peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
+    if (isOffer) {
+      peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
+    }
     peer.createOffer(function(SDP) {
       // url parameter codec=h264
       if (location.search.substr(1).match('h264')) {
