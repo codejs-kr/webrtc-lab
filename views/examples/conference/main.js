@@ -124,9 +124,7 @@ $(function() {
   function createOffer() {
     console.log('createOffer', arguments);
 
-    if (isOffer) {
-      peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
-    }
+    peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
     peer.createOffer(function(SDP) {
       // url parameter codec=h264
       if (location.search.substr(1).match('h264')) {
@@ -152,7 +150,7 @@ $(function() {
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
 
-    peer.addStream(localStream);
+    //peer.addStream(localStream);
     peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
       peer.createAnswer(function(SDP) {
         peer.setLocalDescription(SDP);
