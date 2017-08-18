@@ -323,6 +323,14 @@ $(function() {
       isOffer = true;
       getUserMedia();
       $(this).attr('disabled', true);
+
+      // 단방향 test code
+      mediaConstraints = {
+        'mandatory': {
+          'OfferToReceiveAudio': false,
+          'OfferToReceiveVideo': false
+        }
+      };
     });
 
     $joinWrap.slideUp(1000);
