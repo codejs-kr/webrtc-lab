@@ -87,10 +87,10 @@ $(function() {
         mandatory: {
           // 720p와 360p 해상도 최소 최대를 잡게되면 캡쳐 영역이 가깝게 잡히는 이슈가 있다.
           // 1920 * 1080 | 1280 * 720 | 858 * 480 | 640 * 360 | 480 * 272 | 320 * 180
-          maxWidth: 640,
-          maxHeight: 360,
-          minWidth: 640,
-          minHeight: 360,
+          maxWidth: 1280,
+          maxHeight: 720,
+          minWidth: 1280,
+          minHeight: 720,
           maxFrameRate: 24,
           minFrameRate: 18,
           maxAspectRatio: 1.778,
