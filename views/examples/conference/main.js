@@ -150,7 +150,7 @@ $(function() {
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
 
-    peer.addStream(localStream);
+    //peer.addStream(localStream);
     peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
       peer.createAnswer(function(SDP) {
         peer.setLocalDescription(SDP);
