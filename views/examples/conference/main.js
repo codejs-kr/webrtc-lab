@@ -267,6 +267,7 @@ $(function() {
     // offer, answer cadidate처리
     } else if (msg.candidate) {
       var candidate = new RTCIceCandidate({
+        sdpMid: msg.id,
         sdpMLineIndex: msg.label,
         candidate: msg.candidate
       });
