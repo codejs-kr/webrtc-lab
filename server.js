@@ -51,7 +51,11 @@ app.get('/', function(req, res) {
   res.render('examples/speech-recognition/index.ejs', {
     title: "- 음성 인식"
   });
-});
+}).get('/multi-stream', function(req, res) {
+	res.render('examples/multi-stream/index.ejs', {
+    title: "- 멀티 스트림"
+  });
+})
 
 function findRoomBySocketId(value) {
 	var arr = Object.keys(rooms);
