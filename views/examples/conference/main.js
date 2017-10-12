@@ -1,7 +1,7 @@
 /*!
  *
  * WebRTC Lab
- * @author dodortus (codejs.co.kr / dodortus@gmail.com)
+ * @author dodortus (dodortus@gmail.com / codejs.co.kr)
  *
  */
 
@@ -301,7 +301,7 @@ $(function() {
       var link = location.href;
       if (window.clipboardData){
         window.clipboardData.setData('text', link);
-        $.message('Copy to Clipboard successful.');
+        alert('Copy to Clipboard successful.');
       }
       else {
         window.prompt("Copy to clipboard: Ctrl+C, Enter", link); // Copy to clipboard: Ctrl+C, Enter

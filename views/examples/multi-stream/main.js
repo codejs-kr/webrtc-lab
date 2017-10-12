@@ -1,7 +1,7 @@
 /*!
  *
  * WebRTC Lab
- * @author dodortus (codejs.co.kr / dodortus@gmail.com)
+ * @author dodortus (dodortus@gmail.com / codejs.co.kr)
  *
  */
 
@@ -92,9 +92,8 @@ $(function() {
       }
     }, function(stream) {
       localStream = stream;
-      console.log('localStream', localStream);
-      $videoWrap.append('<video id="local-video" muted="muted" autoplay="true"></video>');
-      document.querySelector('#local-video').srcObject = localStream;
+      $videoWrap.append('<video id="local-video-large" class="local-video" muted="muted" autoplay="true" title="720p"></video>');
+      document.querySelector('#local-video-large').srcObject = localStream;
       $body.addClass('room wait');
       $tokenWrap.slideDown(1000);
 
@@ -102,7 +101,7 @@ $(function() {
         var peer = createPeerConnection('large');
         createOffer('large', peer, localStream);
       }
-      
+
       createSmallVideo();
     }, function() {
       console.error('Error getUserMedia');
@@ -118,7 +117,9 @@ $(function() {
       }
     }, function(stream) {
       localSmallStream = stream;
-      console.log('localSmallStream', localSmallStream);
+      $videoWrap.append('<video id="local-video-small" class="local-video" muted="muted" autoplay="true" title="90p"></video>');
+      document.querySelector('#local-video-small').srcObject = localSmallStream;
+
       var peer = createPeerConnection('small');
       createOffer('small', peer, localSmallStream);
     }, function() {
@@ -210,8 +211,8 @@ $(function() {
     peer.pc.onaddstream = function(event) {
       console.log("Adding remote strem", event);
 
-      var id = 'remote-video' + type;
-      $videoWrap.append('<video id="' + id + '" autoplay="true"></video>');
+      var id = 'remote-video-' + type;
+      $videoWrap.append('<video id="' + id + '" class="remote-video" autoplay="true"></video>');
       document.querySelector('#' + id).srcObject = event.stream;
       $body.removeClass('wait').addClass('connected');
     };
@@ -236,7 +237,7 @@ $(function() {
 
     // add peers array
     peers.push(peer);
-    console.log('확인 peers', peers);
+
     return peer.pc;
   }
 
@@ -348,7 +349,7 @@ $(function() {
       var link = location.href;
       if (window.clipboardData){
         window.clipboardData.setData('text', link);
-        $.message('Copy to Clipboard successful.');
+        alert('Copy to Clipboard successful.');
       }
       else {
         window.prompt("Copy to clipboard: Ctrl+C, Enter", link); // Copy to clipboard: Ctrl+C, Enter
@@ -364,7 +365,8 @@ $(function() {
       '<div class="room-info">',
         '<p>당신을 기다리고 있어요. 참여 하실래요?</p>',
         '<button id="join">Join</button>',
-      '</div>'].join('\n'));
+      '</div>'].join('\n')
+    );
 
     var $btnJoin = $('#join');
     $btnJoin.click(function() {
@@ -383,7 +385,7 @@ $(function() {
    */
   function onLeave(userId) {
     if (remoteUserId == userId) {
-      $('#remote-video').remove();
+      $('.remote-video').remove();
       $body.removeClass('connected').addClass('wait');
       remoteUserId = null;
     }

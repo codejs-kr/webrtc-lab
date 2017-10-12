@@ -1,3 +1,9 @@
+/*!
+ *
+ * WebRTC Lab
+ * @author dodortus (dodortus@gmail.com / codejs.co.kr)
+ *
+ */
 var	express = require('express');
 var	app = express();
 var	config = require('./config.json');

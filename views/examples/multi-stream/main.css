@@ -2,7 +2,7 @@
 /*!
  *
  * WebRTC Lab
- * @author dodortus (codejs.co.kr / dodortus@gmail.com)
+ * @author dodortus (dodortus@gmail.com / codejs.co.kr)
  *
  */
 
@@ -35,22 +35,26 @@ video.effect {
 	-ms-transform: scale(1, 1);
 }
 
-body.wait #join-wrap,
-body.connected #join-wrap,
-body.connected #room-list { display: none; }
-body.connected #local-video {
-	top: 2px; left: 2px !important;
-	width: 150px !important; border: solid 1px #fff; z-index: 2;
-}
-
 /* room */
 #video-wrap { display: none; position: relative; margin: 0 auto; }
 #video-wrap .buttons { position: absolute; bottom: -50px; }
 .room #video-wrap { display: block; }
 #local { width: 340px; height: 220px; border: solid 1px #fff; position: absolute; top: 4%; right: 2%; }
-#local-video { position: absolute; top: 0; left: 0; }
+.local-video { width: 49%; }
 
-.wait #video-wrap { min-height: 600px; }
 .room #share-wrap { display: block; }
 .room #room-list { display: none; }
 .room #content { padding-top: 30px; }
+
+.wait #video-wrap { min-height: 350px; }
+.wait #local-video-large { margin-right: 10px; }
+.wait #join-wrap,
+.connected #join-wrap,
+.connected #room-list { display: none; }
+
+.connected .local-video { position: absolute; }
+.connected #local-video-large,
+.connected #local-video-small {
+	top: 2px; left: 2px; width: 150px !important; border: solid 1px #fff; z-index: 2;
+}
+.connected #local-video-small { left: 160px !important; }
