@@ -61,6 +61,10 @@ app.get('/', function(req, res) {
 	res.render('examples/multi-stream/index.ejs', {
     title: "- 멀티 스트림"
   });
+}).get('/dynamic-resolution', function(req, res) {
+	res.render('examples/dynamic-resolution/index.ejs', {
+    title: "- 다이나믹 레졸루션"
+  });
 })
 
 function findRoomBySocketId(value) {

@@ -57,12 +57,18 @@ $(function() {
       'DtlsSrtpKeyAgreement': 'true'
     }]
   };
+
   var mediaConstraints = {
     'mandatory': {
       'OfferToReceiveAudio': true,
       'OfferToReceiveVideo': true
     }
   };
+
+  var resolution = {
+    width: 1280,
+    height: 720
+  }
 
   // edge is not supported
   if (isEdge) {
@@ -102,26 +108,6 @@ $(function() {
         createOffer('large', peer, localStream);
       }
 
-      createSmallVideo();
-    }, function() {
-      console.error('Error getUserMedia');
-    });
-  }
-
-  function createSmallVideo() {
-    navigator.getUserMedia({
-      audio: true,
-      video: {
-        width: 160,
-        height: 90
-      }
-    }, function(stream) {
-      localSmallStream = stream;
-      $videoWrap.append('<video id="local-video-small" class="local-video" muted="muted" autoplay="true" title="90p"></video>');
-      document.querySelector('#local-video-small').srcObject = localSmallStream;
-
-      var peer = createPeerConnection('small');
-      createOffer('small', peer, localSmallStream);
     }, function() {
       console.error('Error getUserMedia');
     });
@@ -246,7 +232,7 @@ $(function() {
   * 다수의 Peer중 해당하는 type과 매칭되는 peer 리턴한다.
   */
   function getPeer(type) {
-    console.log('getPeer', arguments);
+    console.log('getPeer', arguments, peers);
     var peer = null;
 
     for(var i=0; i < peers.length; i++) {
@@ -256,6 +242,30 @@ $(function() {
     }
 
     return peer;
+  }
+
+  /**
+  * changeResolution
+  */
+  function changeResolution() {
+    localStream.getVideoTracks().forEach(function(track) {
+      console.log('확인 track', track, track.getConstraints(), track.applyConstraints);
+
+      if (resolution.height === 720) {
+        resolution = {
+          width: 160,
+          height: 90
+        };
+      } else {
+        resolution = {
+          width: 1280,
+          height: 720
+        };
+      }
+
+      track.applyConstraints(resolution);
+      console.log('확인 result', track.getConstraints());
+    });
   }
 
   /**
@@ -447,6 +457,10 @@ $(function() {
       } else {
         unmuteAudio();
       }
+    });
+
+    $('#btn-change-resolution').click(function() {
+      changeResolution();
     });
   }
   initialize();
