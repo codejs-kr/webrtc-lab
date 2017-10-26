@@ -104,7 +104,7 @@ $(function() {
     peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
     peer.createOffer(function(SDP) {
 
-      SDP.sdp = SDP.sdp.replace("96 97", "100 96 97"); // for h.264
+      SDP.sdp = SDP.sdp.replace("96 97 98 99 100 101 102 124 127 125 123", "100 101 102 124 127 125 123 96 97 98 99"); // for h.264
       //SDP.sdp = SDP.sdp.replace("42e01f", "42e028");
 
       peer.setLocalDescription(SDP);
@@ -328,6 +328,23 @@ $(function() {
     });
   }
   initialize();
+
+  window.getPeerStats = function() {﻿
+    peer.getStats(function(res) {
+      var items = [];
+      res.result().forEach(function(result) {
+        var item = {};
+        result.names().forEach(function(name) {
+          item[name] = result.stat(name);
+        });
+        item.id = result.id;
+        item.type = result.type;
+        item.timestamp = result.timestamp;
+        items.push(item);
+      });
+      console.log(items);
+    });
+  }
 
   /**
    * socket handling
