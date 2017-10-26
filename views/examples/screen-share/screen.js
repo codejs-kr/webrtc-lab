@@ -33,7 +33,7 @@ function ScreenShare(parent) {
           chromeMediaSource: 'desktop',
           chromeMediaSourceId: sourceId,
           maxWidth: screen.width, // screen.width,
-          maxHeight: screen.heigh, // screen.height,
+          maxHeight: screen.height, // screen.height,
           maxFrameRate: 3,
         },
         optional: [

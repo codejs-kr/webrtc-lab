@@ -9,7 +9,8 @@
   },
   "permissions": [
     "desktopCapture",
-    "<all_urls>"
+    "<all_urls>",
+    "*://localhost:*/*"
   ],
   "background": {
     "scripts": ["background.js"]
@@ -17,7 +18,8 @@
   "content_scripts": [ {
     "js": [ "content.js" ],
     "matches": [
-      "http://localhost:3000/*"
+      "*://webrtclab.herokuapp.com/*",
+      "*://localhost:*/*"
     ]
   }],
   "web_accessible_resources": [
@@ -25,7 +27,8 @@
   ],
   "externally_connectable": {
 	  "matches": [
-	  	"http://localhost:3000/*"
+      "*://webrtclab.herokuapp.com/*",
+      "*://localhost:*/*"
   	]
 	}
 }
