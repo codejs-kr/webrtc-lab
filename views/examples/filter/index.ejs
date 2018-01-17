@@ -23,7 +23,8 @@
       audio: true,
       video: true
     }, function(stream) {
-      $video.attr('src', URL.createObjectURL(stream));
+      // 비디오 테그에 stream 할당
+      $video[0].srcObject = stream;
       $video[0].onloadedmetadata = function(e) {
         console.log('onloadedmetadata', e);
         $video[0].play();
@@ -66,7 +67,8 @@
         audio: true,
         video: true
       }, function(stream) {
-        $video.attr('src', URL.createObjectURL(stream));
+        // 비디오 테그에 stream 할당
+        $video[0].srcObject = stream;
         $video[0].onloadedmetadata = function(e) {
           console.log('onloadedmetadata', e);
           $video[0].play();

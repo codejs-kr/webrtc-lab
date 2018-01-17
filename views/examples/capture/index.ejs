@@ -33,7 +33,7 @@
   var height = 260;
 
   function success(stream) {
-    $(video).attr('src', URL.createObjectURL(stream));
+    video.srcObject = stream;
   }
 
   function error(err) {
@@ -79,7 +79,7 @@
    		, height = 260;
 
     function success(stream) {
-      $(video).attr('src', URL.createObjectURL(stream));
+      video.srcObject = stream;
     }
 
     function error(err) {

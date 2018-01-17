@@ -9,13 +9,10 @@
     "javascript"
   ],
   "dependencies": {
-  	"express": "4.13.4",
-  	"ejs": "2.4.1",
-  	"socket.io": "1.4.6"
+    "ejs": "^2.5.7",
+    "express": "4.13.4",
+    "socket.io": "1.4.6"
   },
-  "engine": {
-		"node": "0.12.x"
-	},
   "scripts": {
     "start": "node server.js"
   }
