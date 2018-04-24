@@ -89,11 +89,7 @@ $(function() {
           // 1920 * 1080 | 1280 * 720 | 858 * 480 | 640 * 360 | 480 * 272 | 320 * 180
           maxWidth: 1920,
           maxHeight: 1080,
-          minWidth: 1920,
-          minHeight: 1080,
           maxFrameRate: 24,
-          minFrameRate: 18,
-          maxAspectRatio: 1.778,
           minAspectRatio: 1.777
         },
         optional: [
