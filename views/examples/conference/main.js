@@ -124,8 +124,8 @@ $(function() {
     peer.createOffer(function(SDP) {
       // url parameter codec=h264
       if (location.search.substr(1).match('h264')) {
-        SDP.sdp = SDP.sdp.replace("100 101 107", "107 100 101"); // for chrome < 57
         SDP.sdp = SDP.sdp.replace("96 98 100", "100 96 98"); // for chrome 57 <
+        SDP.sdp = SDP.sdp.replace("96 97 98 99 100 101 102", "100 101 102 96 97 98 99"); // for chrome 65 <
       }
 
       peer.setLocalDescription(SDP);
