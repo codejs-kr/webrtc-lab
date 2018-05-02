@@ -38,6 +38,7 @@ $(function() {
   var localStream = null;
   var peer = null; // offer or answer peer
   var iceServers = {
+    'iceTransportPolicy': 'relay',
     'iceServers': [
       {
         'urls': [
@@ -48,11 +49,18 @@ $(function() {
       },
       {
         'urls': [
-          'turn:107.150.19.220:3478'
+          'turn:stcoturn1.remotemeeting.com'
         ],
-        'credential': 'turnserver',
-        'username': 'subrosa'
+        'username': '1587525364611:357dc338f6ea24f1cd068534ae7b5055c9181c62',
+        'credential': 'lWsc05fk7OPsHdT6sgwWYjWcDAc='
       }
+      // {
+      //   'urls': [
+      //     'turn:107.150.19.220:3478'
+      //   ],
+      //   'credential': 'turnserver',
+      //   'username': 'subrosa'
+      // }
     ]
   };
 
@@ -71,7 +79,12 @@ $(function() {
   // edge is not supported
   if (isEdge) {
     peerConnectionOptions = {};
-    mediaConstraints = {};
+    mediaConstraints = {
+      'mandatory': {
+        'OfferToReceiveAudio': false,
+        'OfferToReceiveVideo': false
+      }
+    };
   }
 
   // DOM
@@ -106,7 +119,7 @@ $(function() {
       }
     }, function(stream) {
       localStream = stream;
-      $videoWrap.append('<video id="local-video" muted="muted" autoplay="true"></video>');
+      $videoWrap.append('<video id="local-video" muted="muted" autoplay />');
       document.querySelector('#local-video').srcObject = localStream;
       $body.addClass('room wait');
       $tokenWrap.slideDown(1000);
@@ -121,6 +134,25 @@ $(function() {
   }
 
   /**
+   * SDP 변경 함수
+   * @param SDP
+   * @returns {*}
+   */
+  function editSDP(SDP) {
+    console.log('editSDP', SDP);
+
+    SDP.sdp = SDP.sdp.replace("96 98 100", "100 96 98"); // for chrome 57 <
+    SDP.sdp = SDP.sdp.replace("96 97 98 99 100 101 102", "100 101 102 96 97 98 99"); // for chrome 65 <
+
+    SDP.sdp = SDP.sdp.replace(/a=rtcp-fb:102 transport-cc\r\na=rtcp-fb:102 ccm fir\r\na=rtcp-fb:102 nack/, 'a=rtcp-fb:102 nack');
+    SDP.sdp = SDP.sdp.replace(/a=rtcp-fb:125 transport-cc\r\na=rtcp-fb:125 ccm fir\r\na=rtcp-fb:125 nack/, 'a=rtcp-fb:125 nack');
+    SDP.sdp = SDP.sdp.replace(/a=rtcp-fb:127 transport-cc\r\na=rtcp-fb:127 ccm fir\r\na=rtcp-fb:127 nack/, 'a=rtcp-fb:127 nack');
+
+    console.log('return editSDP', SDP);
+    return SDP;
+  }
+
+  /**
   * createOffer
   * offer SDP를 생성 한다.
   */
@@ -131,8 +163,7 @@ $(function() {
     peer.createOffer(function(SDP) {
       // url parameter codec=h264
       if (location.href.match('h264')) {
-        SDP.sdp = SDP.sdp.replace("96 98 100", "100 96 98"); // for chrome 57 <
-        SDP.sdp = SDP.sdp.replace("96 97 98 99 100 101 102", "100 101 102 96 97 98 99"); // for chrome 65 <
+        SDP = editSDP(SDP);
       }
 
       peer.setLocalDescription(SDP);
@@ -156,6 +187,7 @@ $(function() {
     peer.addStream(localStream);
     peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
       peer.createAnswer(function(SDP) {
+        SDP = editSDP(SDP);
         peer.setLocalDescription(SDP);
         console.log("Sending answer to peer.", SDP);
         send({
@@ -196,7 +228,7 @@ $(function() {
     peer.onaddstream = function(event) {
       console.log("Adding remote strem", event);
 
-      $videoWrap.append('<video id="remote-video" autoplay="true"></video>');
+      $videoWrap.append('<video id="remote-video" autoplay />');
       document.querySelector('#remote-video').srcObject = event.stream;
       $body.removeClass('wait').addClass('connected');
     };
@@ -231,7 +263,7 @@ $(function() {
 
   /**
   * send
-  * @param {object} msg data
+  * @param {object} data
   */
   function send(data) {
     console.log('send', data);
@@ -242,7 +274,7 @@ $(function() {
 
   /**
   * onmessage
-  * @param {object} msg data
+  * @param {object} data
   */
   function onmessage(data) {
     console.log('onmessage', data);
@@ -256,13 +288,13 @@ $(function() {
 
     // 접속자가 보내온 offer처리
     if (sdp) {
-      if (sdp.type  == 'offer') {
+      if (sdp.type === 'offer') {
         createPeerConnection();
         console.log('Adding local stream...');
         createAnswer(msg);
 
       // offer에 대한 응답 처리
-      } else if (sdp.type == 'answer') {
+      } else if (sdp.type === 'answer') {
         // answer signaling
         peer.setRemoteDescription(new RTCSessionDescription(msg.sdp));
       }
