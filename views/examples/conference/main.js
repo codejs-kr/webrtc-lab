@@ -37,6 +37,7 @@ $(function() {
   var isOffer = null;
   var localStream = null;
   var peer = null; // offer or answer peer
+  var isH264 = location.href.match('h264');
   var iceServers = {
     'iceTransportPolicy': 'relay',
     'iceServers': [
@@ -79,12 +80,7 @@ $(function() {
   // edge is not supported
   if (isEdge) {
     peerConnectionOptions = {};
-    mediaConstraints = {
-      'mandatory': {
-        'OfferToReceiveAudio': false,
-        'OfferToReceiveVideo': false
-      }
-    };
+    mediaConstraints = {};
   }
 
   // DOM
@@ -161,8 +157,7 @@ $(function() {
 
     peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
     peer.createOffer(function(SDP) {
-      // url parameter codec=h264
-      if (location.href.match('h264')) {
+      if (isH264) {
         SDP = editSDP(SDP);
       }
 
@@ -184,7 +179,9 @@ $(function() {
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
 
-    peer.addStream(localStream);
+    if (!isH264) {
+      peer.addStream(localStream); // TODO REMOVE (for TEST)
+    }
     peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
       peer.createAnswer(function(SDP) {
         SDP = editSDP(SDP);
@@ -370,7 +367,7 @@ $(function() {
    * @param {string} userId
    */
   function onLeave(userId) {
-    if (remoteUserId == userId) {
+    if (remoteUserId === userId) {
       $('#remote-video').remove();
       $body.removeClass('connected').addClass('wait');
       remoteUserId = null;
