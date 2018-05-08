@@ -39,7 +39,7 @@ $(function() {
   var peer = null; // offer or answer peer
   var isH264 = location.href.match('h264');
   var iceServers = {
-    'iceTransportPolicy': 'relay',
+    // 'iceTransportPolicy': 'relay',
     'iceServers': [
       {
         'urls': [
