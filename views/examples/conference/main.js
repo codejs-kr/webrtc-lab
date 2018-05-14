@@ -184,9 +184,7 @@ $(function() {
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
 
-    // if (!isH264) {
-    //   peer.addStream(localStream); // TODO REMOVE (for TEST)
-    // }
+    peer.addStream(localStream);
     peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
       peer.createAnswer(function(SDP) {
         // if (isH264) {
