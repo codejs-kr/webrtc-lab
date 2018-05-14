@@ -162,9 +162,9 @@ $(function() {
 
     peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
     peer.createOffer(function(SDP) {
-      if (isH264) {
-        SDP = editSDP(SDP);
-      }
+      // if (isH264) {
+      //   SDP = editSDP(SDP);
+      // }
 
       peer.setLocalDescription(SDP);
       console.log("Sending offer description", SDP);
@@ -184,14 +184,14 @@ $(function() {
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
 
-    if (!isH264) {
-      peer.addStream(localStream); // TODO REMOVE (for TEST)
-    }
+    // if (!isH264) {
+    //   peer.addStream(localStream); // TODO REMOVE (for TEST)
+    // }
     peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
       peer.createAnswer(function(SDP) {
-        if (isH264) {
-          SDP = editSDP(SDP);
-        }
+        // if (isH264) {
+        //   SDP = editSDP(SDP);
+        // }
         peer.setLocalDescription(SDP);
         console.log("Sending answer to peer.", SDP);
         send({
