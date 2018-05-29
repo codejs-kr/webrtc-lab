@@ -35,8 +35,32 @@
     	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
     $('button').click(function() {
-      // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
-      navigator.getUserMedia({audio:true, video:true}, success, error);
+
+      if (DetectRTC.browser.isEdge) {
+        navigator.getDisplayMedia({ video: true })
+          .then(success, error);
+
+      } else {
+        // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
+        // navigator.getUserMedia({audio:true, video:true}, success, error);
+        navigator.getUserMedia({
+          audio: true,
+          video: {
+            width: {
+              min: 1280,
+              max: 1280
+            },
+            height: {
+              min: 720,
+              max: 720
+            },
+            frameRate: {
+              min: 10,
+              max: 10
+            }
+          }
+        }, success, error);
+      }
     });
 
     function success(stream) {
