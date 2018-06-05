@@ -42,21 +42,21 @@
 
       } else {
         // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
-        // navigator.getUserMedia({audio:true, video:true}, success, error);
-        navigator.getUserMedia({
-          audio: true,
-          video: {
-            width: {
-              max: 1280
-            },
-            height: {
-              max: 720
-            },
-            frameRate: {
-              min: 10
-            }
-          }
-        }, success, error);
+        navigator.getUserMedia({audio:true, video:true}, success, error);
+        // navigator.getUserMedia({
+        //   audio: true,
+        //   video: {
+        //     width: {
+        //       max: 1280
+        //     },
+        //     height: {
+        //       max: 720
+        //     },
+        //     frameRate: {
+        //       min: 10
+        //     }
+        //   }
+        // }, success, error);
       }
     });
 
