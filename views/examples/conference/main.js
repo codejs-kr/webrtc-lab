@@ -133,15 +133,6 @@ $(function() {
     SDP.sdp = SDP.sdp.replace("96 98 100", "100 96 98"); // for chrome 57 <
     SDP.sdp = SDP.sdp.replace("96 97 98 99 100 101 102", "100 101 102 96 97 98 99"); // for chrome 65 <
 
-    // SDP.sdp = SDP.sdp.replace(
-    //   /a=mid:video\r\na=extmap:2 urn:ietf:params:rtp-hdrext:toffset\r\na=extmap:3 http:\/\/www.webrtc.org\/experiments\/rtp-hdrext\/abs-send-time\r\na=extmap:4 urn:3gpp:video-orientation\r\na=extmap:5 http:\/\/www.ietf.org\/id\/draft-holmer-rmcat-transport-wide-cc-extensions-01\r\na=extmap:6 http:\/\/www.webrtc.org\/experiments\/rtp-hdrext\/playout-delay\r\na=extmap:7 http:\/\/www.webrtc.org\/experiments\/rtp-hdrext\/video-content-type\r\na=extmap:8 http:\/\/www.webrtc.org\/experiments\/rtp-hdrext\/video-timing/,
-    //   'a=mid:video'
-    // );
-    //
-    // SDP.sdp = SDP.sdp.replace(/a=rtcp-fb:102 transport-cc\r\na=rtcp-fb:102 ccm fir\r\na=rtcp-fb:102 nack/, 'a=rtcp-fb:102 nack');
-    // SDP.sdp = SDP.sdp.replace(/a=rtcp-fb:125 transport-cc\r\na=rtcp-fb:125 ccm fir\r\na=rtcp-fb:125 nack/, 'a=rtcp-fb:125 nack');
-    // SDP.sdp = SDP.sdp.replace(/a=rtcp-fb:127 transport-cc\r\na=rtcp-fb:127 ccm fir\r\na=rtcp-fb:127 nack/, 'a=rtcp-fb:127 nack');
-
     console.log('return editSDP', SDP);
     return SDP;
   }
