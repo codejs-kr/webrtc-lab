@@ -1,7 +1,7 @@
 <% include ../../partials/header %>
 <div id="content">
   <div class="wrap">
-    <video autoplay controls></video>
+    <video autoplay></video>
     <button>getUserMedia()</button>
 
     <pre>
@@ -63,6 +63,11 @@
     function success(stream) {
       console.log('success', arguments);
       var video = $('video')[0];
+
+      // For IOS safari (https://github.com/webrtc/samples/issues/929)
+      if (DetectRTC.browser.isSafari) {
+        video.controls = true;
+      }
 
       // 비디오 테그에 stream 할당
       video.srcObject = stream;
