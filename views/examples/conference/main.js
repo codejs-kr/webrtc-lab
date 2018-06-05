@@ -50,18 +50,11 @@ $(function() {
       },
       {
         'urls': [
-          'turn:stcoturn1.remotemeeting.com'
+          'turn:107.150.19.220:3478'
         ],
-        'username': '1587525364611:357dc338f6ea24f1cd068534ae7b5055c9181c62',
-        'credential': 'lWsc05fk7OPsHdT6sgwWYjWcDAc='
+        'credential': 'turnserver',
+        'username': 'subrosa'
       }
-      // {
-      //   'urls': [
-      //     'turn:107.150.19.220:3478'
-      //   ],
-      //   'credential': 'turnserver',
-      //   'username': 'subrosa'
-      // }
     ]
   };
 
