@@ -65,8 +65,7 @@
       var video = $('video')[0];
 
       // 비디오 테그에 stream 할당
-      video.src = URL.createObjectURL(stream);
-      // video.srcObject = stream;
+      video.srcObject = stream;
 
       // do something...
     }
