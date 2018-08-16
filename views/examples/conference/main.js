@@ -28,6 +28,7 @@ $(function() {
   var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
   var browserVersion = DetectRTC.browser.version;
   var isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
+  var isSafari = DetectRTC.browser.isSafari;
 
   // for logic
   var socket = io();
@@ -109,9 +110,15 @@ $(function() {
     }, function(stream) {
       localStream = stream;
       $videoWrap.append('<video id="local-video" muted="muted" autoplay />');
-      document.querySelector('#local-video').srcObject = localStream;
+      var localVideo = document.querySelector('#local-video');
+      if (isSafari) {
+        localVideo.controls = true;
+      }
+
+      localVideo.srcObject = localStream;
       $body.addClass('room wait');
       $tokenWrap.slideDown(1000);
+
 
       if (isOffer) {
         createPeerConnection();
