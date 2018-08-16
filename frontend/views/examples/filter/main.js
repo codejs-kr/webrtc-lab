@@ -1,16 +1,5 @@
-<% include ../../partials/header %>
-<link href="main.css" rel="stylesheet" type="text/css">
-
-<div id="content">
-  <div class="wrap">
-    <video autoplay></video>
-    <p>비디오 화면을 클릭하면 CSS필터가 적용됩니다.</p>
-    <button id="start">Start</button>
-
-    <pre>
-      <code class="highlight">$(function() {
-  navigator.getUserMedia = navigator.getUserMedia ||
-  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+$(function() {
+  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
   const $video = $('video');
   const $start = $('#start');
@@ -64,11 +53,4 @@
    */
   $video.click(changeFilter);
   $start.click(getUserMedia);
-});</code>
-   	</pre>
-
-  </div>
-</div>
-
-<script src="./main.js"></script>
-<% include ../../partials/footer %>
+});

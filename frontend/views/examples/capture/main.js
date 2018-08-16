@@ -1,31 +1,6 @@
-<% include ../../partials/header %>
-<link href="main.css" rel="stylesheet" type="text/css">
-
-<div id="content">
-  <div class="wrap">
-  	<div class="two-peace">
-	  	<div>
-		    <video id="video" width="350" height="260" autoplay></video>
-	  	</div>
-	  	<div>
-		    <canvas id="canvas" width="350" height="260"></canvas>
-	  	</div>
-  	</div>
-    <button id="btn-camera">비디오출력</button>
-    <button id="btn-capture">캡쳐</button>
-    <hr>
-
-	  <div id="output">
-	  	<strong>Capture images</strong>
-	  	<div id="images">
-
-	  	</div>
-	  </div>
-
-    <pre>
-      <code class="highlight">$(function() {
+$(function() {
   navigator.getUserMedia = navigator.getUserMedia ||
-  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
   const videoEl = document.getElementById('video');
   const canvasEl = document.getElementById('canvas');
@@ -44,7 +19,7 @@
    * getUserMedia 실패
    * @param err
    */
-  function error(error) {
+  function error(err) {
     console.log('error', arguments);
   }
 
@@ -65,7 +40,7 @@
    * @param imgData
    */
   function insertImg(imgData) {
-    $('#images').prepend("&lt;img src=" + imgData + " /&gt;");
+    $('#images').prepend("<img src=" + imgData + " />");
   }
 
   /**
@@ -78,10 +53,3 @@
 
   $('#btn-capture').click(capture);
 });
-</code>
-   	</pre>
-  </div>
-</div>
-
-<script src="./main.js"></script>
-<% include ../../partials/footer %>

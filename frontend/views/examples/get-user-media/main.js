@@ -1,13 +1,6 @@
-<% include ../../partials/header %>
-<div id="content">
-  <div class="wrap">
-    <video autoplay></video>
-    <button>getUserMedia()</button>
-
-    <pre>
-      <code class="highlight">$(function() {
+$(function() {
   navigator.getUserMedia = navigator.getUserMedia ||
-  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
   /**
    * getUserMedia 성공
@@ -15,6 +8,11 @@
    */
   function success(stream) {
     console.log('success', arguments);
+
+    // For IOS safari (https://github.com/webrtc/samples/issues/929)
+    if (DetectRTC.browser.isSafari) {
+      video.controls = true;
+    }
 
     // 비디오 테그에 stream 바인딩
     $('video')[0].srcObject = stream;
@@ -38,10 +36,4 @@
   $('button').click(function() {
     navigator.getUserMedia({ audio: true, video: true }, success, error);
   });
-});</code>
-   	</pre>
-  </div>
-</div>
-
-<script src="./main.js"></script>
-<% include ../../partials/footer %>
+});
