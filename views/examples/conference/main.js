@@ -112,7 +112,11 @@ $(function() {
       $videoWrap.append('<video id="local-video" muted="muted" autoplay />');
       var localVideo = document.querySelector('#local-video');
       if (isSafari) {
-        localVideo.controls = true;
+        localVideo.setAttribute("playsinline", true);
+        localVideo.setAttribute("controls", true);
+        setTimeout(function() {
+          localVideo.removeAttribute("controls");
+        });
       }
 
       localVideo.srcObject = localStream;
@@ -235,7 +239,11 @@ $(function() {
       remoteVideo.srcObject = event.stream;
 
       if (isSafari) {
-        remoteVideo.controls = true;
+        remoteVideo.setAttribute("playsinline", true);
+        remoteVideo.setAttribute("controls", true);
+        setTimeout(function() {
+          remoteVideo.removeAttribute("controls");
+        });
       }
       $body.removeClass('wait').addClass('connected');
     };
