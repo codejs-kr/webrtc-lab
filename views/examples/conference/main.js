@@ -231,7 +231,12 @@ $(function() {
       console.log("Adding remote strem", event);
 
       $videoWrap.append('<video id="remote-video" autoplay />');
-      document.querySelector('#remote-video').srcObject = event.stream;
+      var remoteVideo = document.querySelector('#remote-video');
+      remoteVideo.srcObject = event.stream;
+
+      if (isSafari) {
+        remoteVideo.controls = true;
+      }
       $body.removeClass('wait').addClass('connected');
     };
 
