@@ -21,7 +21,7 @@ $(function() {
     ].join('\n'));
   }
 
-  function addNoCamMsg() {
+  function showNeedCamMsg() {
     alert('예제는 캠이 있어야 작동합니다.');
   }
 
@@ -46,7 +46,7 @@ $(function() {
     // 캠 체크, 체크 텀이 필요함
     setTimeout(function() {
       if (checkPage && !DetectRTC.hasWebcam) {
-        addNoCamMsg();
+        showNeedCamMsg();
       }
     }, 300);
   }
