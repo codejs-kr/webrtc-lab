@@ -111,18 +111,13 @@ $(function() {
       localStream = stream;
       $videoWrap.append('<video id="local-video" muted="muted" autoplay />');
       var localVideo = document.querySelector('#local-video');
-      if (isSafari) {
-        localVideo.setAttribute("playsinline", true);
-        localVideo.setAttribute("controls", true);
-        setTimeout(function() {
-          localVideo.removeAttribute("controls");
-        });
-      }
-
       localVideo.srcObject = localStream;
       $body.addClass('room wait');
       $tokenWrap.slideDown(1000);
 
+      if (isSafari) {
+        playForSafari(localVideo);
+      }
 
       if (isOffer) {
         createPeerConnection();
@@ -237,15 +232,11 @@ $(function() {
       $videoWrap.append('<video id="remote-video" autoplay />');
       var remoteVideo = document.querySelector('#remote-video');
       remoteVideo.srcObject = event.stream;
+      $body.removeClass('wait').addClass('connected');
 
       if (isSafari) {
-        remoteVideo.setAttribute("playsinline", true);
-        remoteVideo.setAttribute("controls", true);
-        setTimeout(function() {
-          remoteVideo.removeAttribute("controls");
-        });
+        playForSafari(remoteVideo);
       }
-      $body.removeClass('wait').addClass('connected');
     };
 
     peer.onremovestream = function(event) {
@@ -414,6 +405,15 @@ $(function() {
     console.log('unmuteAudio', arguments);
     localStream.getAudioTracks()[0].enabled = true;
     callback && callback();
+  }
+
+
+  function playForSafari(video) {
+    video.setAttribute("playsinline", true);
+    video.setAttribute("controls", true);
+    //setTimeout(function() {
+    //  video.removeAttribute("controls");
+    //}, 1);
   }
 
   /**
