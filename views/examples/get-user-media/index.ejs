@@ -42,6 +42,11 @@
     function success(stream) {
       console.log('success', arguments);
 
+      // For IOS safari (https://github.com/webrtc/samples/issues/929)
+      if (DetectRTC.browser.isSafari) {
+        video.controls = true;
+      }
+
       // 비디오 테그에 stream 할당
       $('video')[0].srcObject = stream;
 

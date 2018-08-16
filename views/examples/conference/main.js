@@ -26,8 +26,10 @@ $(function() {
   var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
   var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
   var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
+  var isMobile = DetectRTC.isMobileDevice;
   var browserVersion = DetectRTC.browser.version;
   var isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
+  var isSafari = DetectRTC.browser.isSafari;
 
   // for logic
   var socket = io();
@@ -109,9 +111,14 @@ $(function() {
     }, function(stream) {
       localStream = stream;
       $videoWrap.append('<video id="local-video" muted="muted" autoplay />');
-      document.querySelector('#local-video').srcObject = localStream;
+      var localVideo = document.querySelector('#local-video');
+      localVideo.srcObject = localStream;
       $body.addClass('room wait');
       $tokenWrap.slideDown(1000);
+
+      if (isMobile && isSafari) {
+        playForIOS(localVideo);
+      }
 
       if (isOffer) {
         createPeerConnection();
@@ -215,8 +222,13 @@ $(function() {
       console.log("Adding remote strem", event);
 
       $videoWrap.append('<video id="remote-video" autoplay />');
-      document.querySelector('#remote-video').srcObject = event.stream;
+      var remoteVideo = document.querySelector('#remote-video');
+      remoteVideo.srcObject = event.stream;
       $body.removeClass('wait').addClass('connected');
+
+      if (isMobile && isSafari) {
+        playForIOS(remoteVideo);
+      }
     };
 
     peer.onremovestream = function(event) {
@@ -385,6 +397,19 @@ $(function() {
     console.log('unmuteAudio', arguments);
     localStream.getAudioTracks()[0].enabled = true;
     callback && callback();
+  }
+
+  /**
+   * IOS 11이상 비디오 컨트롤 인터페이스가 있어야 실행이 된다.
+   * 속성을 추가했다 제거하는 트릭으로 자동 재생되도록 한다.
+   * @param video
+   */
+  function playForIOS(video) {
+    video.setAttribute("playsinline", true);
+    video.setAttribute("controls", true);
+    setTimeout(function() {
+      video.removeAttribute("controls");
+    }, 1);
   }
 
   /**
