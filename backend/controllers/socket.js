@@ -32,7 +32,7 @@ module.exports = (http) => {
    */
   io.on('connection', (socket) => {
     // 룸접속
-    socket.on('joinRoom', (roomName, userId) => {
+    socket.on('enter', (roomName, userId) => {
       roomId = roomName;
       socket.join(roomId);  // 소켓을 특정 room에 binding합니다.
 
@@ -50,7 +50,7 @@ module.exports = (http) => {
       console.log('thisRoom', thisRoom);
 
       // 유저 정보 추가
-      io.sockets.in(roomId).emit('joinRoom', roomId, thisRoom);
+      io.sockets.in(roomId).emit('join', roomId, thisRoom);
       //console.log('ROOM LIST', io.sockets.adapter.rooms);
       console.log('ROOM LIST', rooms);
     });
@@ -81,7 +81,7 @@ module.exports = (http) => {
 
       const roomId = findRoomBySocketId(socket.id);
       if (roomId) {
-        socket.broadcast.to(roomId).emit('leaveRoom', rooms[roomId][socket.id]); // 자신 제외 룸안의 유저ID 전달
+        socket.broadcast.to(roomId).emit('leave', rooms[roomId][socket.id]); // 자신 제외 룸안의 유저ID 전달
         delete rooms[roomId][socket.id]; // 해당 유저 제거
       }
     });
