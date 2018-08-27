@@ -6,18 +6,20 @@
  */
 
 $(function() {
-  var browserVersion = DetectRTC.browser.version;
-  var isFirefox = DetectRTC.browser.isFirefox;
-  var isChrome = DetectRTC.browser.isChrome;
-  var isOpera = DetectRTC.browser.isOpera;
-  var isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
-  var isSafari = DetectRTC.browser.isSafari && browserVersion >= 11; // 11버전 이상
-  var checkPage = (location.href.match(/conference/) || $('video').length);
-  var $commentTarget = $('#content .wrap:eq(0)');
+  const browserVersion = DetectRTC.browser.version;
+  const isFirefox = DetectRTC.browser.isFirefox;
+  const isChrome = DetectRTC.browser.isChrome;
+  const isOpera = DetectRTC.browser.isOpera;
+  const isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063;   // edge 15버전 이상
+  const isSafari = DetectRTC.browser.isSafari && browserVersion >= 11;  // safari 11버전 이상
+  const checkPage = (location.href.match(/conference/) || $('video').length);
+  const $commentTarget = $('#content .wrap:eq(0)');
 
-  function addNotSupportBrowserMsg() {
+  function showNotSupportBrowserMsg() {
     $commentTarget.prepend([
-      "<strong class='alert-message'>WebRTC는 현재 Chrome, Firefox, Edge 15이상, Safari 11이상, Opera 브라우저만 지원합니다.</strong>"
+      "<strong class='alert-message'>",
+        "WebRTC는 현재 Chrome, Firefox, Edge 15이상, Safari 11이상, Opera 브라우저만 지원합니다.",
+      "</strong>"
     ].join('\n'));
   }
 
@@ -39,7 +41,7 @@ $(function() {
 
     // webrtc 미지원 브라우저 체크
     if (checkPage && !isFirefox && !isChrome && !isOpera && !isEdge && !isSafari) {
-      addNotSupportBrowserMsg();
+      showNotSupportBrowserMsg();
       return false;
     }
 

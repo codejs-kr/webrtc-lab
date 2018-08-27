@@ -1,18 +1,20 @@
 <% include ../../partials/header %>
-<link href="main.css" rel="stylesheet" type="text/css">
+<link href="css/main.css" rel="stylesheet" type="text/css">
 
 <div id="content">
   <div class="wrap">
     <section id="share-wrap">
       <a href="#" id="unique-token">Share this room link</a>
     </section>
-    <section id="join-wrap">
-      <p>영상회의를 시작하시겠습니까?</p>
-      <button id="btn-start">Start</button>
-    </section>
-    <section id="room-list"></section>
 
-    <!-- local/remote videos container -->
+    <section id="enter-wrap">
+      <div id="create-wrap">
+        <p>영상회의를 시작하시겠습니까?</p>
+        <button id="btn-start">Start</button>
+      </div>
+      <div id="wait-wrap"></div>
+    </section>
+
     <section id="video-wrap">
       <div class="buttons">
         <button id="btn-camera">Camera Pause</button>
@@ -24,6 +26,7 @@
 
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
-<script src="./modules/peer-handler.js"></script>
-<script src="./main.js"></script>
+<script src="js/modules/peer-handler.js"></script>
+<script src="js/modules/media-handler.js"></script>
+<script src="js/main.js"></script>
 <% include ../../partials/footer %>

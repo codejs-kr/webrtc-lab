@@ -6,7 +6,9 @@
  *
  */
 
-video { width: 100%; }
+video {
+  width: 100%;
+}
 .blur {
   -webkit-filter: blur(3px);
   -moz-filter: blur(3px);
@@ -72,8 +74,8 @@ video { width: 100%; }
 }
 .invert {
   -webkit-filter: invert(1);
-  -moz-filter: invert(1)
-  -o-filter: invert(1)
-  -ms-filter: invert(1)
-  filter: invert(1)
+  -moz-filter: invert(1);
+  -o-filter: invert(1);
+  -ms-filter: invert(1);
+  filter: invert(1);
 }

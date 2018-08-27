@@ -11,8 +11,8 @@
 		    <canvas id="canvas" width="350" height="260"></canvas>
 	  	</div>
   	</div>
-    <button id="btn-camera">비디오출력</button>
-    <button id="btn-capture">캡쳐</button>
+    <button id="btn-camera">1. 비디오출력</button>
+    <button id="btn-capture">2. 캡쳐</button>
     <hr>
 
 	  <div id="output">
@@ -25,7 +25,7 @@
     <pre>
       <code class="highlight">$(function() {
   navigator.getUserMedia = navigator.getUserMedia ||
-  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
   const videoEl = document.getElementById('video');
   const canvasEl = document.getElementById('canvas');
@@ -44,7 +44,7 @@
    * getUserMedia 실패
    * @param err
    */
-  function error(error) {
+  function error(err) {
     console.log('error', arguments);
   }
 
@@ -54,29 +54,32 @@
   function capture() {
     const context = canvasEl.getContext('2d');
     context.drawImage(videoEl, 0, 0, width, height);
-    canvasEl.width = width;
-    canvasEl.height = height;
-
-    insertImg(canvasEl.toDataURL('image/png'));
+    insertImage(canvasEl.toDataURL('image/png'));
   }
 
   /**
    * 캡쳐한 이미지 노출 함수
-   * @param imgData
+   * @param imageData
    */
-  function insertImg(imgData) {
-    $('#images').prepend("&lt;img src=" + imgData + " /&gt;");
+  function insertImage(imageData) {
+    $('#images').prepend("&lt;img src=" + imageData + " /&gt;");
   }
 
   /**
-   * 이벤트 바인딩
+   * 초기 이벤트 바인딩
    */
-  $('#btn-camera').click(function() {
-    // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
-    navigator.getUserMedia({ audio: false, video: true }, success, error);
-  });
+  function initialize() {
+    canvasEl.width = width;
+    canvasEl.height = height;
 
-  $('#btn-capture').click(capture);
+    $('#btn-camera').click(function() {
+      // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
+      navigator.getUserMedia({ audio: false, video: true }, success, error);
+    });
+
+    $('#btn-capture').click(capture);
+  }
+  initialize();
 });
 </code>
    	</pre>

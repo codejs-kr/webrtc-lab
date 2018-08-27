@@ -6,6 +6,14 @@
  *
  */
 
+input[type="text"] {
+  padding: 6px 10px;
+  width: 120px;
+  height: 30px;
+  border: solid 1px #bbb;
+  font-size: 1.3em;
+}
+
 .wrap {
   margin-top: 30px;
   position: relative;
@@ -17,29 +25,20 @@
   font-size: 1.25em;
 }
 
-input[type="text"] {
-  padding: 6px 10px;
-  width: 120px;
-  height: 30px;
-  border: solid 1px #bbb;
-  font-size: 1.3em;
-}
-
-#share-wrap {
-  display: none;
-  margin: 10px 0;
-}
-
 .wrap button {
   margin-top: 20px;
-  vertical-align: top;
   min-width: 80px;
+  vertical-align: top;
 }
 
 .room-info {
   vertical-align: top;
 }
 
+
+/********************************************
+  Below room style
+*********************************************/
 video {
   margin: 0 0 20px 0;
   width: 100%;
@@ -53,43 +52,25 @@ video.effect {
   transform: scale(1, 1);
 }
 
-body.wait #join-wrap,
-body.connected #join-wrap,
-body.connected #room-list {
-  display: none;
-}
-
-body.connected #local-video {
-  top: 2px;
-  left: 2px !important;
-  width: 150px !important;
-  border: solid 1px #fff;
-  z-index: 2;
-}
-
-/* room */
 #video-wrap {
   display: none;
   position: relative;
   margin: 0 auto;
+  min-height: 620px;
 }
 
 #video-wrap .buttons {
   position: absolute;
-  bottom: -50px;
-}
-
-.room #video-wrap {
-  display: block;
+  bottom: 0;
 }
 
 #local {
-  width: 340px;
-  height: 220px;
-  border: solid 1px #fff;
   position: absolute;
   top: 4%;
   right: 2%;
+  width: 340px;
+  height: 220px;
+  border: solid 1px #fff;
 }
 
 #local-video {
@@ -98,16 +79,34 @@ body.connected #local-video {
   left: 0;
 }
 
-.wait #video-wrap {
-  min-height: 600px;
+#share-wrap {
+  display: none;
+  margin: 10px 0;
+}
+
+.room #enter-wrap,
+.connected #create-wrap,
+.connected #wait-wrap {
+  display: none;
+}
+.connected #local-video {
+  top: 2px;
+  left: 2px !important;
+  width: 150px !important;
+  border: solid 1px #fff;
+  z-index: 2;
 }
 
 .room #share-wrap {
   display: block;
 }
 
-.room #room-list {
+.room #wait-wrap {
   display: none;
+}
+
+.room #video-wrap {
+  display: block;
 }
 
 .room #content {

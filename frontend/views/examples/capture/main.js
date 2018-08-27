@@ -29,27 +29,30 @@ $(function() {
   function capture() {
     const context = canvasEl.getContext('2d');
     context.drawImage(videoEl, 0, 0, width, height);
-    canvasEl.width = width;
-    canvasEl.height = height;
-
-    insertImg(canvasEl.toDataURL('image/png'));
+    insertImage(canvasEl.toDataURL('image/png'));
   }
 
   /**
    * 캡쳐한 이미지 노출 함수
-   * @param imgData
+   * @param imageData
    */
-  function insertImg(imgData) {
-    $('#images').prepend("<img src=" + imgData + " />");
+  function insertImage(imageData) {
+    $('#images').prepend("<img src=" + imageData + " />");
   }
 
   /**
-   * 이벤트 바인딩
+   * 초기 이벤트 바인딩
    */
-  $('#btn-camera').click(function() {
-    // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
-    navigator.getUserMedia({ audio: false, video: true }, success, error);
-  });
+  function initialize() {
+    canvasEl.width = width;
+    canvasEl.height = height;
 
-  $('#btn-capture').click(capture);
+    $('#btn-camera').click(function() {
+      // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
+      navigator.getUserMedia({ audio: false, video: true }, success, error);
+    });
+
+    $('#btn-capture').click(capture);
+  }
+  initialize();
 });

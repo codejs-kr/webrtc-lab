@@ -1,22 +1,24 @@
-
+/**
+ * PeerHandler
+ * @param options
+ * @constructor
+ */
 function PeerHandler(options) {
-  // cross browsing
+  console.log('Loaded PeerHandler', arguments);
+  EventEmitter.call(this);
+
+  // Cross browsing
   navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
-  var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-  var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
-  var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
+  const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+  const RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
+  const RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
+  const browserVersion = DetectRTC.browser.version;
+  const isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
+  const isH264 = location.href.match('h264');
 
-  var browserVersion = DetectRTC.browser.version;
-  var isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
-  var isSafari = DetectRTC.browser.isSafari;
-  var isH264 = location.href.match('h264');
-  var isMobile = DetectRTC.isMobileDevice;
-
-  var send = options.send;
-  var onRemoteStream = options.onRemoteStream;
-  var localStream = null;
-  var peer = null; // offer or answer peer
-  var iceServers = {
+  const that = this;
+  const send = options.send;
+  const iceServers = {
     // 'iceTransportPolicy': 'relay',
     'iceServers': [
       {
@@ -36,12 +38,14 @@ function PeerHandler(options) {
     ]
   };
 
-  var peerConnectionOptions = {
+  let localStream = null;
+  let peer = null; // offer or answer peer
+  let peerConnectionOptions = {
     'optional': [{
       'DtlsSrtpKeyAgreement': 'true'
     }]
   };
-  var mediaConstraints = {
+  let mediaConstraints = {
     'mandatory': {
       'OfferToReceiveAudio': true,
       'OfferToReceiveVideo': true
@@ -54,30 +58,13 @@ function PeerHandler(options) {
     mediaConstraints = {};
   }
 
-
   /**
    * getUserMedia
    */
-  function getUserMedia(callback, isOffer) {
+  function getUserMedia(mediaOption, callback, isOffer) {
     console.log('getUserMedia');
 
-    navigator.getUserMedia({
-      audio: true,
-      video: {
-        mandatory: {
-          // 720p와 360p 해상도 최소 최대를 잡게되면 캡쳐 영역이 가깝게 잡히는 이슈가 있다.
-          // 1920 * 1080 | 1280 * 720 | 858 * 480 | 640 * 360 | 480 * 272 | 320 * 180
-          maxWidth: 1920,
-          maxHeight: 1080,
-          maxFrameRate: 24,
-          minAspectRatio: 1.777
-        },
-        optional: [
-          {googNoiseReduction: true}, // Likely removes the noise in the captured video stream at the expense of computational effort.
-          {facingMode: "user"}        // Select the front/user facing camera or the rear/environment facing camera if available (on Phone)
-        ]
-      }
-    }, function(stream) {
+    navigator.getUserMedia(mediaOption, function(stream) {
       localStream = stream;
       callback && callback(localStream);
 
@@ -91,7 +78,7 @@ function PeerHandler(options) {
   }
 
   /**
-   * SDP 변경 함수
+   * SDP 변경
    * @param SDP
    * @returns {*}
    */
@@ -106,7 +93,6 @@ function PeerHandler(options) {
   }
 
   /**
-   * createOffer
    * offer SDP를 생성 한다.
    */
   function createOffer() {
@@ -128,9 +114,8 @@ function PeerHandler(options) {
   }
 
   /**
-   * createAnswer
    * offer에 대한 응답 SDP를 생성 한다.
-   * @param {object} msg offer가 보내온 signaling
+   * @param msg offer가 보내온 signaling massage
    */
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
@@ -179,11 +164,12 @@ function PeerHandler(options) {
 
     peer.onaddstream = function(event) {
       console.log("Adding remote strem", event);
-      onRemoteStream(event.stream);
+      that.emit('addRemoteStream', event.stream);
     };
 
     peer.onremovestream = function(event) {
       console.log("Removing remote stream", event);
+      that.emit('removeRemoteStream', event.stream);
     };
 
     peer.onnegotiationneeded = function(event) {
@@ -198,6 +184,8 @@ function PeerHandler(options) {
       console.log("oniceconnectionstatechange",
         'iceGatheringState: ' + peer.iceGatheringState,
         '/ iceConnectionState: ' + peer.iceConnectionState);
+
+      that.emit('iceconnectionStateChange', event);
     }
   }
 
@@ -208,58 +196,30 @@ function PeerHandler(options) {
     console.log('onSdpError', arguments);
   }
 
-
-  function pauseVideo(callback) {
-    console.log('pauseVideo', arguments);
-    localStream.getVideoTracks()[0].enabled = false;
-    callback && callback();
-  }
-
-  function resumeVideo(callback) {
-    console.log('resumeVideo', arguments);
-    localStream.getVideoTracks()[0].enabled = true;
-    callback && callback();
-  }
-
-  function muteAudio(callback) {
-    console.log('muteAudio', arguments);
-    localStream.getAudioTracks()[0].enabled = false;
-    callback && callback();
-  }
-
-  function unmuteAudio(callback) {
-    console.log('unmuteAudio', arguments);
-    localStream.getAudioTracks()[0].enabled = true;
-    callback && callback();
-  }
-
   /**
    * signaling
-   * @param {object} data
+   * @param data
    */
   function signaling(data) {
     console.log('onmessage', data);
 
-    var msg = data;
-    var sdp = msg.sdp || null;
+    const msg = data;
+    const sdp = msg.sdp || null;
 
     // 접속자가 보내온 offer처리
     if (sdp) {
       if (sdp.type === 'offer') {
         createPeerConnection();
-        console.log('Adding local stream...');
-
         createAnswer(msg);
 
         // offer에 대한 응답 처리
       } else if (sdp.type === 'answer') {
-        // answer signaling
         peer.setRemoteDescription(new RTCSessionDescription(msg.sdp));
       }
 
-      // offer, answer cadidate처리
+      // offer or answer cadidate처리
     } else if (msg.candidate) {
-      var candidate = new RTCIceCandidate({
+      const candidate = new RTCIceCandidate({
         sdpMid: msg.id,
         sdpMLineIndex: msg.label,
         candidate: msg.candidate
@@ -272,9 +232,10 @@ function PeerHandler(options) {
   }
 
   /**
-   * extend interfaces
+   * extends
    */
   this.getUserMedia = getUserMedia;
   this.signaling = signaling;
 }
 
+inherit(EventEmitter, PeerHandler);
