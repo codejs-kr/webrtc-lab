@@ -5,29 +5,42 @@
  *
  */
 $(function() {
-  if (typeof webkitSpeechRecognition != 'function') {
+  if (typeof webkitSpeechRecognition !== 'function') {
     alert('크롬에서만 동작 합니다.');
     return false;
   }
 
-  var recognition = new webkitSpeechRecognition();
-  var isRecognizing = false;
-  var ignoreOnend = false;
-  var finalTranscript = '';
- 	var audio = document.getElementById('audio');
-  var $btnMic = $('#btn-mic');
- 	var $result = $('#result');
- 	var $iconMusic = $('#icon-music');
+  let isRecognizing = false;
+  let ignoreOnend = false;
+  let finalTranscript = '';
+
+ 	const audio = document.getElementById('audio');
+  const recognition = new webkitSpeechRecognition();
+  const language = 'ko-KR';
+  const two_line = /\n\n/g;
+  const one_line = /\n/g;
+  const first_char = /\S/;
+
+  const $btnMic = $('#btn-mic');
+ 	const $result = $('#result');
+ 	const $iconMusic = $('#icon-music');
+
   recognition.continuous = true;
   recognition.interimResults = true;
 
+  /**
+   * 음성 인식 시작
+   */
   recognition.onstart = function() {
     console.log('onstart', arguments);
     isRecognizing = true;
-
     $btnMic.attr('class', 'on');
   };
 
+  /**
+   * 음성 인식 종료
+   * @returns {boolean}
+   */
   recognition.onend = function() {
     console.log('onend', arguments);
     isRecognizing = false;
@@ -45,24 +58,27 @@ $(function() {
 
     if (window.getSelection) {
       window.getSelection().removeAllRanges();
-      var range = document.createRange();
+      const range = document.createRange();
       range.selectNode(document.getElementById('final-span'));
       window.getSelection().addRange(range);
     }
-
   };
 
+  /**
+   * 음성 인식 결과
+   * @param event
+   */
   recognition.onresult = function(event) {
     console.log('onresult', event);
 
-    var interimTranscript = '';
-    if (typeof(event.results) == 'undefined') {
+    let interimTranscript = '';
+    if (typeof(event.results) === 'undefined') {
       recognition.onend = null;
       recognition.stop();
       return;
     }
 
-    for (var i = event.resultIndex; i < event.results.length; ++i) {
+    for (let i = event.resultIndex; i < event.results.length; ++i) {
       if (event.results[i].isFinal) {
         finalTranscript += event.results[i][0].transcript;
       } else {
@@ -80,20 +96,27 @@ $(function() {
   };
 
   /**
-   * changeColor
-   *
+   * 음성 인식 에러 핸들링
+   * @param event
    */
-  /*
-	  .red 		{ background: red; }
-		.blue 	{ background: blue; }
-		.green 	{ background: green; }
-		.yellow { background: yellow; }
-		.orange { background: orange; }
-		.grey 	{ background: grey; }
-		.gold   { background: gold; }
-		.white 	{ background: white; }
-		.black  { background: black; }
- 	*/
+  recognition.onerror = function(event) {
+    console.log('onerror', event);
+
+    if (event.error === 'no-speech') {
+      ignoreOnend = true;
+    } else if (event.error === 'audio-capture') {
+      ignoreOnend = true;
+    } else if (event.error === 'not-allowed') {
+      ignoreOnend = true;
+    }
+
+    $btnMic.attr('class', 'off');
+  };
+
+  /**
+   * 명령어 처리
+   * @param string
+   */
   function fireCommand(string) {
   	if (string.endsWith('레드')) {
   		$result.attr('class', 'red');
@@ -130,66 +153,60 @@ $(function() {
   	}
   }
 
-  recognition.onerror = function(event) {
-    console.log('onerror', event);
-
-    if (event.error == 'no-speech') {
-      ignoreOnend = true;
-    } else if (event.error == 'audio-capture') {
-      ignoreOnend = true;
-    } else if (event.error == 'not-allowed') {
-      ignoreOnend = true;
-    }
-
-    $btnMic.attr('class', 'off');
-  };
-
-  var two_line = /\n\n/g;
-  var one_line = /\n/g;
-  var first_char = /\S/;
-
+  /**
+   * 개행 처리
+   * @param s
+   * @returns {string}
+   */
   function linebreak(s) {
     return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
   }
 
+  /**
+   * 첫문자를 대문자로 변환
+   * @param s
+   * @returns {string | void | *}
+   */
   function capitalize(s) {
     return s.replace(first_char, function(m) {
       return m.toUpperCase();
     });
   }
 
+  /**
+   * 음성 인식 트리거
+   * @param event
+   */
   function start(event) {
     if (isRecognizing) {
       recognition.stop();
       return;
     }
-    recognition.lang = 'ko-KR';
+    recognition.lang = language;
     recognition.start();
     ignoreOnend = false;
 
     finalTranscript = '';
     final_span.innerHTML = '';
     interim_span.innerHTML = '';
-
   }
 
   /**
-   * textToSpeech
+   * 문자를 음성으로 읽어 줍니다.
    * 지원: 크롬, 사파리, 오페라, 엣지
    */
   function textToSpeech(text) {
     console.log('textToSpeech', arguments);
 
-    /*
-    var u = new SpeechSynthesisUtterance();
-    u.text = 'Hello world';
-    u.lang = 'en-US';
-    u.rate = 1.2;
-    u.onend = function(event) {
-      log('Finished in ' + event.elapsedTime + ' seconds.');
-    };
-    speechSynthesis.speak(u);
-    */
+    // speechSynthesis option
+    // const u = new SpeechSynthesisUtterance();
+    // u.text = 'Hello world';
+    // u.lang = 'en-US';
+    // u.rate = 1.2;
+    // u.onend = function(event) {
+    //   log('Finished in ' + event.elapsedTime + ' seconds.');
+    // };
+    // speechSynthesis.speak(u);
 
     // simple version
     speechSynthesis.speak(new SpeechSynthesisUtterance(text));
@@ -215,10 +232,14 @@ $(function() {
   }
 
   /**
-   * init
+   * 초기 바인딩
    */
-  $btnMic.click(start);
-  $('#btn-tts').click(function() {
-    textToSpeech($('#final_span').text() || '전 음성 인식된 글자를 읽습니다.');
-  });
+  function initialize() {
+    $btnMic.click(start);
+    $('#btn-tts').click(function() {
+      textToSpeech($('#final_span').text() || '전 음성 인식된 글자를 읽습니다.');
+    });
+  }
+
+  initialize();
 });
