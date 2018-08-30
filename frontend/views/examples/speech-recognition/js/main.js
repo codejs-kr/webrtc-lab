@@ -11,10 +11,10 @@ $(function() {
   }
 
   let isRecognizing = false;
-  let ignoreOnend = false;
+  let ignoreEndProcess = false;
   let finalTranscript = '';
 
- 	const audio = document.getElementById('audio');
+ 	const audio = document.querySelector('#audio');
   const recognition = new webkitSpeechRecognition();
   const language = 'ko-KR';
   const two_line = /\n\n/g;
@@ -29,7 +29,7 @@ $(function() {
   recognition.interimResults = true;
 
   /**
-   * 음성 인식 시작
+   * 음성 인식 시작 처리
    */
   recognition.onstart = function() {
     console.log('onstart', arguments);
@@ -38,14 +38,14 @@ $(function() {
   };
 
   /**
-   * 음성 인식 종료
+   * 음성 인식 종료 처리
    * @returns {boolean}
    */
   recognition.onend = function() {
     console.log('onend', arguments);
     isRecognizing = false;
 
-    if (ignoreOnend) {
+    if (ignoreEndProcess) {
       return false;
     }
 
@@ -55,17 +55,10 @@ $(function() {
       console.log('empty finalTranscript');
       return false;
     }
-
-    if (window.getSelection) {
-      window.getSelection().removeAllRanges();
-      const range = document.createRange();
-      range.selectNode(document.getElementById('final-span'));
-      window.getSelection().addRange(range);
-    }
   };
 
   /**
-   * 음성 인식 결과
+   * 음성 인식 결과 처리
    * @param event
    */
   recognition.onresult = function(event) {
@@ -96,18 +89,14 @@ $(function() {
   };
 
   /**
-   * 음성 인식 에러 핸들링
+   * 음성 인식 에러 처리
    * @param event
    */
   recognition.onerror = function(event) {
     console.log('onerror', event);
 
-    if (event.error === 'no-speech') {
-      ignoreOnend = true;
-    } else if (event.error === 'audio-capture') {
-      ignoreOnend = true;
-    } else if (event.error === 'not-allowed') {
-      ignoreOnend = true;
+    if (event.error.match(/no-speech|audio-capture|not-allowed/)) {
+      ignoreEndProcess = true;
     }
 
     $btnMic.attr('class', 'off');
@@ -184,7 +173,7 @@ $(function() {
     }
     recognition.lang = language;
     recognition.start();
-    ignoreOnend = false;
+    ignoreEndProcess = false;
 
     finalTranscript = '';
     final_span.innerHTML = '';
@@ -213,6 +202,7 @@ $(function() {
   }
 
   /**
+   * 미사용
    * requestServer
    * key - AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg
    */
@@ -237,7 +227,8 @@ $(function() {
   function initialize() {
     $btnMic.click(start);
     $('#btn-tts').click(function() {
-      textToSpeech($('#final_span').text() || '전 음성 인식된 글자를 읽습니다.');
+      const text = $('#final_span').text() || '전 음성 인식된 글자를 읽습니다.';
+      textToSpeech(text);
     });
   }
 

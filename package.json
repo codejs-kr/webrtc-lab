@@ -1,7 +1,7 @@
 {
   "name": "webrtc-lab",
-  "description": "Webrtc simple examples",
-  "version": "0.9.0",
+  "description": "WebRTC simple examples",
+  "version": "0.9.1",
   "author": "dodortus",
   "license": "MIT",
   "keywords": [
