@@ -35,7 +35,8 @@ $(function() {
   var roomId;
   var remoteUserId;
   var isOffer;
-  var localStream;
+  var localLargeStream;
+  var localmediumStream;
   var localSmallStream;
   var streams = [];
   var peer; // offer or answer peer
@@ -91,18 +92,38 @@ $(function() {
         height: 720
       }
     }, function(stream) {
-      localStream = stream;
+      localLargeStream = stream;
       $videoWrap.append('<video id="local-video-large" class="local-video" muted="muted" autoplay="true" title="720p"></video>');
-      document.querySelector('#local-video-large').srcObject = localStream;
+      document.querySelector('#local-video-large').srcObject = localLargeStream;
       $body.addClass('room wait');
       $tokenWrap.slideDown(1000);
 
       if (isOffer) {
         var peer = createPeerConnection('large');
-        createOffer('large', peer, localStream);
+        createOffer('large', peer, localLargeStream);
       }
 
+      createMediumVideo();
       createSmallVideo();
+    }, function() {
+      console.error('Error getUserMedia');
+    });
+  }
+
+  function createMediumVideo() {
+    navigator.getUserMedia({
+      audio: true,
+      video: {
+        width: 320,
+        height: 180
+      }
+    }, function(stream) {
+      localMediumStream = stream;
+      $videoWrap.append('<video id="local-video-medium" class="local-video" muted="muted" autoplay="true" title="180p"></video>');
+      document.querySelector('#local-video-medium').srcObject = localMediumStream;
+
+      var peer = createPeerConnection('medium');
+      createOffer('medium', peer, localMediumStream);
     }, function() {
       console.error('Error getUserMedia');
     });
@@ -301,7 +322,9 @@ $(function() {
 
         // TODO 개선 필요
         if (sessionType === 'large') {
-          createAnswer(sessionType, peer, msg, localStream);
+          createAnswer(sessionType, peer, msg, localLargeStream);
+        } else if (sessionType === 'medium') {
+          createAnswer(sessionType, peer, msg, localMediumStream);
         } else {
           createAnswer(sessionType, peer, msg, localSmallStream);
         }
@@ -393,25 +416,25 @@ $(function() {
 
   function pauseVideo(callback) {
     console.log('pauseVideo', arguments);
-    localStream.getVideoTracks()[0].enabled = false;
+    localLargeStream.getVideoTracks()[0].enabled = false;
     callback && callback();
   }
 
   function resumeVideo(callback) {
     console.log('resumeVideo', arguments);
-    localStream.getVideoTracks()[0].enabled = true;
+    localLargeStream.getVideoTracks()[0].enabled = true;
     callback && callback();
   }
 
   function muteAudio(callback) {
     console.log('muteAudio', arguments);
-    localStream.getAudioTracks()[0].enabled = false;
+    localLargeStream.getAudioTracks()[0].enabled = false;
     callback && callback();
   }
 
   function unmuteAudio(callback) {
     console.log('unmuteAudio', arguments);
-    localStream.getAudioTracks()[0].enabled = true;
+    localLargeStream.getAudioTracks()[0].enabled = true;
     callback && callback();
   }
 
@@ -454,16 +477,16 @@ $(function() {
   /**
    * socket handling
    */
-  socket.emit('joinRoom', roomId, userId);
-  socket.on('joinRoom', function(roomId, userList) {
-    console.log('joinRoom', arguments);
+  socket.emit('enter', roomId, userId);
+  socket.on('join', function(roomId, userList) {
+    console.log('join', arguments);
     if (Object.size(userList) > 1) {
       onFoundUser();
     }
   });
 
-  socket.on('leaveRoom', function(userId) {
-    console.log('leaveRoom', arguments);
+  socket.on('leave', function(userId) {
+    console.log('leave', arguments);
     onLeave(userId);
   });
 
