@@ -1,22 +1,15 @@
-/*!
- *
- * RemoteMeeting - webrtc screen.js
- *
- * IMPORTANT NOTE: This file is licensed only for use in providing the RSUPPORT services,
- *
- * @license Copyright (c) RSUPPORT CO., LTD. (http://www.rsupport.com/)
- * @author Front-End Team | Park Jeong Shik (jspark@rsupport.com)
- * @fileOverview 스크린쉐어 컨트롤러
- *
+/**
+ * ScreenHandler
+ * @param parent
+ * @constructor
  */
-
-// parent main.js
-function ScreenShare(parent) {
-  console.log('Loaded ScreenShare', arguments);
+function ScreenHandler(parent) {
+  console.log('Loaded ScreenHandler', arguments);
 
   var that = this;
-  var localScreenStream = null;
   var idCount = 1;
+  var maxFrame = 5;
+  var localScreenStream = null;
   var successCallback = null;
   var isScreenEnded = false;
 
@@ -32,9 +25,9 @@ function ScreenShare(parent) {
         mandatory: {
           chromeMediaSource: 'desktop',
           chromeMediaSourceId: sourceId,
-          maxWidth: screen.width, // screen.width,
-          maxHeight: screen.height, // screen.height,
-          maxFrameRate: 3,
+          maxWidth: screen.width,
+          maxHeight: screen.height,
+          maxFrameRate: maxFrame,
         },
         optional: [
           {googLeakyBucket: true},
@@ -42,8 +35,8 @@ function ScreenShare(parent) {
         ]
       }
     }, function(stream) {
-      callback(stream);
       localScreenStream = stream;
+      callback(localScreenStream);
 
       // 브라우저밖 하단의 공유중지 박스로 종료하는경우 처리
       localScreenStream.getVideoTracks()[0].onended = function() {
@@ -80,30 +73,33 @@ function ScreenShare(parent) {
     callback && callback();
   }
 
+  /**
+   * extension message listener
+   */
   window.addEventListener('message', function(event) {
     console.log('window.message', event);
-    if (event.origin != window.location.origin) {
+    if (event.origin !== window.location.origin) {
       return;
     }
 
     var data = event.data;
     var type = data.type;
 
-    if (type == 'gotScreen') {
+    if (type === 'gotScreen') {
       if (data.sourceId) {
         getUserMedia(data.sourceId, successCallback);
       } else {
-        console.log('cancled');
+        console.log('canceled');
         //parent.emit('endScreenShare');
       }
-    } else if (type == 'getScreenPending') {
+    } else if (type === 'getScreenPending') {
       //
     }
   });
 
-  /*
-  * interfaces
-  */
+  /**
+   * extends
+   */
   this.start = start;
   this.end = end;
 }

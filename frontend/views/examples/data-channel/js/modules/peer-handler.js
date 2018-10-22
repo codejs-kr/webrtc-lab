@@ -201,7 +201,7 @@ function PeerHandler(options) {
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
 
-    createAnswerDataChannel(peer);
+    // createAnswerDataChannel(peer);
 
     peer.addStream(localStream);
     peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {

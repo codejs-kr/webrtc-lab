@@ -7,48 +7,7 @@
  */
 
 .wrap {
-	margin-top: 30px;
-	position: relative; font-size: 1.2em; text-align: center;
+  width: 80%;
+  font-size: 1.2em;
+  text-align: center;
 }
-.wrap p { font-size: 1.25em; }
-input[type="text"] {
-	padding: 6px 10px; width: 120px; height: 30px;
-	border: solid 1px #bbb; font-size: 1.3em;
-}
-#share-wrap { display: none; margin: 10px 0; }
-.wrap button { margin-top: 20px; vertical-align: top; min-width: 80px; }
-.room-info { vertical-align: top; }
-
-video {
-	margin: 0 0 20px 0; width: 100%; z-index: 1;
-	background: #222; border: solid 1px #fff;
-	transition: all .6s ease-out;
-	-webkit-transition: all .6s ease-out;
-	-moz-transition: all .6s ease-out;
-}
-
-video.effect {
-	transform: scale(1, 1);
-	-webkit-transform: scale(1, 1);
-	-moz-transform: scale(1, 1);
-	-o-transform: scale(1, 1);
-	-ms-transform: scale(1, 1);
-}
-
-body.wait #join-wrap,
-body.connected #join-wrap,
-body.connected #room-list { display: none; }
-body.connected #local-video {
-	top: 2px; left: 2px !important;
-	width: 150px !important; border: solid 1px #fff; z-index: 2;
-}
-
-/* room */
-#video-wrap { position: relative; margin: 0 auto; }
-#local { width: 340px; height: 220px; border: solid 1px #fff; position: absolute; top: 4%; right: 2%; }
-#local-video { position: absolute; top: 0; left: 0; }
-
-.wait #video-wrap { min-height: 600px; }
-.room #share-wrap { display: block; }
-.room #room-list { display: none; }
-.room #content { padding-top: 30px; }
