@@ -8,7 +8,7 @@ function PeerHandler(options) {
   EventEmitter.call(this);
 
   // Cross browsing
-  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.mediaDevices.getUserMedia;
+  navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
   const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
   const RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
   const RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
@@ -39,8 +39,11 @@ function PeerHandler(options) {
   };
 
   let localStream = null;
+  let channel = null;
+  let receiveBuffer = [];
   let peer = null; // offer or answer peer
   let peerConnectionOptions = {
+
     'optional': [{
       'DtlsSrtpKeyAgreement': 'true'
     }]
@@ -92,11 +95,89 @@ function PeerHandler(options) {
     return SDP;
   }
 
+  //function sendFile() {
+  //  console.log('sendFile');
+  //
+  //  const fileInput = document.querySelector('#file-input');
+  //  const file = fileInput.files[0];
+  //
+  //  if (file) {
+  //    const fileReader = new FileReader();
+  //    console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`, fileReader);
+  //    fileReader.onload = function(e) {
+  //      console.log('전송', e.target.result);
+  //      channel.send(e.target.result);
+  //    };
+  //  }
+  //}
+  //$('#btn-send').click(sendFile);
+
+
+  function onDataMessage(event) {
+    console.log('확인 channel.onmessage', event.data);
+
+    $('ul').append(`<li>${event.data}</li>`);
+  }
+
+  /**
+   * Offer 데이터 채널 생성
+   * @param peer
+   */
+  function createOfferDataChannel(peer) {
+    channel = peer.createDataChannel("chat");
+    console.log('확인 channel', channel);
+
+    channel.onopen = function(event) {
+      console.log('확인 channel.onopen', event);
+      channel.send('Hi!');
+    };
+
+    channel.onclose = function() {
+      console.log("확인 channel.onclose");
+    };
+
+    channel.onerror = function(error) {
+      console.log("확인 channel.onerror", error);
+    };
+
+    channel.onmessage = onDataMessage;
+  }
+
+  /**
+   * Answer 데이터 채널
+   * @param peer
+   */
+  function createAnswerDataChannel(peer) {
+    console.log('createAnswerDataChannel', peer);
+
+    peer.ondatachannel = function(event) {
+      console.log('확인 peer.ondatachannel', event);
+      channel = event.channel;
+
+  ﻿    channel.onopen = function(event) {
+        console.log('확인 channel.onopen', event);
+        channel.send('Hi Back!');
+      };
+
+      channel.onclose = function() {
+        console.log("확인 channel.onclose");
+      };
+
+      channel.onerror = function(error) {
+        console.log("확인 channel.onerror", error);
+      };
+
+      channel.onmessage = onDataMessage;
+    };
+  }
+
   /**
    * offer SDP를 생성 한다.
    */
   function createOffer() {
     console.log('createOffer', arguments);
+
+    createOfferDataChannel(peer);
 
     peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
     peer.createOffer(function(SDP) {
@@ -119,6 +200,8 @@ function PeerHandler(options) {
    */
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
+
+    // createAnswerDataChannel(peer);
 
     peer.addStream(localStream);
     peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
