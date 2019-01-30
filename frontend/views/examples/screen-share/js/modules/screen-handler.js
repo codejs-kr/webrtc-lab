@@ -6,12 +6,12 @@
 function ScreenHandler(parent) {
   console.log('Loaded ScreenHandler', arguments);
 
-  var that = this;
-  var idCount = 1;
-  var maxFrame = 5;
-  var localScreenStream = null;
-  var successCallback = null;
-  var isScreenEnded = false;
+  const that = this;
+  const maxFrame = 5;
+  let idCount = 1;
+  let localScreenStream = null;
+  let successCallback = null;
+  let isScreenEnded = false;
 
   /**
   * getUserMedia
@@ -50,15 +50,36 @@ function ScreenHandler(parent) {
     });
   }
 
+  function startScreenCapture() {
+    if (navigator.getDisplayMedia) {
+      return navigator.getDisplayMedia({video: true});
+    } else if (navigator.mediaDevices.getDisplayMedia) {
+      return navigator.mediaDevices.getDisplayMedia({video: true});
+    } else {
+      return navigator.mediaDevices.getUserMedia({video: {mediaSource: 'screen'}});
+    }
+  }
+
+  /**
+   * 크롬 72버전까지 실험실 기능 활성화 해야 동작함.
+   * @param callback
+   */
+  function getDisplayMedia(callback) {
+    startScreenCapture().then(stream => {
+      console.log('getDisplayMedia', stream);
+      localScreenStream = stream;
+      callback(localScreenStream);
+    }, error => {
+      console.error('Error getDisplayMedia', error);
+    });
+  }
+
   /**
   * start
   */
   function start(callback) {
-    successCallback = callback;
+    getDisplayMedia(callback);
 
-    // isChrome
-    window.postMessage({ type: 'getScreen', id: idCount }, '*');
-    idCount++;
     isScreenEnded = false;
   }
 
@@ -82,8 +103,8 @@ function ScreenHandler(parent) {
       return;
     }
 
-    var data = event.data;
-    var type = data.type;
+    let data = event.data;
+    let type = data.type;
 
     if (type === 'gotScreen') {
       if (data.sourceId) {
