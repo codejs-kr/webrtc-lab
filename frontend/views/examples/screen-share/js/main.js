@@ -10,14 +10,12 @@ $(function() {
   const screenHandler = new ScreenHandler();
 
   /**
-   * 비디오 엘리먼트에 재생을 위해 stream 바인딩 한다
+   * 비디오 엘리먼트에 재생을 위해 stream 바인딩
    * @param data
    */
   function setVideoStream(data) {
-    const type = data.type;
-    const targetEl = data.el;
-
-    targetEl.srcObject = data.stream;
+    const video = data.el;
+    video.srcObject = data.stream;
   }
 
   /**
@@ -27,23 +25,33 @@ $(function() {
   function onLocalStream(stream) {
     console.log('onLocalStream', stream);
 
-    const localVideo = document.querySelector('#local-video');
     setVideoStream({
-      type: 'local',
-      el: localVideo,
+      el: document.querySelector('#local-video'),
       stream: stream
     });
   }
 
   /**
-   * 초기 설정
+   * screenHandler를 통해 캡쳐 API를 호출합니다.
+   */
+  function startScreenShare() {
+    screenHandler.start((stream) => {
+      onLocalStream(stream);
+    });
+  }
+
+  /**
+   * DOM 이벤트 바인딩
+   */
+  function bindEvent() {
+    document.querySelector('#btn-start').onclick = startScreenShare
+  }
+
+  /**
+   * 초기화
    */
   function initialize() {
-    $('#btn-start').click(function() {
-      screenHandler.start(function(stream) {
-        onLocalStream(stream);
-      });
-    });
+    bindEvent();
   }
 
   initialize();

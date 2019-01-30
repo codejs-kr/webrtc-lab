@@ -1,122 +1,60 @@
 /**
  * ScreenHandler
- * @param parent
  * @constructor
  */
-function ScreenHandler(parent) {
+function ScreenHandler() {
   console.log('Loaded ScreenHandler', arguments);
 
-  const that = this;
-  const maxFrame = 5;
-  let idCount = 1;
-  let localScreenStream = null;
-  let successCallback = null;
-  let isScreenEnded = false;
+  // REF https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints#Properties_of_shared_screen_tracks
+  const constraints = {
+    video: {
+      width: 1980,  // 최대 너비
+      height: 1080, // 최대 높이
+      frameRate: 10 // 최대 프레임
+    }
+  };
+  let localStream = null;
 
   /**
-  * getUserMedia
-  */
-  function getUserMedia(sourceId, callback) {
-    console.log('ScreenShare getUserMedia', arguments);
-
-    navigator.getUserMedia({
-      audio: false,
-      video: {
-        mandatory: {
-          chromeMediaSource: 'desktop',
-          chromeMediaSourceId: sourceId,
-          maxWidth: screen.width,
-          maxHeight: screen.height,
-          maxFrameRate: maxFrame,
-        },
-        optional: [
-          {googLeakyBucket: true},
-          {googTemporalLayeredScreencast: true}
-        ]
-      }
-    }, function(stream) {
-      localScreenStream = stream;
-      callback(localScreenStream);
-
-      // 브라우저밖 하단의 공유중지 박스로 종료하는경우 처리
-      localScreenStream.getVideoTracks()[0].onended = function() {
-        // 정상 종료시 이중으로 emit되는걸 막기 위한 처리.
-        if (!isScreenEnded) {
-          //parent.emit('endScreenShare');
-        }
-      };
-    }, function(error) {
-      console.error('Error getUserMedia', error);
-    });
-  }
-
-  function startScreenCapture() {
+   * 스크린캡쳐 API를 브라우저 호환성 맞게 리턴합니다.
+   * navigator.mediaDevices.getDisplayMedia 호출 (크롬 72 이상 지원)
+   * navigator.getDisplayMedia 호출 (크롬 70 ~ 71 실험실기능 활성화 or Edge)
+   *
+   * @returns {*}
+   */
+  function getCrossBrowserScreenCapture() {
     if (navigator.getDisplayMedia) {
-      return navigator.getDisplayMedia({video: true});
+      return navigator.getDisplayMedia(constraints);
     } else if (navigator.mediaDevices.getDisplayMedia) {
-      return navigator.mediaDevices.getDisplayMedia({video: true});
-    } else {
-      return navigator.mediaDevices.getUserMedia({video: {mediaSource: 'screen'}});
+      return navigator.mediaDevices.getDisplayMedia(constraints);
     }
   }
 
   /**
-   * 크롬 72버전까지 실험실 기능 활성화 해야 동작함.
+   * 스크린캡쳐 API를 호출합니다.
    * @param callback
    */
-  function getDisplayMedia(callback) {
-    startScreenCapture().then(stream => {
-      console.log('getDisplayMedia', stream);
-      localScreenStream = stream;
-      callback(localScreenStream);
-    }, error => {
+  function start(callback) {
+    getCrossBrowserScreenCapture().then((stream) => {
+      console.log('Success getDisplayMedia', stream);
+      localStream = stream;
+      callback(localStream);
+    }, (error) => {
       console.error('Error getDisplayMedia', error);
     });
   }
 
   /**
-  * start
-  */
-  function start(callback) {
-    getDisplayMedia(callback);
-
-    isScreenEnded = false;
-  }
-
-  /**
-  * end
-  */
+   * 스트림의 트렉을 stop() 시켜 더이상 스트림이 전송되는것을 중지합니다.
+   * @param callback
+   */
   function end(callback) {
-    isScreenEnded = true;
-    localScreenStream.getTracks().forEach(function(track) {
+    localStream.getTracks().forEach((track) => {
       track.stop();
     });
+
     callback && callback();
   }
-
-  /**
-   * extension message listener
-   */
-  window.addEventListener('message', function(event) {
-    console.log('window.message', event);
-    if (event.origin !== window.location.origin) {
-      return;
-    }
-
-    let data = event.data;
-    let type = data.type;
-
-    if (type === 'gotScreen') {
-      if (data.sourceId) {
-        getUserMedia(data.sourceId, successCallback);
-      } else {
-        console.log('canceled');
-        //parent.emit('endScreenShare');
-      }
-    } else if (type === 'getScreenPending') {
-      //
-    }
-  });
 
   /**
    * extends

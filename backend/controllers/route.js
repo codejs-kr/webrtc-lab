@@ -29,7 +29,7 @@ module.exports = (app) => {
     });
   }).get('/screen-share', (req, res) => {
     res.render('examples/screen-share/index.ejs', {
-      title: "- 스크린 접근하기"
+      title: "- 화면 공유"
     });
   }).get('/data-channel', (req, res) => {
     res.render('examples/data-channel/index.ejs', {
