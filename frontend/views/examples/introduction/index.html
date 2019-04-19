@@ -93,9 +93,17 @@
     <div>
       <h2>P2P기반 NAT 및 방화벽 통과 기법</h2>
       <ul class="description">
-        <li><strong>STUN (Simple Traversal of UDP Through NAT) 서버</strong><br>사내망 환경에 NAT를 통해 공인IP, Port를 알아내는 역활을 함. (Google STUN서버 제공)</li>
-        <li><strong>TURN (Traversal Using Relay NAT) 서버</strong><br>P2P 연결이 안되는 환경일때 트래픽을 중계하는데 사용.</li>
-        <li><strong>ICE (Interactive Connective Esatablishment) 프레임웍</strong><br>STUN, TURN 등의 기술을 종합 활용하여 라우팅 경로를 찾아내는 기술로
+        <li>
+          <strong>STUN (Session Traversal Utilities for NAT) 서버</strong><br>
+          사내망 환경에 NAT를 통해 공인IP, Port를 알아내는 역활을 함
+        </li>
+        <li>
+          <strong>TURN (Traversal Using Relays around NAT) 서버</strong><br>
+          P2P 연결이 안되는 환경일때 트래픽을 중계하는데 사용함
+        </li>
+        <li>
+          <strong>ICE (Interactive Connectivity Establishment)</strong><br>
+          P2P 간 다이렉트로 통신을 위해 STUN, TURN 등의 기술을 종합 활용하여 라우팅 경로를 찾아내는 기술로
           UDP hole punching (P2P간 공인IP가 아니더라도 최대한 연결 가능하도록 하는 기법)을 지원.
         </li>
       </ul>
