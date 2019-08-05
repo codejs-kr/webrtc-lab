@@ -8,7 +8,8 @@ function PeerHandler(options) {
   EventEmitter.call(this);
 
   // Cross browsing
-  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.mediaDevices.getUserMedia;
+  navigator.getUserMedia = navigator.getUserMedia ||
+    navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.mediaDevices.getUserMedia;
   const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
   const RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
   const RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
@@ -85,8 +86,15 @@ function PeerHandler(options) {
   function editSDP(SDP) {
     console.log('editSDP', SDP);
 
-    SDP.sdp = SDP.sdp.replace("96 98 100", "100 96 98"); // for chrome 57 <
-    SDP.sdp = SDP.sdp.replace("96 97 98 99 100 101 102", "100 101 102 96 97 98 99"); // for chrome 65 <
+    if (browserVersion >= 73) {
+      SDP.sdp = SDP.sdp.replace(
+        '96 97 98 99 100 101 102 122 127 121 125 107 108 109 124 120 123',
+        '102 122 127 121 125 107 108 109 124 120 123 96 97 98 99 100 101'
+      );
+    } else {
+      SDP.sdp = SDP.sdp.replace("96 98 100", "100 96 98"); // for chrome 57 <
+      SDP.sdp = SDP.sdp.replace("96 97 98 99 100 101 102", "100 101 102 96 97 98 99"); // for chrome 65 <
+    }
 
     console.log('return editSDP', SDP);
     return SDP;

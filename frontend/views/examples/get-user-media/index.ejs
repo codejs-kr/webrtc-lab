@@ -17,7 +17,7 @@
     console.log('success', arguments);
 
     // 비디오 테그에 stream 바인딩
-    $('video')[0].srcObject = stream;
+    document.querySelector('video').srcObject = stream;
 
     // do something...
   }

@@ -11,11 +11,17 @@ $(function() {
 
     // For IOS safari (https://github.com/webrtc/samples/issues/929)
     if (DetectRTC.browser.isSafari) {
-      video.controls = true;
+      video.setAttribute('playsinline', true);
+      video.setAttribute('controls', true);
+
+      setInterval(function() {
+        video.removeAttribute('controls');
+      }, 0);
     }
 
     // 비디오 테그에 stream 바인딩
     $('video')[0].srcObject = stream;
+    // document.querySelector('video').srcObject = stream;
 
     // do something...
   }
@@ -31,9 +37,19 @@ $(function() {
   }
 
   /**
+   * 클릭 처리
+   */
+  function onClick() {
+    // for safari (Can only call MediaDevices.getUserMedia on instances of MediaDevices)
+    if (DetectRTC.browser.isSafari) {
+      navigator.mediaDevices.getUserMedia({ audio: true, video: true }, success, error);
+    } else {
+      navigator.getUserMedia({ audio: true, video: true }, success, error);
+    }
+  }
+
+  /**
    * 이벤트 바인딩
    */
-  $('button').click(function() {
-    navigator.getUserMedia({ audio: true, video: true }, success, error);
-  });
+  $('button').click(onClick);
 });
