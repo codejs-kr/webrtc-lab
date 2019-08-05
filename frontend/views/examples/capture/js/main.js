@@ -1,6 +1,6 @@
 $(function() {
   navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.mediaDevices.getUserMedia;
 
   const videoEl = document.getElementById('video');
   const canvasEl = document.getElementById('canvas');
