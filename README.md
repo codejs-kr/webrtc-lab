@@ -23,3 +23,13 @@
 
 ### LiveDemo
 https://webrtclab.herokuapp.com
+
+### Setup
+``` javascript
+npm install
+```
+
+### Start
+``` javascript
+npm start
+```
