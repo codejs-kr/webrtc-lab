@@ -4,7 +4,7 @@
  * @param {object} Child
  *
  */
-const inherit = function(Parent, Child) {
+const inherit = (function(Parent, Child) {
   const F = function() {};
   return function(Parent, Child) {
     F.prototype = Parent.prototype;
@@ -12,4 +12,4 @@ const inherit = function(Parent, Child) {
     Child.prototype.constructor = Child;
     Child.super = Parent.prototype;
   };
-}();
+})();

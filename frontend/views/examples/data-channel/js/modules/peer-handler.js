@@ -10,7 +10,8 @@ function PeerHandler(options) {
   // Cross browsing
   navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
   const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-  const RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
+  const RTCSessionDescription =
+    window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
   const RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
   const browserVersion = DetectRTC.browser.version;
   const isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
@@ -20,22 +21,16 @@ function PeerHandler(options) {
   const send = options.send;
   const iceServers = {
     // 'iceTransportPolicy': 'relay',
-    'iceServers': [
+    iceServers: [
       {
-        'urls': [
-          'stun:stun.l.google.com:19302',
-          'stun:stun1.l.google.com:19302',
-          'stun:stun2.l.google.com:19302'
-        ]
+        urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
       },
       {
-        'urls': [
-          'turn:107.150.19.220:3478'
-        ],
-        'credential': 'turnserver',
-        'username': 'subrosa'
-      }
-    ]
+        urls: ['turn:107.150.19.220:3478'],
+        credential: 'turnserver',
+        username: 'subrosa',
+      },
+    ],
   };
 
   let localStream = null;
@@ -43,16 +38,17 @@ function PeerHandler(options) {
   let receiveBuffer = [];
   let peer = null; // offer or answer peer
   let peerConnectionOptions = {
-
-    'optional': [{
-      'DtlsSrtpKeyAgreement': 'true'
-    }]
+    optional: [
+      {
+        DtlsSrtpKeyAgreement: 'true',
+      },
+    ],
   };
   let mediaConstraints = {
-    'mandatory': {
-      'OfferToReceiveAudio': true,
-      'OfferToReceiveVideo': true
-    }
+    mandatory: {
+      OfferToReceiveAudio: true,
+      OfferToReceiveVideo: true,
+    },
   };
 
   // edge is not supported
@@ -67,17 +63,21 @@ function PeerHandler(options) {
   function getUserMedia(mediaOption, callback, isOffer) {
     console.log('getUserMedia');
 
-    navigator.getUserMedia(mediaOption, function(stream) {
-      localStream = stream;
-      callback && callback(localStream);
+    navigator.getUserMedia(
+      mediaOption,
+      function(stream) {
+        localStream = stream;
+        callback && callback(localStream);
 
-      if (isOffer) {
-        createPeerConnection();
-        createOffer();
+        if (isOffer) {
+          createPeerConnection();
+          createOffer();
+        }
+      },
+      function(error) {
+        console.error('Error getUserMedia', error);
       }
-    }, function(error) {
-      console.error('Error getUserMedia', error);
-    });
+    );
   }
 
   /**
@@ -88,8 +88,8 @@ function PeerHandler(options) {
   function editSDP(SDP) {
     console.log('editSDP', SDP);
 
-    SDP.sdp = SDP.sdp.replace("96 98 100", "100 96 98"); // for chrome 57 <
-    SDP.sdp = SDP.sdp.replace("96 97 98 99 100 101 102", "100 101 102 96 97 98 99"); // for chrome 65 <
+    SDP.sdp = SDP.sdp.replace('96 98 100', '100 96 98'); // for chrome 57 <
+    SDP.sdp = SDP.sdp.replace('96 97 98 99 100 101 102', '100 101 102 96 97 98 99'); // for chrome 65 <
 
     console.log('return editSDP', SDP);
     return SDP;
@@ -112,7 +112,6 @@ function PeerHandler(options) {
   //}
   //$('#btn-send').click(sendFile);
 
-
   function onDataMessage(event) {
     console.log('확인 channel.onmessage', event.data);
 
@@ -124,7 +123,7 @@ function PeerHandler(options) {
    * @param peer
    */
   function createOfferDataChannel(peer) {
-    channel = peer.createDataChannel("chat");
+    channel = peer.createDataChannel('chat');
     console.log('확인 channel', channel);
 
     channel.onopen = function(event) {
@@ -133,11 +132,11 @@ function PeerHandler(options) {
     };
 
     channel.onclose = function() {
-      console.log("확인 channel.onclose");
+      console.log('확인 channel.onclose');
     };
 
     channel.onerror = function(error) {
-      console.log("확인 channel.onerror", error);
+      console.log('확인 channel.onerror', error);
     };
 
     channel.onmessage = onDataMessage;
@@ -154,17 +153,17 @@ function PeerHandler(options) {
       console.log('확인 peer.ondatachannel', event);
       channel = event.channel;
 
-  ﻿    channel.onopen = function(event) {
+      channel.onopen = function(event) {
         console.log('확인 channel.onopen', event);
         channel.send('Hi Back!');
       };
 
       channel.onclose = function() {
-        console.log("확인 channel.onclose");
+        console.log('확인 channel.onclose');
       };
 
       channel.onerror = function(error) {
-        console.log("확인 channel.onerror", error);
+        console.log('확인 channel.onerror', error);
       };
 
       channel.onmessage = onDataMessage;
@@ -180,18 +179,22 @@ function PeerHandler(options) {
     createOfferDataChannel(peer);
 
     peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
-    peer.createOffer(function(SDP) {
-      if (isH264) {
-        SDP = editSDP(SDP);
-      }
+    peer.createOffer(
+      function(SDP) {
+        if (isH264) {
+          SDP = editSDP(SDP);
+        }
 
-      peer.setLocalDescription(SDP);
-      console.log("Sending offer description", SDP);
-      send({
-        to: 'all',
-        sdp: SDP
-      });
-    }, onSdpError, mediaConstraints);
+        peer.setLocalDescription(SDP);
+        console.log('Sending offer description', SDP);
+        send({
+          to: 'all',
+          sdp: SDP,
+        });
+      },
+      onSdpError,
+      mediaConstraints
+    );
   }
 
   /**
@@ -204,22 +207,30 @@ function PeerHandler(options) {
     // createAnswerDataChannel(peer);
 
     peer.addStream(localStream);
-    peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
-      peer.createAnswer(function(SDP) {
-        if (isH264) {
-          SDP = editSDP(SDP);
-        }
-        peer.setLocalDescription(SDP);
-        console.log("Sending answer to peer.", SDP);
+    peer.setRemoteDescription(
+      new RTCSessionDescription(msg.sdp),
+      function() {
+        peer.createAnswer(
+          function(SDP) {
+            if (isH264) {
+              SDP = editSDP(SDP);
+            }
+            peer.setLocalDescription(SDP);
+            console.log('Sending answer to peer.', SDP);
 
-        send({
-          to: 'all',
-          sdp: SDP
-        });
-      }, onSdpError, mediaConstraints);
-    }, function() {
-      console.error('setRemoteDescription', arguments);
-    });
+            send({
+              to: 'all',
+              sdp: SDP,
+            });
+          },
+          onSdpError,
+          mediaConstraints
+        );
+      },
+      function() {
+        console.error('setRemoteDescription', arguments);
+      }
+    );
   }
 
   /**
@@ -238,7 +249,7 @@ function PeerHandler(options) {
           to: 'all',
           label: event.candidate.sdpMLineIndex,
           id: event.candidate.sdpMid,
-          candidate: event.candidate.candidate
+          candidate: event.candidate.candidate,
         });
       } else {
         console.info('Candidate denied', event.candidate);
@@ -246,30 +257,32 @@ function PeerHandler(options) {
     };
 
     peer.onaddstream = function(event) {
-      console.log("Adding remote strem", event);
+      console.log('Adding remote strem', event);
       that.emit('addRemoteStream', event.stream);
     };
 
     peer.onremovestream = function(event) {
-      console.log("Removing remote stream", event);
+      console.log('Removing remote stream', event);
       that.emit('removeRemoteStream', event.stream);
     };
 
     peer.onnegotiationneeded = function(event) {
-      console.log("onnegotiationneeded", event);
+      console.log('onnegotiationneeded', event);
     };
 
     peer.onsignalingstatechange = function(event) {
-      console.log("onsignalingstatechange", event);
+      console.log('onsignalingstatechange', event);
     };
 
     peer.oniceconnectionstatechange = function(event) {
-      console.log("oniceconnectionstatechange",
+      console.log(
+        'oniceconnectionstatechange',
         'iceGatheringState: ' + peer.iceGatheringState,
-        '/ iceConnectionState: ' + peer.iceConnectionState);
+        '/ iceConnectionState: ' + peer.iceConnectionState
+      );
 
       that.emit('iceconnectionStateChange', event);
-    }
+    };
   }
 
   /**
@@ -305,7 +318,7 @@ function PeerHandler(options) {
       const candidate = new RTCIceCandidate({
         sdpMid: msg.id,
         sdpMLineIndex: msg.label,
-        candidate: msg.candidate
+        candidate: msg.candidate,
       });
 
       peer.addIceCandidate(candidate);

@@ -8,10 +8,10 @@ function ScreenHandler() {
   // REF https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints#Properties_of_shared_screen_tracks
   const constraints = {
     video: {
-      width: 1980,  // 최대 너비
+      width: 1980, // 최대 너비
       height: 1080, // 최대 높이
-      frameRate: 10 // 최대 프레임
-    }
+      frameRate: 10, // 최대 프레임
+    },
   };
   let localStream = null;
 
@@ -35,13 +35,16 @@ function ScreenHandler() {
    * @param callback
    */
   function start(callback) {
-    getCrossBrowserScreenCapture().then((stream) => {
-      console.log('Success getDisplayMedia', stream);
-      localStream = stream;
-      callback(localStream);
-    }, (error) => {
-      console.error('Error getDisplayMedia', error);
-    });
+    getCrossBrowserScreenCapture().then(
+      (stream) => {
+        console.log('Success getDisplayMedia', stream);
+        localStream = stream;
+        callback(localStream);
+      },
+      (error) => {
+        console.error('Error getDisplayMedia', error);
+      }
+    );
   }
 
   /**

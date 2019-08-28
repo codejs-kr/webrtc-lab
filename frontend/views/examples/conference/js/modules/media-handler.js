@@ -69,10 +69,10 @@ function MediaHandler() {
    * @param videoEl
    */
   function playForIOS(videoEl) {
-    videoEl.setAttribute("playsinline", true);
-    videoEl.setAttribute("controls", true);
+    videoEl.setAttribute('playsinline', true);
+    videoEl.setAttribute('controls', true);
     setTimeout(function() {
-      videoEl.removeAttribute("controls");
+      videoEl.removeAttribute('controls');
     }, 1);
   }
 

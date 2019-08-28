@@ -24,7 +24,8 @@ $(function() {
   // cross browsing
   navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
   var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-  var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
+  var RTCSessionDescription =
+    window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
   var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
   var browserVersion = DetectRTC.browser.version;
   var isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
@@ -41,34 +42,37 @@ $(function() {
   var peer; // offer or answer peer
   var peers = [];
   var iceServers = {
-    'iceServers': [
-      {'url': 'stun:stun.l.google.com:19302'},
-      {'url': 'stun:stun1.l.google.com:19302'},
-      {'url': 'stun:stun2.l.google.com:19302'},
+    iceServers: [
+      { url: 'stun:stun.l.google.com:19302' },
+      { url: 'stun:stun1.l.google.com:19302' },
+      { url: 'stun:stun2.l.google.com:19302' },
       {
-      'url': 'turn:107.150.19.220:3478',
-      'credential': 'turnserver',
-      'username': 'subrosa'
-    }]
+        url: 'turn:107.150.19.220:3478',
+        credential: 'turnserver',
+        username: 'subrosa',
+      },
+    ],
   };
 
   var peerConnectionOptions = {
-    'optional': [{
-      'DtlsSrtpKeyAgreement': 'true'
-    }]
+    optional: [
+      {
+        DtlsSrtpKeyAgreement: 'true',
+      },
+    ],
   };
 
   var mediaConstraints = {
-    'mandatory': {
-      'OfferToReceiveAudio': true,
-      'OfferToReceiveVideo': true
-    }
+    mandatory: {
+      OfferToReceiveAudio: true,
+      OfferToReceiveVideo: true,
+    },
   };
 
   var resolution = {
     width: 1280,
-    height: 720
-  }
+    height: 720,
+  };
 
   // edge is not supported
   if (isEdge) {
@@ -85,95 +89,112 @@ $(function() {
   var $joinWrap = $('#join-wrap');
 
   /**
-  * getUserMedia
-  */
+   * getUserMedia
+   */
   function getUserMedia() {
     console.log('getUserMedia');
 
-    navigator.getUserMedia({
-      audio: true,
-      video: {
-        width: 1280,
-        height: 720
-      }
-    }, function(stream) {
-      localStream = stream;
-      $videoWrap.append('<video id="local-video-large" class="local-video" muted="muted" autoplay="true" title="720p"></video>');
-      document.querySelector('#local-video-large').srcObject = localStream;
-      $body.addClass('room wait');
-      $tokenWrap.slideDown(1000);
+    navigator.getUserMedia(
+      {
+        audio: true,
+        video: {
+          width: 1280,
+          height: 720,
+        },
+      },
+      function(stream) {
+        localStream = stream;
+        $videoWrap.append(
+          '<video id="local-video-large" class="local-video" muted="muted" autoplay="true" title="720p"></video>'
+        );
+        document.querySelector('#local-video-large').srcObject = localStream;
+        $body.addClass('room wait');
+        $tokenWrap.slideDown(1000);
 
-      if (isOffer) {
-        var peer = createPeerConnection('large');
-        createOffer('large', peer, localStream);
+        if (isOffer) {
+          var peer = createPeerConnection('large');
+          createOffer('large', peer, localStream);
+        }
+      },
+      function() {
+        console.error('Error getUserMedia');
       }
-
-    }, function() {
-      console.error('Error getUserMedia');
-    });
+    );
   }
 
   /**
-  * createOffer
-  * offer SDP를 생성 한다.
-  */
+   * createOffer
+   * offer SDP를 생성 한다.
+   */
   function createOffer(sessionType, peer, stream) {
     console.log('createOffer', arguments);
 
     peer.addStream(stream); // addStream 제외시 recvonly로 SDP 생성됨
-    peer.createOffer(function(SDP) {
-      // url parameter codec=h264
-      if (location.search.substr(1).match('h264')) {
-        SDP.sdp = SDP.sdp.replace("100 101 107", "107 100 101"); // for chrome < 57
-        SDP.sdp = SDP.sdp.replace("96 98 100", "100 96 98"); // for chrome 57 <
-      }
+    peer.createOffer(
+      function(SDP) {
+        // url parameter codec=h264
+        if (location.search.substr(1).match('h264')) {
+          SDP.sdp = SDP.sdp.replace('100 101 107', '107 100 101'); // for chrome < 57
+          SDP.sdp = SDP.sdp.replace('96 98 100', '100 96 98'); // for chrome 57 <
+        }
 
-      peer.setLocalDescription(SDP);
-      console.log("Sending offer description", SDP);
-      send({
-        sender: userId,
-        to: 'all',
-        sessionType: sessionType,
-        sdp: SDP
-      });
-    }, onSdpError, mediaConstraints);
-  }
-
-  /**
-  * createAnswer
-  * offer에 대한 응답 SDP를 생성 한다.
-  * @param {object} msg offer가 보내온 signaling
-  */
-  function createAnswer(sessionType, peer, msg, stream) {
-    console.log('createAnswer', arguments);
-
-    peer.addStream(stream);
-    peer.setRemoteDescription(new RTCSessionDescription(msg.sdp), function() {
-      peer.createAnswer(function(SDP) {
         peer.setLocalDescription(SDP);
-        console.log("Sending answer to peer.", SDP);
+        console.log('Sending offer description', SDP);
         send({
           sender: userId,
           to: 'all',
           sessionType: sessionType,
-          sdp: SDP
+          sdp: SDP,
         });
-      }, onSdpError, mediaConstraints);
-    }, function() {
-      console.error('setRemoteDescription', arguments);
-    });
+      },
+      onSdpError,
+      mediaConstraints
+    );
   }
 
   /**
-  * createPeerConnection
-  * offer, answer 공통 함수로 peer를 생성하고 관련 이벤트를 바인딩 한다.
-  */
+   * createAnswer
+   * offer에 대한 응답 SDP를 생성 한다.
+   * @param {object} msg offer가 보내온 signaling
+   */
+  function createAnswer(sessionType, peer, msg, stream) {
+    console.log('createAnswer', arguments);
+
+    peer.addStream(stream);
+    peer.setRemoteDescription(
+      new RTCSessionDescription(msg.sdp),
+      function() {
+        peer.createAnswer(
+          function(SDP) {
+            peer.setLocalDescription(SDP);
+            console.log('Sending answer to peer.', SDP);
+            send({
+              sender: userId,
+              to: 'all',
+              sessionType: sessionType,
+              sdp: SDP,
+            });
+          },
+          onSdpError,
+          mediaConstraints
+        );
+      },
+      function() {
+        console.error('setRemoteDescription', arguments);
+      }
+    );
+  }
+
+  /**
+   * createPeerConnection
+   * offer, answer 공통 함수로 peer를 생성하고 관련 이벤트를 바인딩 한다.
+   */
   function createPeerConnection(type) {
     console.log('createPeerConnection', arguments);
 
     var peer = {
       type: type,
-      pc: null
+      pc: null,
     };
 
     peer.pc = new RTCPeerConnection(iceServers, peerConnectionOptions);
@@ -187,7 +208,7 @@ $(function() {
           label: event.candidate.sdpMLineIndex,
           id: event.candidate.sdpMid,
           candidate: event.candidate.candidate,
-          sessionType: type
+          sessionType: type,
         });
       } else {
         console.info('Candidate denied', event.candidate);
@@ -195,7 +216,7 @@ $(function() {
     };
 
     peer.pc.onaddstream = function(event) {
-      console.log("Adding remote strem", event);
+      console.log('Adding remote strem', event);
 
       var id = 'remote-video-' + type;
       $videoWrap.append('<video id="' + id + '" class="remote-video" autoplay="true"></video>');
@@ -204,22 +225,24 @@ $(function() {
     };
 
     peer.pc.onremovestream = function(event) {
-      console.log("Removing remote stream", event);
+      console.log('Removing remote stream', event);
     };
 
     peer.pc.onnegotiationneeded = function(event) {
-      console.log("onnegotiationneeded", event);
+      console.log('onnegotiationneeded', event);
     };
 
     peer.pc.onsignalingstatechange = function(event) {
-      console.log("onsignalingstatechange", event);
+      console.log('onsignalingstatechange', event);
     };
 
     peer.pc.oniceconnectionstatechange = function(event) {
-      console.log("oniceconnectionstatechange",
-      'iceGatheringState: ' + peer.iceGatheringState,
-      '/ iceConnectionState: ' + peer.iceConnectionState);
-    }
+      console.log(
+        'oniceconnectionstatechange',
+        'iceGatheringState: ' + peer.iceGatheringState,
+        '/ iceConnectionState: ' + peer.iceConnectionState
+      );
+    };
 
     // add peers array
     peers.push(peer);
@@ -228,14 +251,14 @@ $(function() {
   }
 
   /**
-  * getPeer
-  * 다수의 Peer중 해당하는 type과 매칭되는 peer 리턴한다.
-  */
+   * getPeer
+   * 다수의 Peer중 해당하는 type과 매칭되는 peer 리턴한다.
+   */
   function getPeer(type) {
     console.log('getPeer', arguments, peers);
     var peer = null;
 
-    for(var i=0; i < peers.length; i++) {
+    for (var i = 0; i < peers.length; i++) {
       if (peers[i].type === type) {
         peer = peers[i].pc;
       }
@@ -245,8 +268,8 @@ $(function() {
   }
 
   /**
-  * changeResolution
-  */
+   * changeResolution
+   */
   function changeResolution() {
     localStream.getVideoTracks().forEach(function(track) {
       console.log('확인 track', track, track.getConstraints(), track.applyConstraints);
@@ -254,12 +277,12 @@ $(function() {
       if (resolution.height === 720) {
         resolution = {
           width: 160,
-          height: 90
+          height: 90,
         };
       } else {
         resolution = {
           width: 1280,
-          height: 720
+          height: 720,
         };
       }
 
@@ -269,8 +292,8 @@ $(function() {
   }
 
   /**
-  * onSdpError
-  */
+   * onSdpError
+   */
   function onSdpError() {
     console.log('onSdpError', arguments);
   }
@@ -278,9 +301,9 @@ $(function() {
   /****************************** Below for signaling ************************/
 
   /**
-  * send
-  * @param {object} msg data
-  */
+   * send
+   * @param {object} msg data
+   */
   function send(data) {
     console.log('send', data);
 
@@ -289,9 +312,9 @@ $(function() {
   }
 
   /**
-  * onmessage
-  * @param {object} msg data
-  */
+   * onmessage
+   * @param {object} msg data
+   */
   function onmessage(data) {
     console.log('onmessage', data);
 
@@ -305,7 +328,7 @@ $(function() {
 
     // 접속자가 보내온 offer처리
     if (sdp) {
-      if (sdp.type  == 'offer') {
+      if (sdp.type == 'offer') {
         console.log('Adding local stream...');
         var peer = createPeerConnection(sessionType);
 
@@ -315,19 +338,19 @@ $(function() {
         } else {
           createAnswer(sessionType, peer, msg, localSmallStream);
         }
-      // offer에 대한 응답 처리
+        // offer에 대한 응답 처리
       } else if (sdp.type == 'answer') {
         var peer = getPeer(sessionType);
         peer.setRemoteDescription(new RTCSessionDescription(msg.sdp));
       }
 
-    // offer, answer cadidate처리
+      // offer, answer cadidate처리
     } else if (msg.candidate) {
       var peer = getPeer(sessionType);
       var candidate = new RTCIceCandidate({
         sdpMid: msg.id,
         sdpMLineIndex: msg.label,
-        candidate: msg.candidate
+        candidate: msg.candidate,
       });
 
       peer.addIceCandidate(candidate);
@@ -345,7 +368,12 @@ $(function() {
     if (location.hash.length > 2) {
       $uniqueToken.attr('href', location.href);
     } else {
-      location.hash = '#' + (Math.random() * new Date().getTime()).toString(32).toUpperCase().replace(/\./g, '-');
+      location.hash =
+        '#' +
+        (Math.random() * new Date().getTime())
+          .toString(32)
+          .toUpperCase()
+          .replace(/\./g, '-');
     }
   }
 
@@ -355,14 +383,13 @@ $(function() {
   function setClipboard() {
     //console.log('setClipboard', arguments);
 
-    $uniqueToken.click(function(){
+    $uniqueToken.click(function() {
       var link = location.href;
-      if (window.clipboardData){
+      if (window.clipboardData) {
         window.clipboardData.setData('text', link);
         alert('Copy to Clipboard successful.');
-      }
-      else {
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", link); // Copy to clipboard: Ctrl+C, Enter
+      } else {
+        window.prompt('Copy to clipboard: Ctrl+C, Enter', link); // Copy to clipboard: Ctrl+C, Enter
       }
     });
   }
@@ -371,11 +398,13 @@ $(function() {
    * onFoundUser
    */
   function onFoundUser() {
-    $roomList.html([
-      '<div class="room-info">',
+    $roomList.html(
+      [
+        '<div class="room-info">',
         '<p>당신을 기다리고 있어요. 참여 하실래요?</p>',
         '<button id="join">Join</button>',
-      '</div>'].join('\n')
+        '</div>',
+      ].join('\n')
     );
 
     var $btnJoin = $('#join');
@@ -487,7 +516,8 @@ $(function() {
 });
 
 Object.size = function(obj) {
-  var size = 0, key;
+  var size = 0,
+    key;
   for (key in obj) {
     if (obj.hasOwnProperty(key)) {
       size++;

@@ -27,7 +27,7 @@ $(function() {
 
     setVideoStream({
       el: document.querySelector('#local-video'),
-      stream: stream
+      stream: stream,
     });
   }
 
@@ -44,7 +44,7 @@ $(function() {
    * DOM 이벤트 바인딩
    */
   function bindEvent() {
-    document.querySelector('#btn-start').onclick = startScreenShare
+    document.querySelector('#btn-start').onclick = startScreenShare;
   }
 
   /**

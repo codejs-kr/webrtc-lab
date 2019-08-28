@@ -1,6 +1,9 @@
 $(function() {
-  navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.mediaDevices.getUserMedia;
+  navigator.getUserMedia =
+    navigator.getUserMedia ||
+    navigator.webkitGetUserMedia ||
+    navigator.mozGetUserMedia ||
+    navigator.mediaDevices.getUserMedia;
 
   const videoEl = document.getElementById('video');
   const canvasEl = document.getElementById('canvas');
@@ -37,7 +40,7 @@ $(function() {
    * @param imageData
    */
   function insertImage(imageData) {
-    $('#images').prepend("<img src=" + imageData + " />");
+    $('#images').prepend('<img src=' + imageData + ' />');
   }
 
   /**

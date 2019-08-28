@@ -15,7 +15,7 @@ $(function() {
   const socket = io();
   const mediaHandler = new MediaHandler();
   const peerHandler = new PeerHandler({
-    send: send
+    send: send,
   });
   const animationTime = 500;
   const isSafari = DetectRTC.browser.isSafari;
@@ -26,13 +26,13 @@ $(function() {
       mandatory: {
         maxWidth: 1920,
         maxHeight: 1080,
-        maxFrameRate: 30
+        maxFrameRate: 30,
       },
       optional: [
-        {googNoiseReduction: true}, // Likely removes the noise in the captured video stream at the expense of computational effort.
-        {facingMode: "user"}        // Select the front/user facing camera or the rear/environment facing camera if available (on Phone)
-      ]
-    }
+        { googNoiseReduction: true }, // Likely removes the noise in the captured video stream at the expense of computational effort.
+        { facingMode: 'user' }, // Select the front/user facing camera or the rear/environment facing camera if available (on Phone)
+      ],
+    },
   };
 
   // DOM
@@ -48,12 +48,14 @@ $(function() {
   function onDetectUser() {
     console.log('onDetectUser');
 
-    $waitWrap.html([
-      '<div class="room-info">',
+    $waitWrap.html(
+      [
+        '<div class="room-info">',
         '<p>당신을 기다리고 있어요. 참여 하실래요?</p>',
         '<button id="btn-join">Join</button>',
-      '</div>'
-    ].join('\n'));
+        '</div>',
+      ].join('\n')
+    );
 
     $('#btn-join').click(function() {
       isOffer = true;
@@ -125,7 +127,10 @@ $(function() {
    * 방 고유 접속 토큰 생성
    */
   function setRoomToken() {
-    const hashValue = (Math.random() * new Date().getTime()).toString(32).toUpperCase().replace(/\./g, '-');
+    const hashValue = (Math.random() * new Date().getTime())
+      .toString(32)
+      .toUpperCase()
+      .replace(/\./g, '-');
 
     if (location.hash.length > 2) {
       $uniqueToken.attr('href', location.href);
@@ -138,14 +143,14 @@ $(function() {
    * 클립보드 복사
    */
   function setClipboard() {
-    $uniqueToken.click(function(){
+    $uniqueToken.click(function() {
       const link = location.href;
 
-      if (window.clipboardData){
+      if (window.clipboardData) {
         window.clipboardData.setData('text', link);
         alert('Copy to Clipboard successful.');
       } else {
-        window.prompt("Copy to clipboard: Ctrl+C, Enter", link); // Copy to clipboard: Ctrl+C, Enter
+        window.prompt('Copy to clipboard: Ctrl+C, Enter', link); // Copy to clipboard: Ctrl+C, Enter
       }
     });
   }
@@ -160,7 +165,7 @@ $(function() {
     mediaHandler.setVideoStream({
       type: 'local',
       el: localVideo,
-      stream: stream
+      stream: stream,
     });
 
     $body.addClass('room wait');
@@ -182,7 +187,7 @@ $(function() {
     mediaHandler.setVideoStream({
       type: 'remote',
       el: remoteVideo,
-      stream: stream
+      stream: stream,
     });
 
     $body.removeClass('wait').addClass('connected');
@@ -225,7 +230,6 @@ $(function() {
       $this.toggleClass('active');
       mediaHandler[$this.hasClass('active') ? 'muteAudio' : 'unmuteAudio']();
     });
-
   }
 
   initialize();

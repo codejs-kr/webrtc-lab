@@ -6,9 +6,7 @@ channel.onMessage.addListener(function(message) {
 });
 
 window.addEventListener('message', function(event) {
-  if (event.source != window)
-    return;
-  if (!event.data && (event.data.type == 'getScreen' || event.data.type == 'cancelGetScreen'))
-    return;
+  if (event.source != window) return;
+  if (!event.data && (event.data.type == 'getScreen' || event.data.type == 'cancelGetScreen')) return;
   channel.postMessage(event.data);
 });
