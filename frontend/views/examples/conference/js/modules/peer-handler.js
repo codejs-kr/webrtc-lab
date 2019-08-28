@@ -109,7 +109,12 @@ function PeerHandler(options) {
   function createOffer() {
     console.log('createOffer', arguments);
 
-    peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
+    if (localStream) {
+      // addStream 제외시 recvonly로 SDP 생성됨
+      // peer.addStream(localStream); // TODO 스펙 삭제됨
+      addTrack(peer, localStream);
+    }
+
     peer.createOffer(
       function(SDP) {
         if (isH264) {
@@ -134,8 +139,10 @@ function PeerHandler(options) {
    */
   function createAnswer(msg) {
     console.log('createAnswer', arguments);
-
-    peer.addStream(localStream);
+    if (localStream) {
+      // peer.addStream(localStream); // TODO 스펙 삭제됨
+      addTrack(peer, localStream);
+    }
     peer
       .setRemoteDescription(new RTCSessionDescription(msg.sdp))
       .then(function() {
@@ -183,15 +190,33 @@ function PeerHandler(options) {
       }
     };
 
-    peer.onaddstream = function(event) {
-      console.log('Adding remote strem', event);
-      that.emit('addRemoteStream', event.stream);
-    };
+    /**
+     * 크로스브라우징
+     */
+    if (peer.ontrack) {
+      peer.ontrack = function(event) {
+        console.log('ontrack', event);
+        var stream = event.streams[0];
+        that.emit('addRemoteStream', stream);
+      };
 
-    peer.onremovestream = function(event) {
-      console.log('Removing remote stream', event);
-      that.emit('removeRemoteStream', event.stream);
-    };
+      peer.onremovetrack = function(event) {
+        console.log('onremovetrack', event);
+        var stream = event.streams[0];
+        that.emit('removeRemoteStream', stream);
+      };
+      // 삼성 모바일에서 필요
+    } else {
+      peer.onaddstream = function(event) {
+        console.log('onaddstream', event);
+        that.emit('addRemoteStream', event.stream);
+      };
+
+      peer.onremovestream = function(event) {
+        console.log('onremovestream', event);
+        that.emit('removeRemoteStream', event.stream);
+      };
+    }
 
     peer.onnegotiationneeded = function(event) {
       console.log('onnegotiationneeded', event);
@@ -217,6 +242,46 @@ function PeerHandler(options) {
    */
   function onSdpError() {
     console.log('onSdpError', arguments);
+  }
+
+  /**
+   * addStream 이후 스펙 적용 (크로스브라우징)
+   * 스트림을 받아서 PeerConnection track과 stream을 추가 한다.
+   * TODO 72버전 이상 3인에서 AMS addTrack 하면 AMS로 전송이 안됨. 원인은 기존 트렉이 아닌 getTransceivers(2) (3) 에 추가됨.
+   *
+   * @param peer
+   * @param stream
+   */
+  function addTrack(peer, stream) {
+    if (peer.addTrack) {
+      stream.getTracks().forEach(function(track) {
+        console.log('확인 addTrack', peer, track, stream);
+        peer.addTrack(track, stream);
+      });
+    } else {
+      peer.addStream(stream);
+    }
+  }
+
+  /**
+   * removeStream 이후 스펙 적용 (크로스브라우징)
+   * @param peer
+   * @param stream
+   */
+  function removeTrack(peer, stream) {
+    if (peer.removeTrack) {
+      stream.getTracks().forEach(function(track) {
+        var sender = peer.getSenders().find(function(s) {
+          return s.track === track;
+        });
+
+        if (sender) {
+          peer.removeTrack(sender);
+        }
+      });
+    } else {
+      peer.removeStream(stream);
+    }
   }
 
   /**
