@@ -6,7 +6,7 @@
  *
  */
 
-input[type="text"] {
+input[type='text'] {
   padding: 6px 10px;
   width: 120px;
   height: 30px;
@@ -35,7 +35,6 @@ input[type="text"] {
   vertical-align: top;
 }
 
-
 /********************************************
   Below room style
 *********************************************/
@@ -45,7 +44,7 @@ video {
   z-index: 1;
   background: #222;
   border: solid 1px #fff;
-  transition: all .6s ease-out;
+  transition: all 0.6s ease-out;
 }
 
 video.effect {

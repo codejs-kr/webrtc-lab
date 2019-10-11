@@ -4,15 +4,15 @@
  * @author dodortus (dodortus@gmail.com / codejs.co.kr)
  *
  */
-const	config = require('./config.json');
+const config = require('./config.json');
 const port = process.env.PORT || config.webserver.port;
-const	express = require('express');
-const	app = express();
+const express = require('express');
+const app = express();
 const ejs = require('ejs');
-const	http = require('http').Server(app);
+const http = require('http').Server(app);
 const root = `${__dirname}/../`;
 const path = {
-  frontend: `${root}/frontend`
+  frontend: `${root}/frontend`,
 };
 
 app.set('views', path.frontend + '/views');

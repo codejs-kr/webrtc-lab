@@ -57,5 +57,6 @@ $(function() {
 
     $('#btn-capture').click(capture);
   }
+
   initialize();
 });

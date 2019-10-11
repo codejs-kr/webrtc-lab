@@ -3,7 +3,7 @@
  * @param http
  */
 module.exports = (http) => {
-  const	io = require('socket.io')(http);
+  const io = require('socket.io')(http);
   let rooms = {};
   let roomId = null;
   let socketIds = {};
@@ -17,7 +17,7 @@ module.exports = (http) => {
     const arr = Object.keys(rooms);
     let result = null;
 
-    for (let i=0; i < arr.length; i++) {
+    for (let i = 0; i < arr.length; i++) {
       if (rooms[arr[i]][value]) {
         result = arr[i];
         break;
@@ -34,7 +34,7 @@ module.exports = (http) => {
     // 룸접속
     socket.on('enter', (roomName, userId) => {
       roomId = roomName;
-      socket.join(roomId);  // 소켓을 특정 room에 binding합니다.
+      socket.join(roomId); // 소켓을 특정 room에 binding합니다.
 
       // 룸에 사용자 정보 추가, 이미 룸이 있는경우
       if (rooms[roomId]) {

@@ -5,67 +5,151 @@
  * @author dodortus (dodortus@gmail.com / codejs.co.kr)
  *
  */
-body, p { margin: 0; padding: 0; font-size: 16px; line-height: 1.4; }
-body { padding: 16px; background: #fff; }
-button { cursor: pointer; }
-h1 {
-	padding: 0 0 0.2em 0; height: 50px; line-height: 50px;
-	font-weight: bold; margin: 0; text-indent: 5px; border-bottom: 1px solid #ccc;
+body,
+p {
+  margin: 0;
+  padding: 0;
+  font-size: 16px;
+  line-height: 1.4;
 }
-h3 { margin: 0 0 0.3em 0; }
-ul { margin: 0; }
-ul li { line-height: 1.8; font-size: 1.2em; }
-p { margin: 5px 0 10px; }
-a { color: #000; text-decoration: none; }
-a:hover { text-decoration: underline; }
-footer { margin: 30px 0; text-align: center; }
-pre { margin-top: 0 !important; }
+body {
+  padding: 16px;
+  background: #fff;
+}
+button {
+  cursor: pointer;
+}
+h1 {
+  padding: 0 0 0.2em 0;
+  height: 50px;
+  line-height: 50px;
+  font-weight: bold;
+  margin: 0;
+  text-indent: 5px;
+  border-bottom: 1px solid #ccc;
+}
+h3 {
+  margin: 0 0 0.3em 0;
+}
+ul {
+  margin: 0;
+}
+ul li {
+  line-height: 1.8;
+  font-size: 1.2em;
+}
+p {
+  margin: 5px 0 10px;
+}
+a {
+  color: #000;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+footer {
+  margin: 30px 0;
+  text-align: center;
+}
+pre {
+  margin-top: 0 !important;
+}
 code {
-	background: #F7F7F7 !important; border: solid 1px #bbb;
-	border-radius: 3px; font-size: 0.9em;
+  background: #f7f7f7 !important;
+  border: solid 1px #bbb;
+  border-radius: 3px;
+  font-size: 0.9em;
 }
 
-.align-center { text-align: center; }
+.align-center {
+  text-align: center;
+}
 #content {
-	padding: 80px 30px; min-height: 350px;
-	border-bottom: solid 1px #ebebeb;
+  padding: 80px 30px;
+  min-height: 350px;
+  border-bottom: solid 1px #ebebeb;
 }
 #logo-webrtc {
-	display: block;
-	height: 170px;
-	background: #fff url(../img/logo-webrtc.png) no-repeat center top;
+  display: block;
+  height: 170px;
+  background: #fff url(../img/logo-webrtc.png) no-repeat center top;
 }
-.wrap { width: 720px; margin: 0 auto; }
-.wrap-250 { width: 250px; margin: 0 auto; }
-.wrap-340 { width: 340px; margin: 0 auto; }
-.two-peace div { float: left; width: 48%; }
-.two-peace div:first-child { margin-right: 15px; }
-.two-peace:after { display: block; content: ""; clear: both; }
+.wrap {
+  width: 720px;
+  margin: 0 auto;
+}
+.wrap-250 {
+  width: 250px;
+  margin: 0 auto;
+}
+.wrap-340 {
+  width: 340px;
+  margin: 0 auto;
+}
+.two-peace div {
+  float: left;
+  width: 48%;
+}
+.two-peace div:first-child {
+  margin-right: 15px;
+}
+.two-peace:after {
+  display: block;
+  content: '';
+  clear: both;
+}
 
 .btn {
-  padding: 6px 25px; color: #000; font-size: 16px;
-  border: solid 1px #000; background: #fff; border-radius: 6px;
+  padding: 6px 25px;
+  color: #000;
+  font-size: 16px;
+  border: solid 1px #000;
+  background: #fff;
+  border-radius: 6px;
 }
-.btn:hover { background: #000; color: #fff; }
+.btn:hover {
+  background: #000;
+  color: #fff;
+}
 
 button {
-	margin: 0 0 1em 0;
-	padding: 0.4em 0.7em 0.5em 0.7em;
-	min-width: 100px;
-	background-color: #d84a38;
-	border: none;
-	border-radius: 2px;
-	color: white;
-	font-family: 'Roboto', sans-serif;
-	font-size: 1em;
+  margin: 0 0 1em 0;
+  padding: 0.4em 0.7em 0.5em 0.7em;
+  min-width: 100px;
+  background-color: #d84a38;
+  border: none;
+  border-radius: 2px;
+  color: white;
+  font-family: 'Roboto', sans-serif;
+  font-size: 1em;
   cursor: pointer;
 }
 
-button:active { background-color: #cf402f; }
-button:hover { background-color: #cf402f; }
-button[disabled] { color: #ccc; }
-button[disabled]:hover { background-color: #d84a38; }
-video { margin: 0 0 20px 0; width: 100%; background: #222; }
-canvas { margin-bottom: 20px; }
-.not-yet * { color: #bbb; }
-.alert-message { color: #f00; font-size: 1em; }
+button:active {
+  background-color: #cf402f;
+}
+button:hover {
+  background-color: #cf402f;
+}
+button[disabled] {
+  color: #ccc;
+}
+button[disabled]:hover {
+  background-color: #d84a38;
+}
+video {
+  margin: 0 0 20px 0;
+  width: 100%;
+  background: #222;
+}
+canvas {
+  margin-bottom: 20px;
+}
+.not-yet * {
+  color: #bbb;
+}
+.alert-message {
+  color: #f00;
+  font-size: 1em;
+}
