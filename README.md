@@ -23,9 +23,7 @@
 ### LiveDemo
 https://webrtclab.herokuapp.com
 
-![WebRTC 연구실 ](https://play.codejs.co.kr/dist/img/main.8301c4a6a87f98279cd4af1d8ce6b045.png)
-
-
+![WebRTC 연구실](https://play.codejs.co.kr/dist/img/main.8301c4a6a87f98279cd4af1d8ce6b045.png)
 
 ### Setup
 ``` javascript
