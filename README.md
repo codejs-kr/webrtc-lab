@@ -6,7 +6,6 @@
 	* WebRTC를 보다 쉽게 이해하고 사용할 수 있도록 주요 API를 예제로 설명한다.
 	* WebRTC를 활용할 수 있도록 흥미로운 응용 주제를 소개한다.
 
-
 ### 구성
 
 	1. WebRTC 소개
@@ -23,6 +22,10 @@
 
 ### LiveDemo
 https://webrtclab.herokuapp.com
+
+![WebRTC 연구실 ](https://play.codejs.co.kr/dist/img/main.8301c4a6a87f98279cd4af1d8ce6b045.png)
+
+
 
 ### Setup
 ``` javascript
