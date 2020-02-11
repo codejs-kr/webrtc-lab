@@ -34,3 +34,8 @@ npm install
 ``` javascript
 npm start
 ```
+
+### Start nodemon (optional)
+``` javascript
+npm run nodemon
+```
