@@ -24,10 +24,8 @@ $(function() {
     audio: true,
     video: {
       mandatory: {
-        minWidth: 1920,
-        minHeight: 1080,
-        // maxWidth: 1920,
-        // maxHeight: 1080,
+        maxWidth: 1920,
+        maxHeight: 1080,
         maxFrameRate: 30,
       },
       optional: [
