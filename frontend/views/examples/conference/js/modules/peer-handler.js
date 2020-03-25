@@ -91,7 +91,7 @@ function PeerHandler(options) {
 
     // H.264 for chrome >= 73
     if (browserVersion >= 73) {
-      SDP.sdp = SDP.sdp.replace('96 97 98 99 100', '100 96 97 98 99');
+      SDP.sdp = SDP.sdp.replace('96 97 98 99 100 101 102', '102 101 100 96 97 98 99');
     } else {
       SDP.sdp = SDP.sdp.replace('96 98 100', '100 96 98'); // for chrome 57 <
       SDP.sdp = SDP.sdp.replace('96 97 98 99 100 101 102', '100 101 102 96 97 98 99'); // for chrome 65 <
