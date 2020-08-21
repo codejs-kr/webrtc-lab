@@ -4,26 +4,27 @@
  * @author dodortus (codejs.co.kr / dodortus@gmail.com)
  *
  */
-$(function() {
+$(function () {
   if (typeof webkitSpeechRecognition !== 'function') {
     alert('크롬에서만 동작 합니다.');
     return false;
   }
 
-  let isRecognizing = false;
-  let ignoreEndProcess = false;
-  let finalTranscript = '';
+  const FIRST_CHAR = /\S/;
+  const TWO_LINE = /\n\n/g;
+  const ONE_LINE = /\n/g;
 
-  const audio = document.querySelector('#audio');
   const recognition = new webkitSpeechRecognition();
   const language = 'ko-KR';
-  const two_line = /\n\n/g;
-  const one_line = /\n/g;
-  const first_char = /\S/;
+  const audio = document.querySelector('#audio');
 
   const $btnMic = $('#btn-mic');
   const $result = $('#result');
   const $iconMusic = $('#icon-music');
+
+  let isRecognizing = false;
+  let ignoreEndProcess = false;
+  let finalTranscript = '';
 
   recognition.continuous = true;
   recognition.interimResults = true;
@@ -31,7 +32,7 @@ $(function() {
   /**
    * 음성 인식 시작 처리
    */
-  recognition.onstart = function() {
+  recognition.onstart = function () {
     console.log('onstart', arguments);
     isRecognizing = true;
     $btnMic.attr('class', 'on');
@@ -41,7 +42,7 @@ $(function() {
    * 음성 인식 종료 처리
    * @returns {boolean}
    */
-  recognition.onend = function() {
+  recognition.onend = function () {
     console.log('onend', arguments);
     isRecognizing = false;
 
@@ -61,7 +62,7 @@ $(function() {
    * 음성 인식 결과 처리
    * @param event
    */
-  recognition.onresult = function(event) {
+  recognition.onresult = function (event) {
     console.log('onresult', event);
 
     let interimTranscript = '';
@@ -92,7 +93,7 @@ $(function() {
    * 음성 인식 에러 처리
    * @param event
    */
-  recognition.onerror = function(event) {
+  recognition.onerror = function (event) {
     console.log('onerror', event);
 
     if (event.error.match(/no-speech|audio-capture|not-allowed/)) {
@@ -148,7 +149,7 @@ $(function() {
    * @returns {string}
    */
   function linebreak(s) {
-    return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+    return s.replace(TWO_LINE, '<p></p>').replace(ONE_LINE, '<br>');
   }
 
   /**
@@ -157,16 +158,15 @@ $(function() {
    * @returns {string | void | *}
    */
   function capitalize(s) {
-    return s.replace(first_char, function(m) {
+    return s.replace(FIRST_CHAR, function (m) {
       return m.toUpperCase();
     });
   }
 
   /**
    * 음성 인식 트리거
-   * @param event
    */
-  function start(event) {
+  function start() {
     if (isRecognizing) {
       recognition.stop();
       return;
@@ -213,8 +213,8 @@ $(function() {
         'https://www.google.com/speech-api/v2/recognize?output=json&lang=en-us&key=AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg',
       data: '/examples/speech-recognition/hello.wav',
       contentType: 'audio/l16; rate=16000;', // 'audio/x-flac; rate=44100;',
-      success: function(data) {},
-      error: function(xhr) {},
+      success: function (data) {},
+      error: function (xhr) {},
     });
   }
 
@@ -223,7 +223,7 @@ $(function() {
    */
   function initialize() {
     $btnMic.click(start);
-    $('#btn-tts').click(function() {
+    $('#btn-tts').click(function () {
       const text = $('#final_span').text() || '전 음성 인식된 글자를 읽습니다.';
       textToSpeech(text);
     });
