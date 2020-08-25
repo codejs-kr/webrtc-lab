@@ -40,7 +40,6 @@ $(function () {
 
   /**
    * 음성 인식 종료 처리
-   * @returns {boolean}
    */
   recognition.onend = function () {
     console.log('onend', arguments);
@@ -60,7 +59,6 @@ $(function () {
 
   /**
    * 음성 인식 결과 처리
-   * @param event
    */
   recognition.onresult = function (event) {
     console.log('onresult', event);
@@ -91,7 +89,6 @@ $(function () {
 
   /**
    * 음성 인식 에러 처리
-   * @param event
    */
   recognition.onerror = function (event) {
     console.log('onerror', event);
@@ -145,8 +142,7 @@ $(function () {
 
   /**
    * 개행 처리
-   * @param s
-   * @returns {string}
+   * @param {string} s
    */
   function linebreak(s) {
     return s.replace(TWO_LINE, '<p></p>').replace(ONE_LINE, '<br>');
@@ -154,8 +150,7 @@ $(function () {
 
   /**
    * 첫문자를 대문자로 변환
-   * @param s
-   * @returns {string | void | *}
+   * @param {string} s
    */
   function capitalize(s) {
     return s.replace(FIRST_CHAR, function (m) {
@@ -187,7 +182,7 @@ $(function () {
   function textToSpeech(text) {
     console.log('textToSpeech', arguments);
 
-    // speechSynthesis option
+    // speechSynthesis options
     // const u = new SpeechSynthesisUtterance();
     // u.text = 'Hello world';
     // u.lang = 'en-US';
@@ -199,23 +194,6 @@ $(function () {
 
     // simple version
     speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-  }
-
-  /**
-   * 미사용
-   * requestServer
-   * key - AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg
-   */
-  function requestServer() {
-    $.ajax({
-      method: 'post',
-      url:
-        'https://www.google.com/speech-api/v2/recognize?output=json&lang=en-us&key=AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg',
-      data: '/examples/speech-recognition/hello.wav',
-      contentType: 'audio/l16; rate=16000;', // 'audio/x-flac; rate=44100;',
-      success: function (data) {},
-      error: function (xhr) {},
-    });
   }
 
   /**
