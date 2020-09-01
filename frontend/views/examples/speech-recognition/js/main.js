@@ -16,9 +16,8 @@ $(function () {
 
   const recognition = new webkitSpeechRecognition();
   const language = 'ko-KR';
-  const audio = document.querySelector('#audio');
-
-  const $btnMic = $('#btn-mic');
+  const $audio = document.querySelector('#audio');
+  const $btnMic = document.querySelector('#btn-mic');
   const $result = $('#result');
   const $iconMusic = $('#icon-music');
 
@@ -35,7 +34,7 @@ $(function () {
   recognition.onstart = function () {
     console.log('onstart', arguments);
     isRecognizing = true;
-    $btnMic.attr('class', 'on');
+    $btnMic.className = 'on';
   };
 
   /**
@@ -50,7 +49,7 @@ $(function () {
     }
 
     // DO end process
-    $btnMic.attr('class', 'off');
+    $btnMic.className = 'off';
     if (!finalTranscript) {
       console.log('empty finalTranscript');
       return false;
@@ -97,7 +96,7 @@ $(function () {
       ignoreEndProcess = true;
     }
 
-    $btnMic.attr('class', 'off');
+    $btnMic.className = 'off';
   };
 
   /**
@@ -126,15 +125,15 @@ $(function () {
     } else if (string.endsWith('알람') || string.endsWith('알 람')) {
       alert('알람');
     } else if (string.endsWith('노래 켜') || string.endsWith('음악 켜')) {
-      audio.play();
+      $audio.play();
       $iconMusic.addClass('visible');
     } else if (string.endsWith('노래 꺼') || string.endsWith('음악 꺼')) {
-      audio.pause();
+      $audio.pause();
       $iconMusic.removeClass('visible');
     } else if (string.endsWith('볼륨 업') || string.endsWith('볼륨업')) {
-      audio.volume += 0.2;
+      $audio.volume += 0.2;
     } else if (string.endsWith('볼륨 다운') || string.endsWith('볼륨다운')) {
-      audio.volume -= 0.2;
+      $audio.volume -= 0.2;
     } else if (string.endsWith('스피치') || string.endsWith('말해줘') || string.endsWith('말 해 줘')) {
       textToSpeech($('#final_span').text() || '전 음성 인식된 글자를 읽습니다.');
     }
@@ -200,11 +199,13 @@ $(function () {
    * 초기 바인딩
    */
   function initialize() {
-    $btnMic.click(start);
-    $('#btn-tts').click(function () {
+    const $btnTTS = document.querySelector('#btn-tts');
+    $btnTTS.addEventListener('click', () => {
       const text = $('#final_span').text() || '전 음성 인식된 글자를 읽습니다.';
       textToSpeech(text);
     });
+
+    $btnMic.addEventListener('click', start);
   }
 
   initialize();
