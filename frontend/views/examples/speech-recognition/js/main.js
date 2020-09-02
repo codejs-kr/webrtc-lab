@@ -18,8 +18,8 @@ $(function () {
   const language = 'ko-KR';
   const $audio = document.querySelector('#audio');
   const $btnMic = document.querySelector('#btn-mic');
-  const $result = $('#result');
-  const $iconMusic = $('#icon-music');
+  const $resultWrap = document.querySelector('#result');
+  const $iconMusic = document.querySelector('#icon-music');
 
   let isRecognizing = false;
   let ignoreEndProcess = false;
@@ -105,31 +105,31 @@ $(function () {
    */
   function fireCommand(string) {
     if (string.endsWith('레드')) {
-      $result.attr('class', 'red');
+      $resultWrap.className = 'red';
     } else if (string.endsWith('블루')) {
-      $result.attr('class', 'blue');
+      $resultWrap.className = 'blue';
     } else if (string.endsWith('그린')) {
-      $result.attr('class', 'green');
+      $resultWrap.className = 'green';
     } else if (string.endsWith('옐로우')) {
-      $result.attr('class', 'yellow');
+      $resultWrap.className = 'yellow';
     } else if (string.endsWith('오렌지')) {
-      $result.attr('class', 'orange');
+      $resultWrap.className = 'orange';
     } else if (string.endsWith('그레이')) {
-      $result.attr('class', 'grey');
+      $resultWrap.className = 'grey';
     } else if (string.endsWith('골드')) {
-      $result.attr('class', 'gold');
+      $resultWrap.className = 'gold';
     } else if (string.endsWith('화이트')) {
-      $result.attr('class', 'white');
+      $resultWrap.className = 'white';
     } else if (string.endsWith('블랙')) {
-      $result.attr('class', 'black');
+      $resultWrap.className = 'black';
     } else if (string.endsWith('알람') || string.endsWith('알 람')) {
       alert('알람');
     } else if (string.endsWith('노래 켜') || string.endsWith('음악 켜')) {
       $audio.play();
-      $iconMusic.addClass('visible');
+      $iconMusic.classList.add('visible');
     } else if (string.endsWith('노래 꺼') || string.endsWith('음악 꺼')) {
       $audio.pause();
-      $iconMusic.removeClass('visible');
+      $iconMusic.classList.remove('visible');
     } else if (string.endsWith('볼륨 업') || string.endsWith('볼륨업')) {
       $audio.volume += 0.2;
     } else if (string.endsWith('볼륨 다운') || string.endsWith('볼륨다운')) {
