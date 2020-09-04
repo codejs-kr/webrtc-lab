@@ -70,10 +70,12 @@ $(function () {
     }
 
     for (let i = event.resultIndex; i < event.results.length; ++i) {
+      const transcript = event.results[i][0].transcript;
+
       if (event.results[i].isFinal) {
-        finalTranscript += event.results[i][0].transcript;
+        finalTranscript += transcript;
       } else {
-        interimTranscript += event.results[i][0].transcript;
+        interimTranscript += transcript;
       }
     }
 
@@ -200,8 +202,10 @@ $(function () {
    */
   function initialize() {
     const $btnTTS = document.querySelector('#btn-tts');
+    const defaultMsg = '전 음성 인식된 글자를 읽습니다.';
+
     $btnTTS.addEventListener('click', () => {
-      const text = $('#final_span').text() || '전 음성 인식된 글자를 읽습니다.';
+      const text = final_span.innerText || defaultMsg;
       textToSpeech(text);
     });
 
