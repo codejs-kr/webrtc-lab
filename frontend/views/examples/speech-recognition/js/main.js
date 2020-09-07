@@ -4,26 +4,26 @@
  * @author dodortus (codejs.co.kr / dodortus@gmail.com)
  *
  */
-$(function() {
+$(function () {
   if (typeof webkitSpeechRecognition !== 'function') {
     alert('크롬에서만 동작 합니다.');
     return false;
   }
 
+  const FIRST_CHAR = /\S/;
+  const TWO_LINE = /\n\n/g;
+  const ONE_LINE = /\n/g;
+
+  const recognition = new webkitSpeechRecognition();
+  const language = 'ko-KR';
+  const $audio = document.querySelector('#audio');
+  const $btnMic = document.querySelector('#btn-mic');
+  const $resultWrap = document.querySelector('#result');
+  const $iconMusic = document.querySelector('#icon-music');
+
   let isRecognizing = false;
   let ignoreEndProcess = false;
   let finalTranscript = '';
-
-  const audio = document.querySelector('#audio');
-  const recognition = new webkitSpeechRecognition();
-  const language = 'ko-KR';
-  const two_line = /\n\n/g;
-  const one_line = /\n/g;
-  const first_char = /\S/;
-
-  const $btnMic = $('#btn-mic');
-  const $result = $('#result');
-  const $iconMusic = $('#icon-music');
 
   recognition.continuous = true;
   recognition.interimResults = true;
@@ -31,17 +31,16 @@ $(function() {
   /**
    * 음성 인식 시작 처리
    */
-  recognition.onstart = function() {
+  recognition.onstart = function () {
     console.log('onstart', arguments);
     isRecognizing = true;
-    $btnMic.attr('class', 'on');
+    $btnMic.className = 'on';
   };
 
   /**
    * 음성 인식 종료 처리
-   * @returns {boolean}
    */
-  recognition.onend = function() {
+  recognition.onend = function () {
     console.log('onend', arguments);
     isRecognizing = false;
 
@@ -50,7 +49,7 @@ $(function() {
     }
 
     // DO end process
-    $btnMic.attr('class', 'off');
+    $btnMic.className = 'off';
     if (!finalTranscript) {
       console.log('empty finalTranscript');
       return false;
@@ -59,9 +58,8 @@ $(function() {
 
   /**
    * 음성 인식 결과 처리
-   * @param event
    */
-  recognition.onresult = function(event) {
+  recognition.onresult = function (event) {
     console.log('onresult', event);
 
     let interimTranscript = '';
@@ -72,10 +70,12 @@ $(function() {
     }
 
     for (let i = event.resultIndex; i < event.results.length; ++i) {
+      const transcript = event.results[i][0].transcript;
+
       if (event.results[i].isFinal) {
-        finalTranscript += event.results[i][0].transcript;
+        finalTranscript += transcript;
       } else {
-        interimTranscript += event.results[i][0].transcript;
+        interimTranscript += transcript;
       }
     }
 
@@ -90,16 +90,15 @@ $(function() {
 
   /**
    * 음성 인식 에러 처리
-   * @param event
    */
-  recognition.onerror = function(event) {
+  recognition.onerror = function (event) {
     console.log('onerror', event);
 
     if (event.error.match(/no-speech|audio-capture|not-allowed/)) {
       ignoreEndProcess = true;
     }
 
-    $btnMic.attr('class', 'off');
+    $btnMic.className = 'off';
   };
 
   /**
@@ -108,35 +107,35 @@ $(function() {
    */
   function fireCommand(string) {
     if (string.endsWith('레드')) {
-      $result.attr('class', 'red');
+      $resultWrap.className = 'red';
     } else if (string.endsWith('블루')) {
-      $result.attr('class', 'blue');
+      $resultWrap.className = 'blue';
     } else if (string.endsWith('그린')) {
-      $result.attr('class', 'green');
+      $resultWrap.className = 'green';
     } else if (string.endsWith('옐로우')) {
-      $result.attr('class', 'yellow');
+      $resultWrap.className = 'yellow';
     } else if (string.endsWith('오렌지')) {
-      $result.attr('class', 'orange');
+      $resultWrap.className = 'orange';
     } else if (string.endsWith('그레이')) {
-      $result.attr('class', 'grey');
+      $resultWrap.className = 'grey';
     } else if (string.endsWith('골드')) {
-      $result.attr('class', 'gold');
+      $resultWrap.className = 'gold';
     } else if (string.endsWith('화이트')) {
-      $result.attr('class', 'white');
+      $resultWrap.className = 'white';
     } else if (string.endsWith('블랙')) {
-      $result.attr('class', 'black');
+      $resultWrap.className = 'black';
     } else if (string.endsWith('알람') || string.endsWith('알 람')) {
       alert('알람');
     } else if (string.endsWith('노래 켜') || string.endsWith('음악 켜')) {
-      audio.play();
-      $iconMusic.addClass('visible');
+      $audio.play();
+      $iconMusic.classList.add('visible');
     } else if (string.endsWith('노래 꺼') || string.endsWith('음악 꺼')) {
-      audio.pause();
-      $iconMusic.removeClass('visible');
+      $audio.pause();
+      $iconMusic.classList.remove('visible');
     } else if (string.endsWith('볼륨 업') || string.endsWith('볼륨업')) {
-      audio.volume += 0.2;
+      $audio.volume += 0.2;
     } else if (string.endsWith('볼륨 다운') || string.endsWith('볼륨다운')) {
-      audio.volume -= 0.2;
+      $audio.volume -= 0.2;
     } else if (string.endsWith('스피치') || string.endsWith('말해줘') || string.endsWith('말 해 줘')) {
       textToSpeech($('#final_span').text() || '전 음성 인식된 글자를 읽습니다.');
     }
@@ -144,29 +143,26 @@ $(function() {
 
   /**
    * 개행 처리
-   * @param s
-   * @returns {string}
+   * @param {string} s
    */
   function linebreak(s) {
-    return s.replace(two_line, '<p></p>').replace(one_line, '<br>');
+    return s.replace(TWO_LINE, '<p></p>').replace(ONE_LINE, '<br>');
   }
 
   /**
    * 첫문자를 대문자로 변환
-   * @param s
-   * @returns {string | void | *}
+   * @param {string} s
    */
   function capitalize(s) {
-    return s.replace(first_char, function(m) {
+    return s.replace(FIRST_CHAR, function (m) {
       return m.toUpperCase();
     });
   }
 
   /**
    * 음성 인식 트리거
-   * @param event
    */
-  function start(event) {
+  function start() {
     if (isRecognizing) {
       recognition.stop();
       return;
@@ -187,7 +183,7 @@ $(function() {
   function textToSpeech(text) {
     console.log('textToSpeech', arguments);
 
-    // speechSynthesis option
+    // speechSynthesis options
     // const u = new SpeechSynthesisUtterance();
     // u.text = 'Hello world';
     // u.lang = 'en-US';
@@ -202,31 +198,18 @@ $(function() {
   }
 
   /**
-   * 미사용
-   * requestServer
-   * key - AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg
-   */
-  function requestServer() {
-    $.ajax({
-      method: 'post',
-      url:
-        'https://www.google.com/speech-api/v2/recognize?output=json&lang=en-us&key=AIzaSyDiMqfg8frtoZflA_2LPqfGdpjmgTMgWhg',
-      data: '/examples/speech-recognition/hello.wav',
-      contentType: 'audio/l16; rate=16000;', // 'audio/x-flac; rate=44100;',
-      success: function(data) {},
-      error: function(xhr) {},
-    });
-  }
-
-  /**
    * 초기 바인딩
    */
   function initialize() {
-    $btnMic.click(start);
-    $('#btn-tts').click(function() {
-      const text = $('#final_span').text() || '전 음성 인식된 글자를 읽습니다.';
+    const $btnTTS = document.querySelector('#btn-tts');
+    const defaultMsg = '전 음성 인식된 글자를 읽습니다.';
+
+    $btnTTS.addEventListener('click', () => {
+      const text = final_span.innerText || defaultMsg;
       textToSpeech(text);
     });
+
+    $btnMic.addEventListener('click', start);
   }
 
   initialize();
