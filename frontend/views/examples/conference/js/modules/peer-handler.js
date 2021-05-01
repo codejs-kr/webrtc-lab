@@ -7,12 +7,6 @@ function PeerHandler(options) {
   console.log('Loaded PeerHandler', arguments);
   EventEmitter.call(this);
 
-  // Cross browsing
-  navigator.getUserMedia =
-    navigator.getUserMedia ||
-    navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia ||
-    navigator.mediaDevices.getUserMedia;
   const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
   const RTCSessionDescription =
     window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
@@ -67,7 +61,7 @@ function PeerHandler(options) {
 
     navigator.mediaDevices
       .getUserMedia(mediaOption)
-      .then(function(stream) {
+      .then(function (stream) {
         localStream = stream;
         callback && callback(localStream);
 
@@ -76,7 +70,7 @@ function PeerHandler(options) {
           createOffer();
         }
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error('Error getUserMedia', error);
       });
   }
@@ -114,7 +108,7 @@ function PeerHandler(options) {
     }
 
     peer.createOffer(
-      function(SDP) {
+      function (SDP) {
         if (isH264) {
           SDP = editSDP(SDP);
         }
@@ -143,10 +137,10 @@ function PeerHandler(options) {
     }
     peer
       .setRemoteDescription(new RTCSessionDescription(msg.sdp))
-      .then(function() {
+      .then(function () {
         peer
           .createAnswer()
-          .then(function(SDP) {
+          .then(function (SDP) {
             if (isH264) {
               SDP = editSDP(SDP);
             }
@@ -160,7 +154,7 @@ function PeerHandler(options) {
           })
           .catch(onSdpError);
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.error('Error setRemoteDescription', error);
       });
   }
@@ -175,7 +169,7 @@ function PeerHandler(options) {
     peer = new RTCPeerConnection(iceServers, peerConnectionOptions);
     console.log('new Peer', peer);
 
-    peer.onicecandidate = function(event) {
+    peer.onicecandidate = function (event) {
       if (event.candidate) {
         send({
           to: 'all',
@@ -192,39 +186,39 @@ function PeerHandler(options) {
      * 크로스브라우징
      */
     if (peer.ontrack) {
-      peer.ontrack = function(event) {
+      peer.ontrack = function (event) {
         console.log('ontrack', event);
         var stream = event.streams[0];
         that.emit('addRemoteStream', stream);
       };
 
-      peer.onremovetrack = function(event) {
+      peer.onremovetrack = function (event) {
         console.log('onremovetrack', event);
         var stream = event.streams[0];
         that.emit('removeRemoteStream', stream);
       };
       // 삼성 모바일에서 필요
     } else {
-      peer.onaddstream = function(event) {
+      peer.onaddstream = function (event) {
         console.log('onaddstream', event);
         that.emit('addRemoteStream', event.stream);
       };
 
-      peer.onremovestream = function(event) {
+      peer.onremovestream = function (event) {
         console.log('onremovestream', event);
         that.emit('removeRemoteStream', event.stream);
       };
     }
 
-    peer.onnegotiationneeded = function(event) {
+    peer.onnegotiationneeded = function (event) {
       console.log('onnegotiationneeded', event);
     };
 
-    peer.onsignalingstatechange = function(event) {
+    peer.onsignalingstatechange = function (event) {
       console.log('onsignalingstatechange', event);
     };
 
-    peer.oniceconnectionstatechange = function(event) {
+    peer.oniceconnectionstatechange = function (event) {
       console.log(
         'oniceconnectionstatechange',
         'iceGatheringState: ' + peer.iceGatheringState,
@@ -252,7 +246,7 @@ function PeerHandler(options) {
    */
   function addTrack(peer, stream) {
     if (peer.addTrack) {
-      stream.getTracks().forEach(function(track) {
+      stream.getTracks().forEach(function (track) {
         console.log('확인 addTrack', peer, track, stream);
         peer.addTrack(track, stream);
       });
@@ -268,8 +262,8 @@ function PeerHandler(options) {
    */
   function removeTrack(peer, stream) {
     if (peer.removeTrack) {
-      stream.getTracks().forEach(function(track) {
-        var sender = peer.getSenders().find(function(s) {
+      stream.getTracks().forEach(function (track) {
+        var sender = peer.getSenders().find(function (s) {
           return s.track === track;
         });
 

@@ -1,10 +1,4 @@
-$(function() {
-  navigator.getUserMedia =
-    navigator.getUserMedia ||
-    navigator.webkitGetUserMedia ||
-    navigator.mozGetUserMedia ||
-    navigator.mediaDevices.getUserMedia;
-
+$(function () {
   const videoEl = document.getElementById('video');
   const canvasEl = document.getElementById('canvas');
   const width = 350;
@@ -23,7 +17,8 @@ $(function() {
    * @param err
    */
   function error(err) {
-    console.log('error', arguments);
+    console.log('error', err);
+    alert(err.message);
   }
 
   /**
@@ -44,17 +39,28 @@ $(function() {
   }
 
   /**
+   * 미디어 호출
+   */
+  async function startMedia() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: true,
+      });
+      success(stream);
+    } catch (err) {
+      error(err);
+    }
+  }
+
+  /**
    * 초기 이벤트 바인딩
    */
   function initialize() {
     canvasEl.width = width;
     canvasEl.height = height;
 
-    $('#btn-camera').click(function() {
-      // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
-      navigator.getUserMedia({ audio: false, video: true }, success, error);
-    });
-
+    $('#btn-camera').click(startMedia);
     $('#btn-capture').click(capture);
   }
 

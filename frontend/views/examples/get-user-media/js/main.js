@@ -1,54 +1,52 @@
-$(function() {
-  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
+$(function () {
   /**
    * getUserMedia 성공
    * @param stream
    */
   function success(stream) {
-    console.log('success', arguments);
+    console.log('onSuccess', arguments);
+    const video = document.querySelector('video');
 
     // For IOS safari (https://github.com/webrtc/samples/issues/929)
     if (DetectRTC.browser.isSafari) {
       video.setAttribute('playsinline', true);
       video.setAttribute('controls', true);
 
-      setInterval(function() {
+      setInterval(function () {
         video.removeAttribute('controls');
       }, 0);
     }
 
-    // 비디오 테그에 stream 바인딩
-    $('video')[0].srcObject = stream;
-    // document.querySelector('video').srcObject = stream;
-
-    // do something...
+    // video 테그에 stream 바인딩
+    video.srcObject = stream;
   }
 
   /**
    * getUserMedia 실패
    * @param error
    */
-  function error(error) {
-    console.log('error', arguments);
-
-    alert('카메라와 마이크를 허용해주세요');
+  function error(err) {
+    console.log('error', err);
+    alert(err.message);
   }
 
   /**
-   * 클릭 처리
+   * 미디어 호출
    */
-  function onClick() {
-    // for safari (Can only call MediaDevices.getUserMedia on instances of MediaDevices)
-    if (DetectRTC.browser.isSafari) {
-      navigator.mediaDevices.getUserMedia({ audio: true, video: true }, success, error);
-    } else {
-      navigator.getUserMedia({ audio: true, video: true }, success, error);
+  async function startMedia() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+      success(stream);
+    } catch (err) {
+      error(err);
     }
   }
 
   /**
-   * 이벤트 바인딩
+   * 버튼 이벤트 바인딩
    */
-  $('button').click(onClick);
+  $('button').click(startMedia);
 });

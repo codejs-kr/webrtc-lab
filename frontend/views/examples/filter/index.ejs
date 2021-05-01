@@ -1,54 +1,77 @@
 <% include ../../partials/header %>
-<link href="css/main.css" rel="stylesheet" type="text/css">
+  <link href="css/main.css" rel="stylesheet" type="text/css">
 
-<div id="content">
-  <div class="wrap">
-    <video autoplay></video>
-    <p>비디오 화면을 클릭하면 CSS필터가 적용됩니다.</p>
-    <button id="start">Start</button>
+  <div id="content">
+    <div class="wrap">
+      <video autoplay></video>
+      <p>비디오 화면을 클릭하면 CSS필터가 적용됩니다.</p>
+      <button id="start">Start</button>
 
-    <pre>
+      <pre>
       <code class="highlight">$(function() {
-  navigator.getUserMedia = navigator.getUserMedia ||
-  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
   const $video = $('video');
   const $start = $('#start');
   const filters = [
-    'grayscale', 'sepia', 'blur', 'brightness',
-    'contrast', 'hue-rotate', 'hue-rotate2',
-    'hue-rotate3', 'saturate', 'invert', ''
+    'grayscale',
+    'sepia',
+    'blur',
+    'brightness',
+    'contrast',
+    'hue-rotate',
+    'hue-rotate2',
+    'hue-rotate3',
+    'saturate',
+    'invert',
+    '',
   ];
   let index = 0;
 
   /**
-   * 영상을 호출합니다.
-   */
-  function getUserMedia() {
-    navigator.getUserMedia({
-      audio: true,
-      video: true
-    }, (stream) => {
-      const videoEl = $video[0];
+    * getUserMedia 성공
+    * @param stream
+    */
+  function success(stream) {
+    console.log('onSuccess', arguments);
+    const video = $video[0];
 
-      // 비디오 테그에 stream 할당
-      videoEl.srcObject = stream;
+    // video 테그에 stream 바인딩
+    video.srcObject = stream;
 
-      // 영상 플레이 준비가 되면 시작
-      videoEl.onloadedmetadata = (event) => {
-        console.log('onloadedmetadata', event);
-        videoEl.play();
-      };
-    }, (err) => {
-      console.log('getUserMedia', err);
-      alert(err.message);
-    });
+    // 영상 플레이 준비가 되면 시작
+    video.onloadedmetadata = (event) => {
+      console.log('onloadedmetadata', event);
+      video.play();
+    };
   }
 
   /**
-   * 필터가 변경될때 DOM class를 변경 합니다.
-   * @param event
-   */
+    * getUserMedia 실패
+    * @param error
+    */
+  function error(err) {
+    console.log('error', err);
+    alert(err.message);
+  }
+
+  /**
+    * 미디어 호출
+    */
+  async function startMedia() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: true,
+      });
+      success(stream);
+    } catch (err) {
+      error(err);
+    }
+  }
+
+  /**
+    * 필터가 변경될때 DOM class를 변경 합니다.
+    * @param event
+    */
   function changeFilter(event) {
     const el = event.target;
     const effect = filters[index++ % filters.length]; // loop through filters.
@@ -60,15 +83,19 @@
   }
 
   /**
-   * 이벤트 바인딩
-   */
-  $video.click(changeFilter);
-  $start.click(getUserMedia);
+    * 초기 이벤트 바인딩
+    */
+  function initialize() {
+    $video.click(changeFilter);
+    $start.click(startMedia);
+  }
+
+  initialize();
 });</code>
    	</pre>
 
+    </div>
   </div>
-</div>
 
-<script src="js/main.js"></script>
-<% include ../../partials/footer %>
+  <script src="js/main.js"></script>
+  <% include ../../partials/footer %>
