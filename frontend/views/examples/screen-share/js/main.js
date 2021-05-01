@@ -4,19 +4,10 @@
  * @author dodortus (dodortus@gmail.com / codejs.co.kr)
  *
  */
-$(function() {
+$(function () {
   console.log('Loaded Main');
 
   const screenHandler = new ScreenHandler();
-
-  /**
-   * 비디오 엘리먼트에 재생을 위해 stream 바인딩
-   * @param data
-   */
-  function setVideoStream(data) {
-    const video = data.el;
-    video.srcObject = data.stream;
-  }
 
   /**
    * 로컬 스트림 핸들링
@@ -25,33 +16,23 @@ $(function() {
   function onLocalStream(stream) {
     console.log('onLocalStream', stream);
 
-    setVideoStream({
-      el: document.querySelector('#local-video'),
-      stream: stream,
-    });
+    const video = document.querySelector('#local-video');
+    video.srcObject = stream;
   }
 
   /**
-   * screenHandler를 통해 캡쳐 API를 호출합니다.
+   * screenHandler를 통해 스크린 API를 호출합니다.
    */
-  function startScreenShare() {
-    screenHandler.start((stream) => {
-      onLocalStream(stream);
-    });
+  async function startScreenShare() {
+    const stream = await screenHandler.start();
+    onLocalStream(stream);
   }
 
   /**
-   * DOM 이벤트 바인딩
-   */
-  function bindEvent() {
-    document.querySelector('#btn-start').onclick = startScreenShare;
-  }
-
-  /**
-   * 초기화
+   * 초기 이벤트 바인딩
    */
   function initialize() {
-    bindEvent();
+    $('#btn-start').click(startScreenShare);
   }
 
   initialize();
