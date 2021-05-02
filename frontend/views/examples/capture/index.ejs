@@ -1,30 +1,27 @@
 <% include ../../partials/header %>
-<link href="css/main.css" rel="stylesheet" type="text/css" />
+  <link href="css/main.css" rel="stylesheet" type="text/css" />
 
-<div id="content">
-  <div class="wrap">
-    <div class="two-peace">
-      <div>
-        <video id="video" width="350" height="260" autoplay></video>
+  <div id="content">
+    <div class="wrap">
+      <div class="two-peace">
+        <div>
+          <video id="video" width="350" height="260" autoplay></video>
+        </div>
+        <div>
+          <canvas id="canvas" width="350" height="260"></canvas>
+        </div>
       </div>
-      <div>
-        <canvas id="canvas" width="350" height="260"></canvas>
+      <button id="btn-camera">1. 비디오출력</button>
+      <button id="btn-capture">2. 캡쳐</button>
+      <hr />
+
+      <div id="output">
+        <strong>Capture images</strong>
+        <div id="images"></div>
       </div>
-    </div>
-    <button id="btn-camera">1. 비디오출력</button>
-    <button id="btn-capture">2. 캡쳐</button>
-    <hr />
 
-    <div id="output">
-      <strong>Capture images</strong>
-      <div id="images"></div>
-    </div>
-
-    <pre>
+      <pre>
       <code class="highlight">$(function() {
-  navigator.getUserMedia = navigator.getUserMedia ||
-    navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
   const videoEl = document.getElementById('video');
   const canvasEl = document.getElementById('canvas');
   const width = 350;
@@ -64,25 +61,37 @@
   }
 
   /**
+   * 미디어 호출
+   */
+  async function startMedia() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: true,
+      });
+      success(stream);
+    } catch (err) {
+      error(err);
+    }
+  }
+
+  /**
    * 초기 이벤트 바인딩
    */
   function initialize() {
     canvasEl.width = width;
     canvasEl.height = height;
 
-    $('#btn-camera').click(function() {
-      // getUserMedia(접근할 미디어, 성공 callback, 실패 callback);
-      navigator.getUserMedia({ audio: false, video: true }, success, error);
-    });
-
+    $('#btn-camera').click(startMedia);
     $('#btn-capture').click(capture);
   }
+
   initialize();
 });
 </code>
    	</pre>
+    </div>
   </div>
-</div>
 
-<script src="js/main.js"></script>
-<% include ../../partials/footer %>
+  <script src="js/main.js"></script>
+  <% include ../../partials/footer %>

@@ -1,6 +1,4 @@
-$(function() {
-  navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
+$(function () {
   const $video = $('video');
   const $start = $('#start');
   const filters = [
@@ -19,31 +17,45 @@ $(function() {
   let index = 0;
 
   /**
-   * 영상을 호출합니다.
+   * getUserMedia 성공
+   * @param stream
    */
-  function getUserMedia() {
-    navigator.getUserMedia(
-      {
-        audio: true,
+  function success(stream) {
+    console.log('onSuccess', arguments);
+    const video = $video[0];
+
+    // video 테그에 stream 바인딩
+    video.srcObject = stream;
+
+    // 영상 플레이 준비가 되면 시작
+    video.onloadedmetadata = (event) => {
+      console.log('onloadedmetadata', event);
+      video.play();
+    };
+  }
+
+  /**
+   * getUserMedia 실패
+   * @param error
+   */
+  function error(err) {
+    console.log('error', err);
+    alert(err.message);
+  }
+
+  /**
+   * 미디어 호출
+   */
+  async function startMedia() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
         video: true,
-      },
-      (stream) => {
-        const videoEl = $video[0];
-
-        // 비디오 테그에 stream 할당
-        videoEl.srcObject = stream;
-
-        // 영상 플레이 준비가 되면 시작
-        videoEl.onloadedmetadata = (event) => {
-          console.log('onloadedmetadata', event);
-          videoEl.play();
-        };
-      },
-      (err) => {
-        console.log('getUserMedia', err);
-        alert(err.message);
-      }
-    );
+      });
+      success(stream);
+    } catch (err) {
+      error(err);
+    }
   }
 
   /**
@@ -61,8 +73,12 @@ $(function() {
   }
 
   /**
-   * 이벤트 바인딩
+   * 초기 이벤트 바인딩
    */
-  $video.click(changeFilter);
-  $start.click(getUserMedia);
+  function initialize() {
+    $video.click(changeFilter);
+    $start.click(startMedia);
+  }
+
+  initialize();
 });

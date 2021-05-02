@@ -1,14 +1,11 @@
 <% include ../../partials/header %>
-<div id="content">
-  <div class="wrap">
-    <video autoplay></video>
-    <button>getUserMedia()</button>
+  <div id="content">
+    <div class="wrap">
+      <video autoplay></video>
+      <button>getUserMedia()</button>
 
-    <pre>
+      <pre>
       <code class="highlight">$(function() {
-  navigator.getUserMedia = navigator.getUserMedia ||
-  	navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
   /**
    * getUserMedia 성공
    * @param stream
@@ -24,24 +21,37 @@
 
   /**
    * getUserMedia 실패
-   * @param error
+   * @param err
    */
-  function error(error) {
+  function error(err) {
     console.log('error', arguments);
 
     alert('카메라와 마이크를 허용해주세요');
   }
 
   /**
-   * 이벤트 바인딩
+   * 미디어 호출
    */
-  $('button').click(function() {
-    navigator.getUserMedia({ audio: true, video: true }, success, error);
-  });
+  async function startMedia() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+      success(stream);
+    } catch (err) {
+      error(err);
+    }
+  }
+
+  /**
+   * 버튼 이벤트 바인딩
+   */
+  $('button').click(startMedia);
 });</code>
    	</pre>
+    </div>
   </div>
-</div>
 
-<script src="js/main.js"></script>
-<% include ../../partials/footer %>
+  <script src="js/main.js"></script>
+  <% include ../../partials/footer %>
