@@ -70,16 +70,17 @@
 
   <section class="slide">
     <div>
-      <h2>WebRTC 활용 서비스</h2>
+      <h2>WebRTC를 활용한 서비스</h2>
       <div>
         <ul>
-          <li>구글행아웃 (화상회의 서비스)</li>
-          <li>게더타운 (가상공간 서비스)</li>
-          <li>클럽하우스 (보이스 중심 SNS)</li>
-          <li>슬랙 (통화, 화상회의 기능)</li>
-          <li>레인웨이 (게임 스트리밍)</li>
-          <li>튜터링 (영어 학습 서비스)</li>
-          <li>카카오워크 (화상회의 기능)</li>
+          <li class="next">구글행아웃 (화상회의 서비스)</li>
+          <li class="next">게더타운 (가상공간 서비스)</li>
+          <li class="next">클럽하우스 (보이스 기반 SNS)</li>
+          <li class="next">슬랙 (통화, 화상회의 기능)</li>
+          <li class="next">레인웨이 (게임 스트리밍)</li>
+          <li class="next">튜터링 (영어 회화 서비스)</li>
+          <li class="next">아자르 (비디오 기반 SNS)</li>
+          <li class="next">카카오워크 (화상회의 기능)</li>
         </ul>
       </div>
     </div>
@@ -91,7 +92,10 @@
       <div class="txt-center">
         <img src="img/webrtc2.jpg" alt="WebRTC" />
         <p>
-          <span class="next">No PlugIn</span><span class="next">, No Install</span><span class="next">, Any OS</span>
+          <span class="next">No PlugIn</span>
+          <span class="next">, No Install</span>
+          <span class="next">, Any OS</span>
+          <span class="next">, Support P2P</span>
           <strong class="next">→ Simple Connection!</strong>
         </p>
       </div>
@@ -115,16 +119,15 @@
       <ul class="description">
         <li class="next">
           <strong>STUN (Session Traversal Utilities for NAT) 서버</strong><br>
-          사내망 환경에 NAT를 통해 공인IP, Port를 알아내는 역활을 함
+          P2P 통신을 위해 현재 클라이언트의 Public IP를 반환하는 역할을 하는 서버입니다.
         </li>
         <li class="next">
           <strong>TURN (Traversal Using Relays around NAT) 서버</strong><br>
-          P2P 연결이 안되는 환경일때 트래픽을 중계하는데 사용함
+          피어(Peer)간 직접(P2P) 연결이 실패할 경우 트래픽을 중계하는데 사용됩니다.
         </li>
         <li class="next">
           <strong>ICE (Interactive Connectivity Establishment)</strong><br>
-          P2P 간 다이렉트로 통신을 위해 STUN, TURN 등의 기술을 종합 활용하여 라우팅 경로를 찾아내는 기술로
-          UDP hole punching (P2P간 공인IP가 아니더라도 최대한 연결 가능하도록 하는 기법)을 지원.
+          피어(Peer)간 통신을 위해 STUN, TURN 등의 기술을 통해 최적의 라우팅 경로를 찾아내는 기술입니다.
         </li>
       </ul>
     </div>
