@@ -71,7 +71,7 @@ function MediaHandler() {
   function playForIOS(videoEl) {
     videoEl.setAttribute('playsinline', true);
     videoEl.setAttribute('controls', true);
-    setTimeout(function() {
+    setTimeout(() => {
       videoEl.removeAttribute('controls');
     }, 1);
   }
