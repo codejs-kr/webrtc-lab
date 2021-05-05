@@ -1,3 +1,6 @@
+import PeerHandler from './modules/peer-handler.js';
+import MediaHandler from './modules/media-handler.js';
+
 /*!
  *
  * WebRTC Lab
@@ -13,18 +16,24 @@ $(function () {
   const animationTime = 500;
   const isSafari = DetectRTC.browser.isSafari;
   const isMobile = DetectRTC.isMobileDevice;
-  const mediaOption = {
+  const mediaConstraints = {
     audio: true,
     video: {
-      mandatory: {
-        maxWidth: 1920,
-        maxHeight: 1080,
-        maxFrameRate: 30,
+      width: {
+        ideal: 1280,
+        min: 640,
+        max: 1920,
       },
-      optional: [
-        { googNoiseReduction: true }, // Likely removes the noise in the captured video stream at the expense of computational effort.
-        { facingMode: 'user' }, // Select the front/user facing camera or the rear/environment facing camera if available (on Phone)
-      ],
+      height: {
+        ideal: 720,
+        min: 360,
+        max: 1080,
+      },
+      frameRate: {
+        ideal: 25,
+      },
+      // Select the front/user facing camera or the rear/environment facing camera if available (on Phone)
+      facingMode: 'user',
     },
   };
 
@@ -41,7 +50,7 @@ $(function () {
   const $uniqueToken = $('#unique-token');
 
   async function getUserMedia() {
-    const stream = await peerHandler.getUserMedia(mediaOption, isOffer);
+    const stream = await peerHandler.getUserMedia(mediaConstraints, isOffer);
     onLocalStream(stream);
   }
 
@@ -51,14 +60,12 @@ $(function () {
   function onDetectUser() {
     console.log('onDetectUser');
 
-    $waitWrap.html(
-      [
-        '<div class="room-info">',
-        '<p>당신을 기다리고 있어요. 참여 하실래요?</p>',
-        '<button id="btn-join">Join</button>',
-        '</div>',
-      ].join('\n')
-    );
+    $waitWrap.html(`
+        <div class="room-info">
+          <p>당신을 기다리고 있어요. 참여 하실래요?</p>
+          <button id="btn-join">Join</button>
+        </div>
+      `);
 
     $('#btn-join').click(function () {
       $(this).attr('disabled', true);
@@ -227,6 +234,10 @@ $(function () {
       const $this = $(this);
       $this.toggleClass('active');
       mediaHandler[$this.hasClass('active') ? 'muteAudio' : 'unmuteAudio']();
+    });
+
+    $('#btn-change-resolution').click(function () {
+      peerHandler.changeResolution();
     });
   }
 

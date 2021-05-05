@@ -1,3 +1,6 @@
+import EventEmitter from '/js/lib/eventemitter.js';
+import inherit from '/js/lib/inherit.js';
+
 /**
  * PeerHandler
  * @param options
@@ -12,8 +15,6 @@ function PeerHandler(options) {
   const RTCSessionDescription =
     window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
   const RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
-  const browserVersion = DetectRTC.browser.version;
-  const isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
 
   const that = this;
   const send = options.send;
@@ -31,22 +32,14 @@ function PeerHandler(options) {
   };
 
   let localStream = null;
+  let resolution = {
+    width: 1280,
+    height: 720,
+  };
   let peer = null; // offer or answer peer
   let peerConnectionOptions = {
     optional: [{ DtlsSrtpKeyAgreement: 'true' }],
   };
-  let mediaConstraints = {
-    mandatory: {
-      OfferToReceiveAudio: true,
-      OfferToReceiveVideo: true,
-    },
-  };
-
-  // edge is not supported
-  if (isEdge) {
-    peerConnectionOptions = {};
-    mediaConstraints = {};
-  }
 
   /**
    * getUserMedia
@@ -78,8 +71,9 @@ function PeerHandler(options) {
       addTrack(peer, localStream); // addTrack 제외시 recvonly로 SDP 생성됨
     }
 
-    peer.createOffer(
-      (SDP) => {
+    peer
+      .createOffer()
+      .then((SDP) => {
         peer.setLocalDescription(SDP);
         console.log('Sending offer description', SDP);
 
@@ -87,10 +81,10 @@ function PeerHandler(options) {
           to: 'all',
           sdp: SDP,
         });
-      },
-      onSdpError,
-      mediaConstraints
-    );
+      })
+      .catch((error) => {
+        console.error('Error setLocalDescription', error);
+      });
   }
 
   /**
@@ -239,6 +233,31 @@ function PeerHandler(options) {
   }
 
   /**
+   * 전송중인 영상 해상도를 다이나믹하게 변경합니다.
+   */
+  function changeResolution() {
+    localStream.getVideoTracks().forEach((track) => {
+      console.log('changeResolution', track, track.getConstraints(), track.applyConstraints);
+
+      if (resolution.height > 90) {
+        resolution = {
+          width: 160,
+          height: 90,
+        };
+      } else {
+        resolution = {
+          width: 1280,
+          height: 720,
+        };
+      }
+
+      track.applyConstraints(resolution).then(() => {
+        console.log('changeResolution result', track.getConstraints());
+      });
+    });
+  }
+
+  /**
    * signaling
    * @param data
    */
@@ -278,6 +297,9 @@ function PeerHandler(options) {
    */
   this.getUserMedia = getUserMedia;
   this.signaling = signaling;
+  this.changeResolution = changeResolution;
 }
 
 inherit(EventEmitter, PeerHandler);
+
+export default PeerHandler;

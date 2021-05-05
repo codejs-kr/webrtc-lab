@@ -156,3 +156,5 @@ EventEmitter.prototype.emit = function(type) {
     return false;
   }
 };
+
+export default EventEmitter;

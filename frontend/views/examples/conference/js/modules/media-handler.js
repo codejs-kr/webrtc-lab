@@ -86,3 +86,5 @@ function MediaHandler() {
   this.unmuteAudio = unmuteAudio;
   this.playForIOS = playForIOS;
 }
+
+export default MediaHandler;
