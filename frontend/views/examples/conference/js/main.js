@@ -1,39 +1,46 @@
+import PeerHandler from './modules/peer-handler.js';
+import MediaHandler from './modules/media-handler.js';
+
 /*!
  *
  * WebRTC Lab
  * @author dodortus (dodortus@gmail.com / codejs.co.kr)
  *
  */
-$(function() {
+$(function () {
   console.log('Loaded Main');
+
+  const socket = io();
+  const mediaHandler = new MediaHandler();
+  const peerHandler = new PeerHandler({ send });
+  const animationTime = 500;
+  const isSafari = DetectRTC.browser.isSafari;
+  const isMobile = DetectRTC.isMobileDevice;
+  const mediaConstraints = {
+    audio: true,
+    video: {
+      width: {
+        ideal: 1280,
+        min: 640,
+        max: 1920,
+      },
+      height: {
+        ideal: 720,
+        min: 360,
+        max: 1080,
+      },
+      frameRate: {
+        ideal: 25,
+      },
+      // Select the front/user facing camera or the rear/environment facing camera if available (on Phone)
+      facingMode: 'user',
+    },
+  };
 
   let roomId;
   let userId;
   let remoteUserId;
   let isOffer;
-
-  const socket = io();
-  const mediaHandler = new MediaHandler();
-  const peerHandler = new PeerHandler({
-    send: send,
-  });
-  const animationTime = 500;
-  const isSafari = DetectRTC.browser.isSafari;
-  const isMobile = DetectRTC.isMobileDevice;
-  const mediaOption = {
-    audio: true,
-    video: {
-      mandatory: {
-        maxWidth: 1920,
-        maxHeight: 1080,
-        maxFrameRate: 30,
-      },
-      optional: [
-        { googNoiseReduction: true }, // Likely removes the noise in the captured video stream at the expense of computational effort.
-        { facingMode: 'user' }, // Select the front/user facing camera or the rear/environment facing camera if available (on Phone)
-      ],
-    },
-  };
 
   // DOM
   const $body = $('body');
@@ -42,25 +49,28 @@ $(function() {
   const $videoWrap = $('#video-wrap');
   const $uniqueToken = $('#unique-token');
 
+  async function getUserMedia() {
+    const stream = await peerHandler.getUserMedia(mediaConstraints, isOffer);
+    onLocalStream(stream);
+  }
+
   /**
    * 입장 후 다른 참여자 발견시 호출
    */
   function onDetectUser() {
     console.log('onDetectUser');
 
-    $waitWrap.html(
-      [
-        '<div class="room-info">',
-        '<p>당신을 기다리고 있어요. 참여 하실래요?</p>',
-        '<button id="btn-join">Join</button>',
-        '</div>',
-      ].join('\n')
-    );
+    $waitWrap.html(`
+        <div class="room-info">
+          <p>당신을 기다리고 있어요. 참여 하실래요?</p>
+          <button id="btn-join">Join</button>
+        </div>
+      `);
 
-    $('#btn-join').click(function() {
-      isOffer = true;
-      peerHandler.getUserMedia(mediaOption, onLocalStream, isOffer);
+    $('#btn-join').click(function () {
       $(this).attr('disabled', true);
+      isOffer = true;
+      getUserMedia();
     });
 
     $createWrap.slideUp(animationTime);
@@ -72,7 +82,7 @@ $(function() {
    * @param userList
    */
   function onJoin(roomId, userList) {
-    console.log('onJoin', userList);
+    console.log('onJoin', roomId, userList);
 
     if (Object.size(userList) > 1) {
       onDetectUser();
@@ -127,10 +137,7 @@ $(function() {
    * 방 고유 접속 토큰 생성
    */
   function setRoomToken() {
-    const hashValue = (Math.random() * new Date().getTime())
-      .toString(32)
-      .toUpperCase()
-      .replace(/\./g, '-');
+    const hashValue = (Math.random() * new Date().getTime()).toString(32).toUpperCase().replace(/\./g, '-');
 
     if (location.hash.length > 2) {
       $uniqueToken.attr('href', location.href);
@@ -143,7 +150,7 @@ $(function() {
    * 클립보드 복사
    */
   function setClipboard() {
-    $uniqueToken.click(function() {
+    $uniqueToken.click(function () {
       const link = location.href;
 
       if (window.clipboardData) {
@@ -201,10 +208,10 @@ $(function() {
    * 초기 설정
    */
   function initialize() {
-    roomId = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
-    userId = Math.round(Math.random() * 99999);
     setRoomToken();
     setClipboard();
+    roomId = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
+    userId = Math.round(Math.random() * 99999);
 
     // 소켓 관련 이벤트 바인딩
     socket.emit('enter', roomId, userId);
@@ -215,20 +222,22 @@ $(function() {
     // Peer 관련 이벤트 바인딩
     peerHandler.on('addRemoteStream', onRemoteStream);
 
-    $('#btn-start').click(function() {
-      peerHandler.getUserMedia(mediaOption, onLocalStream);
-    });
+    $('#btn-start').click(getUserMedia);
 
-    $('#btn-camera').click(function() {
+    $('#btn-camera').click(function () {
       const $this = $(this);
       $this.toggleClass('active');
       mediaHandler[$this.hasClass('active') ? 'pauseVideo' : 'resumeVideo']();
     });
 
-    $('#btn-mic').click(function() {
+    $('#btn-mic').click(function () {
       const $this = $(this);
       $this.toggleClass('active');
       mediaHandler[$this.hasClass('active') ? 'muteAudio' : 'unmuteAudio']();
+    });
+
+    $('#btn-change-resolution').click(function () {
+      peerHandler.changeResolution();
     });
   }
 

@@ -1,3 +1,5 @@
+import ScreenHandler from './modules/screen-handler.js';
+
 /*!
  *
  * WebRTC Lab

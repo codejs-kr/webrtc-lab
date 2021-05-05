@@ -55,27 +55,14 @@ video.effect {
   display: none;
   position: relative;
   margin: 0 auto;
-  min-height: 620px;
+}
+
+#video-wrap video {
+  margin-bottom: 0;
 }
 
 #video-wrap .buttons {
-  position: absolute;
-  bottom: 0;
-}
-
-#local {
-  position: absolute;
-  top: 4%;
-  right: 2%;
-  width: 340px;
-  height: 220px;
-  border: solid 1px #fff;
-}
-
-#local-video {
-  position: absolute;
-  top: 0;
-  left: 0;
+  text-align: left;
 }
 
 #share-wrap {
@@ -89,6 +76,7 @@ video.effect {
   display: none;
 }
 .connected #local-video {
+  position: absolute;
   top: 2px;
   left: 2px !important;
   width: 150px !important;

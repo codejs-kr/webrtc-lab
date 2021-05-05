@@ -1,19 +1,19 @@
 <% include ../../partials/header %>
-<link href="css/main.css" rel="stylesheet" type="text/css">
+  <link href="css/main.css" rel="stylesheet" type="text/css">
 
-<div id="content">
-  <div class="wrap">
-    <button id="btn-start">Start</button>
-    <video id="local-video" autoplay></video>
+  <div id="content">
+    <div class="wrap">
+      <button id="btn-start">Start</button>
+      <video id="local-video" autoplay></video>
 
-    <p>
-      확장프로그램이 필요없는 스크린쉐어 API 예제입니다. (<a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia" target="_blank">getDisplayMedia API</a>)<br />
-      Chrome 72+, Firefox 66+, Edge 18+ (https 필수) 에서 지원합니다.
-    </p>
+      <p>
+        확장프로그램이 필요없는 스크린쉐어 API 예제입니다. (<a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getDisplayMedia"
+          target="_blank">getDisplayMedia API</a>)<br />
+        Chrome 72+, Firefox 66+, Edge 18+ (https 필수) 에서 지원합니다.
+      </p>
+    </div>
   </div>
-</div>
 
-<script src="js/modules/screen-handler.js"></script>
-<script src="js/main.js"></script>
+  <script type="module" src="js/main.js"></script>
 
-<% include ../../partials/footer %>
+  <% include ../../partials/footer %>

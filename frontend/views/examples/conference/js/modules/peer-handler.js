@@ -1,3 +1,6 @@
+import EventEmitter from '/js/lib/eventemitter.js';
+import inherit from '/js/lib/inherit.js';
+
 /**
  * PeerHandler
  * @param options
@@ -7,18 +10,15 @@ function PeerHandler(options) {
   console.log('Loaded PeerHandler', arguments);
   EventEmitter.call(this);
 
+  // Cross browsing
   const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
   const RTCSessionDescription =
     window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
   const RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
-  const browserVersion = DetectRTC.browser.version;
-  const isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
-  const isH264 = location.href.match('h264');
 
   const that = this;
   const send = options.send;
   const iceServers = {
-    // 'iceTransportPolicy': 'relay',
     iceServers: [
       {
         urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
@@ -32,118 +32,79 @@ function PeerHandler(options) {
   };
 
   let localStream = null;
+  let resolution = {
+    width: 1280,
+    height: 720,
+  };
   let peer = null; // offer or answer peer
   let peerConnectionOptions = {
-    optional: [
-      {
-        DtlsSrtpKeyAgreement: 'true',
-      },
-    ],
+    optional: [{ DtlsSrtpKeyAgreement: 'true' }],
   };
-  let mediaConstraints = {
-    mandatory: {
-      OfferToReceiveAudio: true,
-      OfferToReceiveVideo: true,
-    },
-  };
-
-  // edge is not supported
-  if (isEdge) {
-    peerConnectionOptions = {};
-    mediaConstraints = {};
-  }
 
   /**
    * getUserMedia
    */
-  function getUserMedia(mediaOption, callback, isOffer) {
+  async function getUserMedia(mediaOption, isOffer) {
     console.log('getUserMedia');
 
-    navigator.mediaDevices
-      .getUserMedia(mediaOption)
-      .then(function (stream) {
-        localStream = stream;
-        callback && callback(localStream);
+    try {
+      localStream = await navigator.mediaDevices.getUserMedia(mediaOption);
 
-        if (isOffer) {
-          createPeerConnection();
-          createOffer();
-        }
-      })
-      .catch(function (error) {
-        console.error('Error getUserMedia', error);
-      });
-  }
-
-  /**
-   * SDP 변경
-   * @param SDP
-   * @returns {*}
-   */
-  function editSDP(SDP) {
-    console.log('editSDP', SDP);
-
-    // H.264 for chrome >= 73
-    if (browserVersion >= 73) {
-      SDP.sdp = SDP.sdp.replace('96 97 98 99 100 101 102', '102 101 100 96 97 98 99');
-    } else {
-      SDP.sdp = SDP.sdp.replace('96 98 100', '100 96 98'); // for chrome 57 <
-      SDP.sdp = SDP.sdp.replace('96 97 98 99 100 101 102', '100 101 102 96 97 98 99'); // for chrome 65 <
+      if (isOffer) {
+        peer = createPeerConnection();
+        createOffer(peer);
+      }
+    } catch (error) {
+      console.error('Error getUserMedia', error);
     }
 
-    console.log('return editSDP', SDP);
-    return SDP;
+    return localStream;
   }
 
   /**
    * offer SDP를 생성 한다.
    */
-  function createOffer() {
+  function createOffer(peer) {
     console.log('createOffer', arguments);
 
     if (localStream) {
-      // addStream 제외시 recvonly로 SDP 생성됨
-      // peer.addStream(localStream); // TODO 스펙 삭제됨
-      addTrack(peer, localStream);
+      addTrack(peer, localStream); // addTrack 제외시 recvonly로 SDP 생성됨
     }
 
-    peer.createOffer(
-      function (SDP) {
-        if (isH264) {
-          SDP = editSDP(SDP);
-        }
-
+    peer
+      .createOffer()
+      .then((SDP) => {
         peer.setLocalDescription(SDP);
         console.log('Sending offer description', SDP);
+
         send({
           to: 'all',
           sdp: SDP,
         });
-      },
-      onSdpError,
-      mediaConstraints
-    );
+      })
+      .catch((error) => {
+        console.error('Error setLocalDescription', error);
+      });
   }
 
   /**
    * offer에 대한 응답 SDP를 생성 한다.
+   * @param peer
    * @param msg offer가 보내온 signaling massage
    */
-  function createAnswer(msg) {
+  function createAnswer(peer, msg) {
     console.log('createAnswer', arguments);
+
     if (localStream) {
-      // peer.addStream(localStream); // TODO 스펙 삭제됨
       addTrack(peer, localStream);
     }
+
     peer
       .setRemoteDescription(new RTCSessionDescription(msg.sdp))
-      .then(function () {
+      .then(() => {
         peer
           .createAnswer()
-          .then(function (SDP) {
-            if (isH264) {
-              SDP = editSDP(SDP);
-            }
+          .then((SDP) => {
             peer.setLocalDescription(SDP);
             console.log('Sending answer to peer.', SDP);
 
@@ -154,7 +115,7 @@ function PeerHandler(options) {
           })
           .catch(onSdpError);
       })
-      .catch(function (error) {
+      .catch((error) => {
         console.error('Error setRemoteDescription', error);
       });
   }
@@ -167,9 +128,9 @@ function PeerHandler(options) {
     console.log('createPeerConnection', arguments);
 
     peer = new RTCPeerConnection(iceServers, peerConnectionOptions);
-    console.log('new Peer', peer);
+    console.log('new peer', peer);
 
-    peer.onicecandidate = function (event) {
+    peer.onicecandidate = (event) => {
       if (event.candidate) {
         send({
           to: 'all',
@@ -186,47 +147,48 @@ function PeerHandler(options) {
      * 크로스브라우징
      */
     if (peer.ontrack) {
-      peer.ontrack = function (event) {
+      peer.ontrack = (event) => {
         console.log('ontrack', event);
-        var stream = event.streams[0];
+        const stream = event.streams[0];
         that.emit('addRemoteStream', stream);
       };
 
-      peer.onremovetrack = function (event) {
+      peer.onremovetrack = (event) => {
         console.log('onremovetrack', event);
-        var stream = event.streams[0];
+        const stream = event.streams[0];
         that.emit('removeRemoteStream', stream);
       };
       // 삼성 모바일에서 필요
     } else {
-      peer.onaddstream = function (event) {
+      peer.onaddstream = (event) => {
         console.log('onaddstream', event);
         that.emit('addRemoteStream', event.stream);
       };
 
-      peer.onremovestream = function (event) {
+      peer.onremovestream = (event) => {
         console.log('onremovestream', event);
         that.emit('removeRemoteStream', event.stream);
       };
     }
 
-    peer.onnegotiationneeded = function (event) {
+    peer.onnegotiationneeded = (event) => {
       console.log('onnegotiationneeded', event);
     };
 
-    peer.onsignalingstatechange = function (event) {
+    peer.onsignalingstatechange = (event) => {
       console.log('onsignalingstatechange', event);
     };
 
-    peer.oniceconnectionstatechange = function (event) {
+    peer.oniceconnectionstatechange = (event) => {
       console.log(
         'oniceconnectionstatechange',
-        'iceGatheringState: ' + peer.iceGatheringState,
-        '/ iceConnectionState: ' + peer.iceConnectionState
+        `iceGatheringState: ${peer.iceGatheringState} / iceConnectionState: ${peer.iceConnectionState}`
       );
 
       that.emit('iceconnectionStateChange', event);
     };
+
+    return peer;
   }
 
   /**
@@ -239,15 +201,12 @@ function PeerHandler(options) {
   /**
    * addStream 이후 스펙 적용 (크로스브라우징)
    * 스트림을 받아서 PeerConnection track과 stream을 추가 한다.
-   * TODO 72버전 이상 3인에서 AMS addTrack 하면 AMS로 전송이 안됨. 원인은 기존 트렉이 아닌 getTransceivers(2) (3) 에 추가됨.
-   *
    * @param peer
    * @param stream
    */
   function addTrack(peer, stream) {
     if (peer.addTrack) {
-      stream.getTracks().forEach(function (track) {
-        console.log('확인 addTrack', peer, track, stream);
+      stream.getTracks().forEach((track) => {
         peer.addTrack(track, stream);
       });
     } else {
@@ -262,11 +221,8 @@ function PeerHandler(options) {
    */
   function removeTrack(peer, stream) {
     if (peer.removeTrack) {
-      stream.getTracks().forEach(function (track) {
-        var sender = peer.getSenders().find(function (s) {
-          return s.track === track;
-        });
-
+      stream.getTracks().forEach((track) => {
+        const sender = peer.getSenders().find((s) => s.track === track);
         if (sender) {
           peer.removeTrack(sender);
         }
@@ -274,6 +230,31 @@ function PeerHandler(options) {
     } else {
       peer.removeStream(stream);
     }
+  }
+
+  /**
+   * 전송중인 영상 해상도를 다이나믹하게 변경합니다.
+   */
+  function changeResolution() {
+    localStream.getVideoTracks().forEach((track) => {
+      console.log('changeResolution', track, track.getConstraints(), track.applyConstraints);
+
+      if (resolution.height > 90) {
+        resolution = {
+          width: 160,
+          height: 90,
+        };
+      } else {
+        resolution = {
+          width: 1280,
+          height: 720,
+        };
+      }
+
+      track.applyConstraints(resolution).then(() => {
+        console.log('changeResolution result', track.getConstraints());
+      });
+    });
   }
 
   /**
@@ -289,8 +270,8 @@ function PeerHandler(options) {
     // 접속자가 보내온 offer처리
     if (sdp) {
       if (sdp.type === 'offer') {
-        createPeerConnection();
-        createAnswer(msg);
+        peer = createPeerConnection();
+        createAnswer(peer, msg);
 
         // offer에 대한 응답 처리
       } else if (sdp.type === 'answer') {
@@ -316,6 +297,9 @@ function PeerHandler(options) {
    */
   this.getUserMedia = getUserMedia;
   this.signaling = signaling;
+  this.changeResolution = changeResolution;
 }
 
 inherit(EventEmitter, PeerHandler);
+
+export default PeerHandler;

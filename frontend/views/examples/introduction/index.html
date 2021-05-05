@@ -1,27 +1,29 @@
 <!DOCTYPE HTML>
 <html lang="en">
+
 <head>
-	<title>WebRTC</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=792, user-scalable=no">
-	<meta http-equiv="x-ua-compatible" content="ie=edge">
-	<link rel="stylesheet" href="shower/themes/ribbon/styles/screen.css">
-	<link rel="shortcut icon" type="image/ico" href="http://www.codejs.co.kr/contents/favicon.ico" />
-	<link href="global.css" media="screen" rel="stylesheet" type="text/css"/>
+  <title>WebRTC</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=792, user-scalable=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <link rel="stylesheet" href="shower/themes/ribbon/styles/screen.css">
+  <link rel="shortcut icon" type="image/ico" href="http://www.codejs.co.kr/contents/favicon.ico" />
+  <link href="global.css" media="screen" rel="stylesheet" type="text/css" />
 </head>
+
 <body class="list">
-	<header class="caption">
-		<h1>WebRTC</h1>
-	</header>
+  <header class="caption">
+    <h1>WebRTC</h1>
+  </header>
 
-	<section id="intro" class="slide txt-center">
-	  <div>
-  		<img src="img/webrtc.jpg" alt="WebRTC" />
-		</div>
-	</section>
+  <section id="intro" class="slide txt-center">
+    <div>
+      <img src="img/webrtc.jpg" alt="WebRTC" />
+    </div>
+  </section>
 
-	<section class="slide">
-	  <div>
+  <section class="slide">
+    <div>
       <h2>목차</h2>
       <ol>
         <li>WebRTC 소개</li>
@@ -33,13 +35,13 @@
     </div>
   </section>
 
-	<section class="slide">
+  <section class="slide">
     <div>
       <h2>WebRTC 소개</h2>
       <blockquote>
         <p>
           <strong>WebRTC (Web Real-Time Communication)</strong>는 웹 브라우저 간에<br>
-           플러그인 도움 없이 상호 통신할 수 있도록 설계된 JavaScript API이다.<br><br>
+          플러그인 도움 없이 상호 통신할 수 있도록 설계된 JavaScript API이다.<br><br>
           WebRTC는 구글이 오픈소스화한 프로젝트에서 기원하였으며,<br>그 뒤로 국제 인터넷 표준화 기구(IETF)가 프로토콜 표준화 작업을,<br>
           W3C가 API 정의를 진행하였으며, 음성 통화, 영상 통화, P2P 파일 공유<br>등으로 활용 될 수 있다.
         </p>
@@ -47,9 +49,10 @@
     </div>
   </section>
 
+
   <section class="slide">
     <div>
-      <h2>WebRTC의 짧은 역사.</h2>
+      <h2>WebRTC의 탄생</h2>
       <div class="txt-center">
         <img src="img/webrtc-history.jpg" width="700" alt="WebRTC" />
       </div>
@@ -67,11 +70,32 @@
 
   <section class="slide">
     <div>
+      <h2>WebRTC를 활용한 서비스</h2>
+      <div>
+        <ul>
+          <li class="next">구글행아웃 (화상회의 서비스)</li>
+          <li class="next">게더타운 (가상공간 서비스)</li>
+          <li class="next">클럽하우스 (보이스 기반 SNS)</li>
+          <li class="next">슬랙 (통화, 화상회의 기능)</li>
+          <li class="next">레인웨이 (게임 스트리밍)</li>
+          <li class="next">튜터링 (영어 회화 서비스)</li>
+          <li class="next">아자르 (비디오 기반 SNS)</li>
+          <li class="next">카카오워크 (화상회의 기능)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide">
+    <div>
       <h2>왜 WebRTC에 주목해야 하는가</h2>
       <div class="txt-center">
         <img src="img/webrtc2.jpg" alt="WebRTC" />
         <p>
-          <span class="next">No PlugIn</span><span class="next">, No Install</span><span class="next">, Bye NPAPI</span><span class="next">, Any OS</span>
+          <span class="next">No PlugIn</span>
+          <span class="next">, No Install</span>
+          <span class="next">, Any OS</span>
+          <span class="next">, Support P2P</span>
           <strong class="next">→ Simple Connection!</strong>
         </p>
       </div>
@@ -82,9 +106,9 @@
     <div>
       <h2>WebRTC 주요 API</h2>
       <ul class="description">
-        <li><strong>GetUserMedia</strong><br>사용자의 카메라와 마이크 접근을 담당.</li>
-        <li><strong>RTCPeerConnection</strong><br>Peer간의 연결을 생성하고, 오디오와 비디오 통신에 사용.<br>(생성시 STUN 서버 요청)</li>
-        <li><strong>RTCDataChannel</strong><br>Peer간의 Data를 주고 받을 수 있는 Tunnel API<br>(WebSocket과 유사하지만, P2P라 속도가 보다 빠름)</li>
+        <li class="next"><strong>GetUserMedia</strong><br>사용자의 카메라와 마이크 접근을 담당.</li>
+        <li class="next"><strong>RTCPeerConnection</strong><br>Peer간의 연결을 생성하고, 오디오와 비디오 통신에 사용.<br>(생성시 STUN 서버를 통해 Public IP 확인)</li>
+        <li class="next"><strong>RTCDataChannel</strong><br>Peer간의 Data를 주고 받을 수 있는 Tunnel API<br>(WebSocket과 유사하지만, P2P라 속도가 보다 빠름)</li>
       </ul>
     </div>
   </section>
@@ -93,18 +117,17 @@
     <div>
       <h2>P2P기반 NAT 및 방화벽 통과 기법</h2>
       <ul class="description">
-        <li>
+        <li class="next">
           <strong>STUN (Session Traversal Utilities for NAT) 서버</strong><br>
-          사내망 환경에 NAT를 통해 공인IP, Port를 알아내는 역활을 함
+          P2P 통신을 위해 현재 클라이언트의 Public IP를 반환하는 역할을 하는 서버입니다.
         </li>
-        <li>
+        <li class="next">
           <strong>TURN (Traversal Using Relays around NAT) 서버</strong><br>
-          P2P 연결이 안되는 환경일때 트래픽을 중계하는데 사용함
+          피어(Peer)간 직접(P2P) 연결이 실패할 경우 트래픽을 중계하는데 사용됩니다.
         </li>
-        <li>
+        <li class="next">
           <strong>ICE (Interactive Connectivity Establishment)</strong><br>
-          P2P 간 다이렉트로 통신을 위해 STUN, TURN 등의 기술을 종합 활용하여 라우팅 경로를 찾아내는 기술로
-          UDP hole punching (P2P간 공인IP가 아니더라도 최대한 연결 가능하도록 하는 기법)을 지원.
+          피어(Peer)간 통신을 위해 STUN, TURN 등의 기술을 통해 최적의 라우팅 경로를 찾아내는 기술입니다.
         </li>
       </ul>
     </div>
@@ -191,25 +214,28 @@
     </div>
   </section>
 
-  <section class="slide">
+  <!-- <section class="slide">
     <div>
       <h2>1대1일을 넘어 다자간 WebRTC</h2>
       <div class="txt-center">
         <img src="img/multi3.jpg" width="700" alt="WebRTC" />
       </div>
     </div>
+  </section> -->
+
+  <section class="slide cover">
+    <div>
+      <h2>Thank you.</h2>
+      <img src="img/bg-webrtc.jpg" alt="" />
+    </div>
   </section>
 
-	<section class="slide cover">
-	  <div>
-  		<h2>Thank you.</h2>
-  		<img src="img/bg-webrtc.jpg" alt="" />
-  	</div>
-	</section>
-
-	<div class="progress"><div></div></div>
-	<script src="shower/shower.min.js"></script>
-	<!-- Copyright © 2013 Yours Truly, Famous Inc. -->
-	<!-- Photos by John Carey, fiftyfootshadows.net -->
+  <div class="progress">
+    <div></div>
+  </div>
+  <script src="shower/shower.min.js"></script>
+  <!-- Copyright © 2013 Yours Truly, Famous Inc. -->
+  <!-- Photos by John Carey, fiftyfootshadows.net -->
 </body>
+
 </html>

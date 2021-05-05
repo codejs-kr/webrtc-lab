@@ -5,7 +5,7 @@
  * @homepage codejs.co.kr
  */
 
-$(function() {
+$(function () {
   const browserVersion = DetectRTC.browser.version;
   const isFirefox = DetectRTC.browser.isFirefox;
   const isChrome = DetectRTC.browser.isChrome;
@@ -46,7 +46,7 @@ $(function() {
     }
 
     // 캠 체크, 체크 텀이 필요함
-    setTimeout(function() {
+    setTimeout(function () {
       if (checkPage && !DetectRTC.hasWebcam) {
         showNeedCamMessage();
       }

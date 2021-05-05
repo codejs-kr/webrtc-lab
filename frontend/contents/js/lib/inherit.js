@@ -13,3 +13,5 @@ const inherit = (function(Parent, Child) {
     Child.super = Parent.prototype;
   };
 })();
+
+export default inherit;
