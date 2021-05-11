@@ -35,6 +35,16 @@ input[type='text'] {
   vertical-align: top;
 }
 
+#create-wrap {
+  overflow: hidden;
+  max-height: 200px;
+  transition: all 0.3s ease-out;
+}
+
+#create-wrap.slideup {
+  max-height: 0;
+}
+
 /********************************************
   Below room style
 *********************************************/
