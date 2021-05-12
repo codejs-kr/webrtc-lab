@@ -19,9 +19,15 @@ function capture() {
 function insertImage(imageData) {
   const $images = document.querySelector('#images');
   const $img = document.createElement('img');
+  const $a = document.createElement('a');
+  const fileName = `[WebRTC 연구실] Capture - ${new Date().getTime()}`;
 
   $img.src = imageData;
-  $images.insertBefore($img, $images.childNodes[0]);
+  $a.href = imageData;
+  $a.download = fileName;
+  $a.appendChild($img);
+
+  $images.insertBefore($a, $images.childNodes[0]);
 }
 
 /**
