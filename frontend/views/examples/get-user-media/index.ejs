@@ -5,50 +5,57 @@
       <button>getUserMedia()</button>
 
       <pre>
-      <code class="highlight">$(function() {
-  /**
-   * getUserMedia 성공
-   * @param stream
-   */
-  function success(stream) {
-    console.log('success', arguments);
+      <code class="highlight">/**
+ * getUserMedia 성공
+ * @param stream
+ */
+function success(stream) {
+  console.log('onSuccess', arguments);
+  const $video = document.querySelector('video');
 
-    // 비디오 테그에 stream 바인딩
-    document.querySelector('video').srcObject = stream;
+  // For IOS safari (https://github.com/webrtc/samples/issues/929)
+  if (DetectRTC.browser.isSafari) {
+    $video.setAttribute('playsinline', true);
+    $video.setAttribute('controls', true);
 
-    // do something...
+    setInterval(function () {
+      $video.removeAttribute('controls');
+    }, 0);
   }
 
-  /**
-   * getUserMedia 실패
-   * @param err
-   */
-  function error(err) {
-    console.log('error', arguments);
+  // video 테그에 stream 바인딩
+  $video.srcObject = stream;
+}
 
-    alert('카메라와 마이크를 허용해주세요');
+/**
+ * getUserMedia 실패
+ * @param error
+ */
+function error(err) {
+  console.log('error', err);
+  alert(err.message);
+}
+
+/**
+ * 미디어 호출
+ */
+async function startMedia() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: true,
+    });
+    success(stream);
+  } catch (err) {
+    error(err);
   }
+}
 
-  /**
-   * 미디어 호출
-   */
-  async function startMedia() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: true,
-        video: true,
-      });
-      success(stream);
-    } catch (err) {
-      error(err);
-    }
-  }
-
-  /**
-   * 버튼 이벤트 바인딩
-   */
-  $('button').click(startMedia);
-});</code>
+/**
+ * 버튼 이벤트 바인딩
+ */
+document.querySelector('button').addEventListener('click', startMedia);
+</code>
    	</pre>
     </div>
   </div>

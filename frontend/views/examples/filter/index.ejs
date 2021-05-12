@@ -5,93 +5,91 @@
     <div class="wrap">
       <video autoplay></video>
       <p>비디오 화면을 클릭하면 CSS필터가 적용됩니다.</p>
-      <button id="start">Start</button>
+      <button id="btn-start">Start</button>
 
       <pre>
-      <code class="highlight">$(function() {
-  const $video = $('video');
-  const $start = $('#start');
-  const filters = [
-    'grayscale',
-    'sepia',
-    'blur',
-    'brightness',
-    'contrast',
-    'hue-rotate',
-    'hue-rotate2',
-    'hue-rotate3',
-    'saturate',
-    'invert',
-    '',
-  ];
-  let index = 0;
+      <code class="highlight">const $video = document.querySelector('video');
+const $start = document.querySelector('#start');
+const filters = [
+  'grayscale',
+  'sepia',
+  'blur',
+  'brightness',
+  'contrast',
+  'hue-rotate',
+  'hue-rotate2',
+  'hue-rotate3',
+  'saturate',
+  'invert',
+  '',
+];
+let index = 0;
 
-  /**
-    * getUserMedia 성공
-    * @param stream
-    */
-  function success(stream) {
-    console.log('onSuccess', arguments);
-    const video = $video[0];
+/**
+  * getUserMedia 성공
+  * @param stream
+  */
+function success(stream) {
+  console.log('onSuccess', arguments);
 
-    // video 테그에 stream 바인딩
-    video.srcObject = stream;
+  // video 테그에 stream 바인딩
+  $video.srcObject = stream;
 
-    // 영상 플레이 준비가 되면 시작
-    video.onloadedmetadata = (event) => {
-      console.log('onloadedmetadata', event);
-      video.play();
-    };
+  // 영상 플레이 준비가 되면 시작
+  $video.onloadedmetadata = (event) => {
+    console.log('onloadedmetadata', event);
+    $video.play();
+  };
+}
+
+/**
+  * getUserMedia 실패
+  * @param error
+  */
+function error(err) {
+  console.log('error', err);
+  alert(err.message);
+}
+
+/**
+  * 미디어 호출
+  */
+async function startMedia() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: false,
+      video: true,
+    });
+    success(stream);
+  } catch (err) {
+    error(err);
   }
+}
 
-  /**
-    * getUserMedia 실패
-    * @param error
-    */
-  function error(err) {
-    console.log('error', err);
-    alert(err.message);
+/**
+  * 필터가 변경될때 DOM class를 변경 합니다.
+  * @param event
+  */
+function changeFilter(event) {
+  const el = event.target;
+  const effect = filters[index++ % filters.length]; // loop through filters.
+
+  el.className = '';
+  if (effect) {
+    el.classList.add(effect);
   }
+}
 
-  /**
-    * 미디어 호출
-    */
-  async function startMedia() {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: false,
-        video: true,
-      });
-      success(stream);
-    } catch (err) {
-      error(err);
-    }
-  }
+/**
+  * 초기 이벤트 바인딩
+  */
+function initialize() {
+  $video.addEventListener('click', changeFilter);
+  $start.addEventListener('click', startMedia);
+}
 
-  /**
-    * 필터가 변경될때 DOM class를 변경 합니다.
-    * @param event
-    */
-  function changeFilter(event) {
-    const el = event.target;
-    const effect = filters[index++ % filters.length]; // loop through filters.
-
-    el.className = '';
-    if (effect) {
-      el.classList.add(effect);
-    }
-  }
-
-  /**
-    * 초기 이벤트 바인딩
-    */
-  function initialize() {
-    $video.click(changeFilter);
-    $start.click(startMedia);
-  }
-
-  initialize();
-});</code>
+initialize();
+</code>
    	</pre>
 
     </div>

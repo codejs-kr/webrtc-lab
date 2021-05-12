@@ -6,36 +6,32 @@ import ScreenHandler from './modules/screen-handler.js';
  * @author dodortus (dodortus@gmail.com / codejs.co.kr)
  *
  */
-$(function () {
-  console.log('Loaded Main');
+const screenHandler = new ScreenHandler();
 
-  const screenHandler = new ScreenHandler();
+/**
+ * 로컬 스트림 핸들링
+ * @param stream
+ */
+function onLocalStream(stream) {
+  console.log('onLocalStream', stream);
 
-  /**
-   * 로컬 스트림 핸들링
-   * @param stream
-   */
-  function onLocalStream(stream) {
-    console.log('onLocalStream', stream);
+  const $video = document.querySelector('#local-video');
+  $video.srcObject = stream;
+}
 
-    const video = document.querySelector('#local-video');
-    video.srcObject = stream;
-  }
+/**
+ * screenHandler를 통해 스크린 API를 호출합니다.
+ */
+async function startScreenShare() {
+  const stream = await screenHandler.start();
+  onLocalStream(stream);
+}
 
-  /**
-   * screenHandler를 통해 스크린 API를 호출합니다.
-   */
-  async function startScreenShare() {
-    const stream = await screenHandler.start();
-    onLocalStream(stream);
-  }
+/**
+ * 초기 이벤트 바인딩
+ */
+function initialize() {
+  document.querySelector('#btn-start').addEventListener('click', startScreenShare);
+}
 
-  /**
-   * 초기 이벤트 바인딩
-   */
-  function initialize() {
-    $('#btn-start').click(startScreenShare);
-  }
-
-  initialize();
-});
+initialize();
