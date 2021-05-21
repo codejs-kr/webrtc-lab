@@ -10,7 +10,6 @@ import MediaHandler from './modules/media-handler.js';
 const socket = io();
 const mediaHandler = new MediaHandler();
 const peerHandler = new PeerHandler({ send });
-const animationTime = 500;
 const isSafari = DetectRTC.browser.isSafari;
 const isMobile = DetectRTC.isMobileDevice;
 const mediaConstraints = {
