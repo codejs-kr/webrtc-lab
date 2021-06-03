@@ -35,7 +35,7 @@ module.exports = [
     renderFile: 'examples/screen-share/index.ejs',
   },
   {
-    title: '파일 & 데이터 전송하기',
+    title: '데이터 채널로 파일 전송하기',
     url: '/data-channel',
     renderFile: 'examples/data-channel/index.ejs',
   },

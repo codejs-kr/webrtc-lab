@@ -50,7 +50,10 @@ module.exports = (http) => {
       console.log('thisRoom', thisRoom);
 
       // 유저 정보 추가
-      io.sockets.in(roomId).emit('join', roomId, thisRoom);
+      io.sockets.in(roomId).emit('join', roomId, {
+        userId,
+        participants: thisRoom,
+      });
       //console.log('ROOM LIST', io.sockets.adapter.rooms);
       console.log('ROOM LIST', rooms);
     });
