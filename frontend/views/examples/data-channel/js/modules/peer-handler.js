@@ -32,10 +32,6 @@ function PeerHandler(options) {
   };
 
   let localStream = null;
-  let resolution = {
-    width: 1280,
-    height: 720,
-  };
   let peer = null; // offer or answer peer
   let peerConnectionOptions = {
     optional: [{ DtlsSrtpKeyAgreement: 'true' }],
@@ -45,24 +41,29 @@ function PeerHandler(options) {
   let receiveChannel = null;
   let fileReader = null;
 
+  let receiveBuffer = [];
+  let receivedSize = 0;
+
+  let bytesPrev = 0;
+  let timestampPrev = 0;
+  let timestampStart;
+  let statsInterval = null;
+  let bitrateMax = 0;
+
+  const bitrateDiv = document.querySelector('#bitrate');
+  const downloadAnchor = document.querySelector('#download');
+  const sendProgress = document.querySelector('#sendProgress');
+  const receiveProgress = document.querySelector('#receiveProgress');
+  const statusMessage = document.querySelector('#status');
+
+  const $fileInput = document.querySelector('#file');
+
   /**
-   * getUserMedia
+   * 커넥션 오퍼 전송을 시작을 합니다.
    */
-  async function getUserMedia(mediaOption, isOffer) {
-    console.log('getUserMedia');
-
-    try {
-      localStream = await navigator.mediaDevices.getUserMedia(mediaOption);
-
-      if (isOffer) {
-        peer = createPeerConnection();
-        createOffer(peer);
-      }
-    } catch (error) {
-      console.error('Error getUserMedia', error);
-    }
-
-    return localStream;
+  function startRtcConnection() {
+    peer = createPeerConnection();
+    createOffer(peer);
   }
 
   /**
@@ -141,6 +142,7 @@ function PeerHandler(options) {
     sendChannel.addEventListener('open', onSendChannelStateChange);
     sendChannel.addEventListener('close', onSendChannelStateChange);
     sendChannel.addEventListener('error', onError);
+    peer.addEventListener('datachannel', receiveChannelCallback);
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
@@ -155,33 +157,33 @@ function PeerHandler(options) {
       }
     };
 
-    /**
-     * 크로스브라우징
-     */
-    if (peer.ontrack) {
-      peer.ontrack = (event) => {
-        console.log('ontrack', event);
-        const stream = event.streams[0];
-        that.emit('addRemoteStream', stream);
-      };
+    // /**
+    //  * 크로스브라우징
+    //  */
+    // if (peer.ontrack) {
+    //   peer.ontrack = (event) => {
+    //     console.log('ontrack', event);
+    //     const stream = event.streams[0];
+    //     that.emit('addRemoteStream', stream);
+    //   };
 
-      peer.onremovetrack = (event) => {
-        console.log('onremovetrack', event);
-        const stream = event.streams[0];
-        that.emit('removeRemoteStream', stream);
-      };
-      // 삼성 모바일에서 필요
-    } else {
-      peer.onaddstream = (event) => {
-        console.log('onaddstream', event);
-        that.emit('addRemoteStream', event.stream);
-      };
+    //   peer.onremovetrack = (event) => {
+    //     console.log('onremovetrack', event);
+    //     const stream = event.streams[0];
+    //     that.emit('removeRemoteStream', stream);
+    //   };
+    //   // 삼성 모바일에서 필요
+    // } else {
+    //   peer.onaddstream = (event) => {
+    //     console.log('onaddstream', event);
+    //     that.emit('addRemoteStream', event.stream);
+    //   };
 
-      peer.onremovestream = (event) => {
-        console.log('onremovestream', event);
-        that.emit('removeRemoteStream', event.stream);
-      };
-    }
+    //   peer.onremovestream = (event) => {
+    //     console.log('onremovestream', event);
+    //     that.emit('removeRemoteStream', event.stream);
+    //   };
+    // }
 
     peer.onnegotiationneeded = (event) => {
       console.log('onnegotiationneeded', event);
@@ -227,49 +229,6 @@ function PeerHandler(options) {
   }
 
   /**
-   * removeStream 이후 스펙 적용 (크로스브라우징)
-   * @param peer
-   * @param stream
-   */
-  function removeTrack(peer, stream) {
-    if (peer.removeTrack) {
-      stream.getTracks().forEach((track) => {
-        const sender = peer.getSenders().find((s) => s.track === track);
-        if (sender) {
-          peer.removeTrack(sender);
-        }
-      });
-    } else {
-      peer.removeStream(stream);
-    }
-  }
-
-  /**
-   * 전송중인 영상 해상도를 다이나믹하게 변경합니다.
-   */
-  function changeResolution() {
-    localStream.getVideoTracks().forEach((track) => {
-      console.log('changeResolution', track, track.getConstraints(), track.applyConstraints);
-
-      if (resolution.height > 90) {
-        resolution = {
-          width: 160,
-          height: 90,
-        };
-      } else {
-        resolution = {
-          width: 1280,
-          height: 720,
-        };
-      }
-
-      track.applyConstraints(resolution).then(() => {
-        console.log('changeResolution result', track.getConstraints());
-      });
-    });
-  }
-
-  /**
    * signaling
    * @param data
    */
@@ -304,8 +263,7 @@ function PeerHandler(options) {
     }
   }
 
-  function sendData() {
-    const file = fileInput.files[0];
+  function sendData(file) {
     console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`);
 
     // Handle 0 size files.
@@ -314,9 +272,10 @@ function PeerHandler(options) {
     if (file.size === 0) {
       bitrateDiv.innerHTML = '';
       statusMessage.textContent = 'File is empty, please select a non-empty file';
-      closeDataChannels();
+      // closeDataChannels();
       return;
     }
+
     sendProgress.max = file.size;
     receiveProgress.max = file.size;
     const chunkSize = 16384;
@@ -325,7 +284,8 @@ function PeerHandler(options) {
     fileReader.addEventListener('error', (error) => console.error('Error reading file:', error));
     fileReader.addEventListener('abort', (event) => console.log('File reading aborted:', event));
     fileReader.addEventListener('load', (e) => {
-      console.log('FileRead.onload ', e);
+      console.log('FileRead.onload ', e.target.result);
+      // sendChannel.send(e.target.result);
       sendChannel.send(e.target.result);
       offset += e.target.result.byteLength;
       sendProgress.value = offset;
@@ -340,6 +300,58 @@ function PeerHandler(options) {
       fileReader.readAsArrayBuffer(slice);
     };
     readSlice(0);
+  }
+
+  function receiveChannelCallback(event) {
+    console.log('Receive Channel Callback', event, event.channel, sendChannel);
+
+    event.channel.onmessage = onReceiveMessageCallback;
+    // sendChannel.onopen = onReceiveChannelStateChange;
+    // sendChannel.onclose = onReceiveChannelStateChange;
+
+    receivedSize = 0;
+    bitrateMax = 0;
+    downloadAnchor.textContent = '';
+    downloadAnchor.removeAttribute('download');
+    if (downloadAnchor.href) {
+      URL.revokeObjectURL(downloadAnchor.href);
+      downloadAnchor.removeAttribute('href');
+    }
+  }
+
+  function onReceiveMessageCallback(event) {
+    console.log(`Received Message`, event);
+
+    receiveBuffer.push(event.data);
+    receivedSize += event.data.byteLength;
+    receiveProgress.value = receivedSize;
+
+    // we are assuming that our signaling protocol told
+    // about the expected file size (and name, hash, etc).
+    // const file = $fileInput.files[0];
+    const file = {
+      size: 131447,
+      name: '전송된 파일.png',
+    };
+    if (receivedSize === file.size) {
+      const received = new Blob(receiveBuffer);
+      receiveBuffer = [];
+
+      downloadAnchor.href = URL.createObjectURL(received);
+      downloadAnchor.download = file.name;
+      downloadAnchor.textContent = `Click to download '${file.name}' (${file.size} bytes)`;
+      downloadAnchor.style.display = 'block';
+
+      // const bitrate = Math.round((receivedSize * 8) / (new Date().getTime() - timestampStart));
+      // bitrateDiv.innerHTML = `<strong>Average Bitrate:</strong> ${bitrate} kbits/sec (max: ${bitrateMax} kbits/sec)`;
+
+      // if (statsInterval) {
+      //   clearInterval(statsInterval);
+      //   statsInterval = null;
+      // }
+
+      // closeDataChannels();
+    }
   }
 
   function closeDataChannels() {
@@ -360,9 +372,8 @@ function PeerHandler(options) {
     console.log('Closed peer connections');
 
     // re-enable the file select
-    fileInput.disabled = false;
-    abortButton.disabled = true;
-    sendFileButton.disabled = false;
+    // $fileInput.disabled = false;
+    // sendFileButton.disabled = false;
   }
 
   function onSendChannelStateChange() {
@@ -371,13 +382,14 @@ function PeerHandler(options) {
       const { readyState } = sendChannel;
       console.log(`Send channel state is: ${readyState}`);
       if (readyState === 'open') {
-        sendData();
+        // sendData();
       }
     }
   }
 
-  async function onReceiveChannelStateChange() {
-    console.log('onSendChannelStateChange :>> ');
+  async function onReceiveChannelStateChange(event) {
+    console.log('onReceiveChannelStateChange :>> ', event);
+
     if (receiveChannel) {
       const readyState = receiveChannel.readyState;
       console.log(`Receive channel state is: ${readyState}`);
@@ -399,16 +411,42 @@ function PeerHandler(options) {
   }
 
   // display bitrate statistics.
+
+  // display bitrate statistics.
   async function displayStats() {
-    console.log('displayStats :>> ');
+    if (remoteConnection && remoteConnection.iceConnectionState === 'connected') {
+      const stats = await remoteConnection.getStats();
+      let activeCandidatePair;
+
+      stats.forEach((report) => {
+        if (report.type === 'transport') {
+          activeCandidatePair = stats.get(report.selectedCandidatePairId);
+        }
+      });
+
+      if (activeCandidatePair) {
+        if (timestampPrev === activeCandidatePair.timestamp) {
+          return;
+        }
+        // calculate current bitrate
+        const bytesNow = activeCandidatePair.bytesReceived;
+        const bitrate = Math.round(((bytesNow - bytesPrev) * 8) / (activeCandidatePair.timestamp - timestampPrev));
+        bitrateDiv.innerHTML = `<strong>Current Bitrate:</strong> ${bitrate} kbits/sec`;
+        timestampPrev = activeCandidatePair.timestamp;
+        bytesPrev = bytesNow;
+        if (bitrate > bitrateMax) {
+          bitrateMax = bitrate;
+        }
+      }
+    }
   }
 
   /**
    * extends
    */
-  this.getUserMedia = getUserMedia;
+  this.startRtcConnection = startRtcConnection;
   this.signaling = signaling;
-  this.changeResolution = changeResolution;
+  this.sendData = sendData;
 }
 
 inherit(EventEmitter, PeerHandler);

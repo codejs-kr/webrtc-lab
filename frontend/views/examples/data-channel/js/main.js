@@ -12,31 +12,10 @@ const mediaHandler = new MediaHandler();
 const peerHandler = new PeerHandler({ send });
 const isSafari = DetectRTC.browser.isSafari;
 const isMobile = DetectRTC.isMobileDevice;
-const mediaConstraints = {
-  audio: true,
-  video: {
-    width: {
-      ideal: 1280,
-      min: 640,
-      max: 1920,
-    },
-    height: {
-      ideal: 720,
-      min: 360,
-      max: 1080,
-    },
-    frameRate: {
-      ideal: 25,
-    },
-    // Select the front/user facing camera or the rear/environment facing camera if available (on Phone)
-    facingMode: 'user',
-  },
-};
 
 let roomId;
 let userId;
 let remoteUserId;
-let isOffer;
 
 // DOM
 const $body = document.body;
@@ -45,9 +24,25 @@ const $waitWrap = document.querySelector('#wait-wrap');
 const $videoWrap = document.querySelector('#file-wrap');
 const $uniqueToken = document.querySelector('#unique-token');
 
-async function getUserMedia() {
-  const stream = await peerHandler.getUserMedia(mediaConstraints, isOffer);
-  onLocalStream(stream);
+const bitrateDiv = document.querySelector('#bitrate');
+const downloadAnchor = document.querySelector('#download');
+const sendProgress = document.querySelector('#sendProgress');
+const receiveProgress = document.querySelector('#receiveProgress');
+const statusMessage = document.querySelector('#status');
+
+const $fileInput = document.querySelector('#file');
+const $btnSend = document.querySelector('#btn-send');
+
+$fileInput.addEventListener('change', handleFileInputChange, false);
+
+function handleFileInputChange() {
+  const file = $fileInput.files[0];
+
+  if (!file) {
+    console.log('No file chosen');
+  } else {
+    $btnSend.disabled = false;
+  }
 }
 
 /**
@@ -56,20 +51,21 @@ async function getUserMedia() {
 function onDetectUser() {
   console.log('onDetectUser');
 
-  $waitWrap.innerHTML = `
-    <div class="room-info">
-      <p>당신을 기다리고 있어요. 참여 하실래요?</p>
-      <button id="btn-join">Join</button>
-    </div>
-  `;
+  // TODO: 연결 UI 처리
 
-  document.querySelector('#btn-join').addEventListener('click', (e) => {
-    e.target.disabled = true;
-    isOffer = true;
-    getUserMedia();
-  });
+  // $waitWrap.innerHTML = `
+  //   <div class="room-info">
+  //     <p>당신을 기다리고 있어요. 참여 하실래요?</p>
+  //     <button id="btn-join">Join</button>
+  //   </div>
+  // `;
 
-  $createWrap.classList.add('slideup');
+  // document.querySelector('#btn-join').addEventListener('click', (e) => {
+  //   e.target.disabled = true;
+  //   isOffer = true;
+  //   getUserMedia();
+  // });
+  // $createWrap.classList.add('slideup');
 }
 
 /**
@@ -77,11 +73,16 @@ function onDetectUser() {
  * @param roomId
  * @param userList
  */
-function onJoin(roomId, userList) {
-  console.log('onJoin', roomId, userList);
+function onJoin(roomId, { userId: joinedUserId, participants }) {
+  console.log('onJoin', roomId, userId, participants);
 
-  if (Object.size(userList) > 1) {
+  if (Object.size(participants) >= 2) {
     onDetectUser();
+  }
+
+  if (userId !== joinedUserId) {
+    console.log('상대방 들어옴 :>> ', joinedUserId);
+    peerHandler.startRtcConnection();
   }
 }
 
@@ -219,19 +220,21 @@ function onRemoteStream(stream) {
  * DOM 이벤트 바인딩
  */
 function bindDomEvent() {
-  document.querySelector('#btn-start').addEventListener('click', getUserMedia);
-  document.querySelector('#btn-camera')?.addEventListener('click', (e) => {
-    const $this = e.target;
-    $this.classList.toggle('active');
-    mediaHandler[$this.className === 'active' ? 'pauseVideo' : 'resumeVideo']();
-  });
-  document.querySelector('#btn-mic')?.addEventListener('click', (e) => {
-    const $this = e.target;
-    $this.classList.toggle('active');
-    mediaHandler[$this.className === 'active' ? 'muteAudio' : 'unmuteAudio']();
-  });
+  // document.querySelector('#btn-start').addEventListener('click', getUserMedia);
+  // document.querySelector('#btn-camera')?.addEventListener('click', (e) => {
+  //   const $this = e.target;
+  //   $this.classList.toggle('active');
+  //   mediaHandler[$this.className === 'active' ? 'pauseVideo' : 'resumeVideo']();
+  // });
+  // document.querySelector('#btn-mic')?.addEventListener('click', (e) => {
+  //   const $this = e.target;
+  //   $this.classList.toggle('active');
+  //   mediaHandler[$this.className === 'active' ? 'muteAudio' : 'unmuteAudio']();
+  // });
 
-  document.querySelector('#btn-change-resolution')?.addEventListener('click', peerHandler.changeResolution);
+  $btnSend.addEventListener('click', () => {
+    peerHandler.sendData($fileInput.files[0]);
+  });
 }
 
 /**
