@@ -1,5 +1,4 @@
 import PeerHandler from './modules/peer-handler.js';
-import MediaHandler from './modules/media-handler.js';
 
 /*!
  *
@@ -8,7 +7,6 @@ import MediaHandler from './modules/media-handler.js';
  *
  */
 const socket = io();
-const mediaHandler = new MediaHandler();
 const peerHandler = new PeerHandler({ send });
 const isSafari = DetectRTC.browser.isSafari;
 const isMobile = DetectRTC.isMobileDevice;
@@ -21,7 +19,6 @@ let remoteUserId;
 const $body = document.body;
 const $createWrap = document.querySelector('#create-wrap');
 const $waitWrap = document.querySelector('#wait-wrap');
-const $videoWrap = document.querySelector('#file-wrap');
 const $uniqueToken = document.querySelector('#unique-token');
 
 const bitrateDiv = document.querySelector('#bitrate');
@@ -158,62 +155,6 @@ function setClipboard() {
       window.prompt('Copy to clipboard: Ctrl+C, Enter', link); // Copy to clipboard: Ctrl+C, Enter
     }
   });
-}
-
-function createVideoEl(id) {
-  const $video = document.createElement('video');
-  $video.id = id || 'new-video';
-  $video.muted = true;
-  $video.autoplay = true;
-
-  return $video;
-}
-
-/**
- * 로컬 스트림 핸들링
- * @param stream
- */
-function onLocalStream(stream) {
-  console.log('onLocalStream', stream);
-
-  const $localVideo = createVideoEl('local-video');
-  $videoWrap.insertBefore($localVideo, $videoWrap.childNodes[0]);
-
-  mediaHandler.setVideoStream({
-    type: 'local',
-    el: $localVideo,
-    stream: stream,
-  });
-
-  $body.className = 'room wait';
-
-  if (isMobile && isSafari) {
-    mediaHandler.playForIOS($localVideo);
-  }
-}
-
-/**
- * 상대방 스트림 핸들링
- * @param stream
- */
-function onRemoteStream(stream) {
-  console.log('onRemoteStream', stream);
-
-  const $remoteVideo = createVideoEl('remote-video');
-  $videoWrap.insertBefore($remoteVideo, $videoWrap.childNodes[0]);
-
-  mediaHandler.setVideoStream({
-    type: 'remote',
-    el: $remoteVideo,
-    stream: stream,
-  });
-
-  $body.classList.remove('wait');
-  $body.classList.add('connected');
-
-  if (isMobile && isSafari) {
-    mediaHandler.playForIOS($remoteVideo);
-  }
 }
 
 /**
