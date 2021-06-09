@@ -193,9 +193,6 @@ function initialize() {
   socket.on('leave', onLeave);
   socket.on('message', onMessage);
 
-  // Peer 관련 이벤트 바인딩
-  peerHandler.on('addRemoteStream', onRemoteStream);
-
   // DOM 이벤트 바인딩
   bindDomEvent();
 }

@@ -43,6 +43,7 @@ function PeerHandler(options) {
 
   let receiveBuffer = [];
   let receivedSize = 0;
+  let fileInfo = null;
 
   let bytesPrev = 0;
   let timestampPrev = 0;
@@ -266,7 +267,6 @@ function PeerHandler(options) {
   function sendData(file) {
     console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`);
 
-    // Handle 0 size files.
     statusMessage.textContent = '';
     downloadAnchor.textContent = '';
     if (file.size === 0) {
@@ -276,27 +276,40 @@ function PeerHandler(options) {
       return;
     }
 
+    // set file size
     sendProgress.max = file.size;
-    receiveProgress.max = file.size;
-    const chunkSize = 16384;
-    fileReader = new FileReader();
+
+    // send file info
+    sendChannel.send(
+      JSON.stringify({
+        fileInfo: {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        },
+      })
+    );
+
+    // slice file and send file data
+    const chunkSize = 16384; // 16kb (1024 * 16)
     let offset = 0;
+    fileReader = new FileReader();
     fileReader.addEventListener('error', (error) => console.error('Error reading file:', error));
     fileReader.addEventListener('abort', (event) => console.log('File reading aborted:', event));
     fileReader.addEventListener('load', (e) => {
       console.log('FileRead.onload ', e.target.result);
-      // sendChannel.send(e.target.result);
       sendChannel.send(e.target.result);
       offset += e.target.result.byteLength;
       sendProgress.value = offset;
+
       if (offset < file.size) {
         readSlice(offset);
       }
     });
 
-    const readSlice = (o) => {
-      console.log('readSlice ', o);
-      const slice = file.slice(offset, o + chunkSize);
+    const readSlice = (offset) => {
+      console.log('readSlice ', offset);
+      const slice = file.slice(offset, offset + chunkSize);
       fileReader.readAsArrayBuffer(slice);
     };
     readSlice(0);
@@ -322,25 +335,33 @@ function PeerHandler(options) {
   function onReceiveMessageCallback(event) {
     console.log(`Received Message`, event);
 
+    // 최초 전송 파일 정보 설정
+    if (typeof event.data === 'string' && event.data.match('fileInfo')) {
+      fileInfo = JSON.parse(event.data).fileInfo;
+      console.log('fileInfo :>> ', fileInfo);
+      return;
+    }
+
     receiveBuffer.push(event.data);
     receivedSize += event.data.byteLength;
-    receiveProgress.value = receivedSize;
+
+    // receiveProgress.max = fileInfo.size;
+    // receiveProgress.value = receivedSize;
 
     // we are assuming that our signaling protocol told
     // about the expected file size (and name, hash, etc).
-    // const file = $fileInput.files[0];
-    const file = {
-      size: 131447,
-      name: '전송된 파일.png',
-    };
-    if (receivedSize === file.size) {
+    if (receivedSize === fileInfo.size) {
+      console.log('Complete received file :>> ', fileInfo);
       const received = new Blob(receiveBuffer);
-      receiveBuffer = [];
-
       downloadAnchor.href = URL.createObjectURL(received);
-      downloadAnchor.download = file.name;
-      downloadAnchor.textContent = `Click to download '${file.name}' (${file.size} bytes)`;
+      downloadAnchor.download = fileInfo.name;
+      downloadAnchor.textContent = `Click to download '${fileInfo.name}' (${fileInfo.size} bytes)`;
       downloadAnchor.style.display = 'block';
+
+      // reset
+      receiveBuffer = [];
+      receivedSize = null;
+      fileInfo = null;
 
       // const bitrate = Math.round((receivedSize * 8) / (new Date().getTime() - timestampStart));
       // bitrateDiv.innerHTML = `<strong>Average Bitrate:</strong> ${bitrate} kbits/sec (max: ${bitrateMax} kbits/sec)`;
