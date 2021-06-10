@@ -48,21 +48,8 @@ function handleFileInputChange() {
 function onDetectUser() {
   console.log('onDetectUser');
 
-  // TODO: 연결 UI 처리
-
-  // $waitWrap.innerHTML = `
-  //   <div class="room-info">
-  //     <p>당신을 기다리고 있어요. 참여 하실래요?</p>
-  //     <button id="btn-join">Join</button>
-  //   </div>
-  // `;
-
-  // document.querySelector('#btn-join').addEventListener('click', (e) => {
-  //   e.target.disabled = true;
-  //   isOffer = true;
-  //   getUserMedia();
-  // });
-  // $createWrap.classList.add('slideup');
+  $btnSend.disabled = false;
+  $body.classList.add('connected');
 }
 
 /**
@@ -91,10 +78,9 @@ function onLeave(userId) {
   console.log('onLeave', arguments);
 
   if (remoteUserId === userId) {
-    document.querySelector('#remote-video').remove();
-    $body.classList.remove('connected');
-    $body.classList.add('wait');
     remoteUserId = null;
+    $body.classList.remove('connected');
+    $btnSend.disabled = true;
   }
 }
 
@@ -134,45 +120,14 @@ function send(data) {
 function setRoomToken() {
   const hashValue = (Math.random() * new Date().getTime()).toString(32).toUpperCase().replace(/\./g, '-');
 
-  if (location.hash.length > 2) {
-    $uniqueToken.href = location.href;
-  } else {
+  if (location.hash.length < 2) {
     location.hash = '#' + hashValue;
   }
 }
-
-/**
- * 클립보드 복사
- */
-function setClipboard() {
-  $uniqueToken.addEventListener('click', () => {
-    const link = location.href;
-
-    if (window.clipboardData) {
-      window.clipboardData.setData('text', link);
-      alert('Copy to Clipboard successful.');
-    } else {
-      window.prompt('Copy to clipboard: Ctrl+C, Enter', link); // Copy to clipboard: Ctrl+C, Enter
-    }
-  });
-}
-
 /**
  * DOM 이벤트 바인딩
  */
 function bindDomEvent() {
-  // document.querySelector('#btn-start').addEventListener('click', getUserMedia);
-  // document.querySelector('#btn-camera')?.addEventListener('click', (e) => {
-  //   const $this = e.target;
-  //   $this.classList.toggle('active');
-  //   mediaHandler[$this.className === 'active' ? 'pauseVideo' : 'resumeVideo']();
-  // });
-  // document.querySelector('#btn-mic')?.addEventListener('click', (e) => {
-  //   const $this = e.target;
-  //   $this.classList.toggle('active');
-  //   mediaHandler[$this.className === 'active' ? 'muteAudio' : 'unmuteAudio']();
-  // });
-
   $btnSend.addEventListener('click', () => {
     peerHandler.sendData($fileInput.files[0]);
   });
@@ -183,7 +138,6 @@ function bindDomEvent() {
  */
 function initialize() {
   setRoomToken();
-  setClipboard();
   roomId = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
   userId = Math.round(Math.random() * 99999);
 

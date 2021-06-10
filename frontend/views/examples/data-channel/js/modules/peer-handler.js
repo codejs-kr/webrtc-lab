@@ -49,7 +49,6 @@ function PeerHandler(options) {
   let timestampPrev = 0;
   let timestampStart;
   let statsInterval = null;
-  let bitrateMax = 0;
 
   const bitrateDiv = document.querySelector('#bitrate');
   const downloadAnchor = document.querySelector('#download');
@@ -72,10 +71,6 @@ function PeerHandler(options) {
    */
   function createOffer(peer) {
     console.log('createOffer', arguments);
-
-    if (localStream) {
-      addTrack(peer, localStream); // addTrack 제외시 recvonly로 SDP 생성됨
-    }
 
     peer
       .createOffer()
@@ -100,10 +95,6 @@ function PeerHandler(options) {
    */
   function createAnswer(peer, msg) {
     console.log('createAnswer', arguments);
-
-    if (localStream) {
-      addTrack(peer, localStream);
-    }
 
     peer
       .setRemoteDescription(new RTCSessionDescription(msg.sdp))
@@ -158,34 +149,6 @@ function PeerHandler(options) {
       }
     };
 
-    // /**
-    //  * 크로스브라우징
-    //  */
-    // if (peer.ontrack) {
-    //   peer.ontrack = (event) => {
-    //     console.log('ontrack', event);
-    //     const stream = event.streams[0];
-    //     that.emit('addRemoteStream', stream);
-    //   };
-
-    //   peer.onremovetrack = (event) => {
-    //     console.log('onremovetrack', event);
-    //     const stream = event.streams[0];
-    //     that.emit('removeRemoteStream', stream);
-    //   };
-    //   // 삼성 모바일에서 필요
-    // } else {
-    //   peer.onaddstream = (event) => {
-    //     console.log('onaddstream', event);
-    //     that.emit('addRemoteStream', event.stream);
-    //   };
-
-    //   peer.onremovestream = (event) => {
-    //     console.log('onremovestream', event);
-    //     that.emit('removeRemoteStream', event.stream);
-    //   };
-    // }
-
     peer.onnegotiationneeded = (event) => {
       console.log('onnegotiationneeded', event);
     };
@@ -211,22 +174,6 @@ function PeerHandler(options) {
    */
   function onSdpError() {
     console.log('onSdpError', arguments);
-  }
-
-  /**
-   * addStream 이후 스펙 적용 (크로스브라우징)
-   * 스트림을 받아서 PeerConnection track과 stream을 추가 한다.
-   * @param peer
-   * @param stream
-   */
-  function addTrack(peer, stream) {
-    if (peer.addTrack) {
-      stream.getTracks().forEach((track) => {
-        peer.addTrack(track, stream);
-      });
-    } else {
-      peer.addStream(stream);
-    }
   }
 
   /**
@@ -316,14 +263,14 @@ function PeerHandler(options) {
   }
 
   function receiveChannelCallback(event) {
-    console.log('Receive Channel Callback', event, event.channel, sendChannel);
+    console.log('Receive Channel Callback', event.channel);
 
-    event.channel.onmessage = onReceiveMessageCallback;
-    // sendChannel.onopen = onReceiveChannelStateChange;
-    // sendChannel.onclose = onReceiveChannelStateChange;
+    receiveChannel = event.channel;
+    receiveChannel.onmessage = onReceiveMessageCallback;
+    // receiveChannel.onopen = onReceiveChannelStateChange;
+    // receiveChannel.onclose = onReceiveChannelStateChange;
 
     receivedSize = 0;
-    bitrateMax = 0;
     downloadAnchor.textContent = '';
     downloadAnchor.removeAttribute('download');
     if (downloadAnchor.href) {
@@ -332,21 +279,26 @@ function PeerHandler(options) {
     }
   }
 
-  function onReceiveMessageCallback(event) {
+  async function onReceiveMessageCallback(event) {
     console.log(`Received Message`, event);
 
     // 최초 전송 파일 정보 설정
     if (typeof event.data === 'string' && event.data.match('fileInfo')) {
       fileInfo = JSON.parse(event.data).fileInfo;
       console.log('fileInfo :>> ', fileInfo);
+
+      timestampStart = new Date().getTime();
+      timestampPrev = timestampStart;
+      statsInterval = setInterval(displayStats, 500);
+      await displayStats();
       return;
     }
 
     receiveBuffer.push(event.data);
     receivedSize += event.data.byteLength;
 
-    // receiveProgress.max = fileInfo.size;
-    // receiveProgress.value = receivedSize;
+    receiveProgress.max = fileInfo.size;
+    receiveProgress.value = receivedSize;
 
     // we are assuming that our signaling protocol told
     // about the expected file size (and name, hash, etc).
@@ -358,19 +310,19 @@ function PeerHandler(options) {
       downloadAnchor.textContent = `Click to download '${fileInfo.name}' (${fileInfo.size} bytes)`;
       downloadAnchor.style.display = 'block';
 
+      const bitrate = Math.round((receivedSize * 8) / (new Date().getTime() - timestampStart));
+      console.log('확인 Average Bitrate :>> ', receivedSize, timestampStart);
+      bitrateDiv.innerHTML = `<strong>Average Bitrate:</strong> ${bitrate} kbits/sec`;
+
+      if (statsInterval) {
+        clearInterval(statsInterval);
+        statsInterval = null;
+      }
+
       // reset
       receiveBuffer = [];
-      receivedSize = null;
+      receivedSize = 0;
       fileInfo = null;
-
-      // const bitrate = Math.round((receivedSize * 8) / (new Date().getTime() - timestampStart));
-      // bitrateDiv.innerHTML = `<strong>Average Bitrate:</strong> ${bitrate} kbits/sec (max: ${bitrateMax} kbits/sec)`;
-
-      // if (statsInterval) {
-      //   clearInterval(statsInterval);
-      //   statsInterval = null;
-      // }
-
       // closeDataChannels();
     }
   }
@@ -397,15 +349,8 @@ function PeerHandler(options) {
     // sendFileButton.disabled = false;
   }
 
-  function onSendChannelStateChange() {
-    console.log('onSendChannelStateChange :>> ');
-    if (sendChannel) {
-      const { readyState } = sendChannel;
-      console.log(`Send channel state is: ${readyState}`);
-      if (readyState === 'open') {
-        // sendData();
-      }
-    }
+  function onSendChannelStateChange(event) {
+    console.log('onSendChannelStateChange :>> ', event);
   }
 
   async function onReceiveChannelStateChange(event) {
@@ -432,11 +377,9 @@ function PeerHandler(options) {
   }
 
   // display bitrate statistics.
-
-  // display bitrate statistics.
   async function displayStats() {
-    if (remoteConnection && remoteConnection.iceConnectionState === 'connected') {
-      const stats = await remoteConnection.getStats();
+    if (peer?.iceConnectionState === 'connected') {
+      const stats = await peer.getStats();
       let activeCandidatePair;
 
       stats.forEach((report) => {
@@ -449,15 +392,13 @@ function PeerHandler(options) {
         if (timestampPrev === activeCandidatePair.timestamp) {
           return;
         }
+
         // calculate current bitrate
         const bytesNow = activeCandidatePair.bytesReceived;
         const bitrate = Math.round(((bytesNow - bytesPrev) * 8) / (activeCandidatePair.timestamp - timestampPrev));
         bitrateDiv.innerHTML = `<strong>Current Bitrate:</strong> ${bitrate} kbits/sec`;
         timestampPrev = activeCandidatePair.timestamp;
         bytesPrev = bytesNow;
-        if (bitrate > bitrateMax) {
-          bitrateMax = bitrate;
-        }
       }
     }
   }
