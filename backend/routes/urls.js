@@ -30,7 +30,7 @@ module.exports = [
     renderFile: 'examples/conference/index.ejs',
   },
   {
-    title: '화면 공유',
+    title: '화면 공유 API 접근하기',
     url: '/screen-share',
     renderFile: 'examples/screen-share/index.ejs',
   },

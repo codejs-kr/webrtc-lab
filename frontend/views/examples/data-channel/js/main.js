@@ -8,8 +8,6 @@ import PeerHandler from './modules/peer-handler.js';
  */
 const socket = io();
 const peerHandler = new PeerHandler({ send });
-const isSafari = DetectRTC.browser.isSafari;
-const isMobile = DetectRTC.isMobileDevice;
 
 let roomId;
 let userId;

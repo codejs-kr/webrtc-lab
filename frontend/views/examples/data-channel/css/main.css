@@ -33,7 +33,11 @@
   width: 100%;
 }
 
-#connection-status i {
+#connection-status > p {
+  margin-bottom: 80px;
+}
+
+#connection-status span {
   font-size: 60px;
 }
 

@@ -215,11 +215,9 @@ function PeerHandler(options) {
     console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`);
 
     statusMessage.textContent = '';
-    downloadAnchor.textContent = '';
     if (file.size === 0) {
       bitrateDiv.innerHTML = '';
       statusMessage.textContent = 'File is empty, please select a non-empty file';
-      // closeDataChannels();
       return;
     }
 
@@ -267,12 +265,11 @@ function PeerHandler(options) {
 
     receiveChannel = event.channel;
     receiveChannel.onmessage = onReceiveMessageCallback;
-    // receiveChannel.onopen = onReceiveChannelStateChange;
-    // receiveChannel.onclose = onReceiveChannelStateChange;
 
     receivedSize = 0;
     downloadAnchor.textContent = '';
     downloadAnchor.removeAttribute('download');
+
     if (downloadAnchor.href) {
       URL.revokeObjectURL(downloadAnchor.href);
       downloadAnchor.removeAttribute('href');
@@ -307,12 +304,11 @@ function PeerHandler(options) {
       const received = new Blob(receiveBuffer);
       downloadAnchor.href = URL.createObjectURL(received);
       downloadAnchor.download = fileInfo.name;
-      downloadAnchor.textContent = `Click to download '${fileInfo.name}' (${fileInfo.size} bytes)`;
+      downloadAnchor.textContent = `Click to download '${fileInfo.name}' (${fileInfo.size.toLocaleString()} bytes)`;
       downloadAnchor.style.display = 'block';
 
       const bitrate = Math.round((receivedSize * 8) / (new Date().getTime() - timestampStart));
-      console.log('확인 Average Bitrate :>> ', receivedSize, timestampStart);
-      bitrateDiv.innerHTML = `<strong>Average Bitrate:</strong> ${bitrate} kbits/sec`;
+      bitrateDiv.innerHTML = `<strong>Average Bitrate:</strong> ${bitrate.toLocaleString()} kbits/sec`;
 
       if (statsInterval) {
         clearInterval(statsInterval);
@@ -323,7 +319,6 @@ function PeerHandler(options) {
       receiveBuffer = [];
       receivedSize = 0;
       fileInfo = null;
-      // closeDataChannels();
     }
   }
 
@@ -343,29 +338,10 @@ function PeerHandler(options) {
     localConnection = null;
     remoteConnection = null;
     console.log('Closed peer connections');
-
-    // re-enable the file select
-    // $fileInput.disabled = false;
-    // sendFileButton.disabled = false;
   }
 
   function onSendChannelStateChange(event) {
     console.log('onSendChannelStateChange :>> ', event);
-  }
-
-  async function onReceiveChannelStateChange(event) {
-    console.log('onReceiveChannelStateChange :>> ', event);
-
-    if (receiveChannel) {
-      const readyState = receiveChannel.readyState;
-      console.log(`Receive channel state is: ${readyState}`);
-      if (readyState === 'open') {
-        timestampStart = new Date().getTime();
-        timestampPrev = timestampStart;
-        statsInterval = setInterval(displayStats, 500);
-        await displayStats();
-      }
-    }
   }
 
   function onError(error) {
@@ -396,7 +372,7 @@ function PeerHandler(options) {
         // calculate current bitrate
         const bytesNow = activeCandidatePair.bytesReceived;
         const bitrate = Math.round(((bytesNow - bytesPrev) * 8) / (activeCandidatePair.timestamp - timestampPrev));
-        bitrateDiv.innerHTML = `<strong>Current Bitrate:</strong> ${bitrate} kbits/sec`;
+        bitrateDiv.innerHTML = `<strong>Current Bitrate:</strong> ${bitrate.toLocaleString()} kbits/sec`;
         timestampPrev = activeCandidatePair.timestamp;
         bytesPrev = bytesNow;
       }
