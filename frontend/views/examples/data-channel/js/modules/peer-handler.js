@@ -31,7 +31,6 @@ function PeerHandler(options) {
     ],
   };
 
-  let localStream = null;
   let peer = null; // offer or answer peer
   let peerConnectionOptions = {
     optional: [{ DtlsSrtpKeyAgreement: 'true' }],
@@ -40,23 +39,21 @@ function PeerHandler(options) {
   let sendChannel = null;
   let receiveChannel = null;
   let fileReader = null;
+  let fileInfo = null;
 
   let receiveBuffer = [];
   let receivedSize = 0;
-  let fileInfo = null;
 
   let bytesPrev = 0;
   let timestampPrev = 0;
-  let timestampStart;
+  let timestampStart = 0;
   let statsInterval = null;
 
-  const bitrateDiv = document.querySelector('#bitrate');
-  const downloadAnchor = document.querySelector('#download');
-  const sendProgress = document.querySelector('#sendProgress');
-  const receiveProgress = document.querySelector('#receiveProgress');
-  const statusMessage = document.querySelector('#status');
-
-  const $fileInput = document.querySelector('#file');
+  const $bitrate = document.querySelector('#bitrate');
+  const $download = document.querySelector('#download');
+  const $sendProgress = document.querySelector('#send-progress');
+  const $receiveProgress = document.querySelector('#receive-progress');
+  const $status = document.querySelector('#status');
 
   /**
    * 커넥션 오퍼 전송을 시작을 합니다.
@@ -184,7 +181,7 @@ function PeerHandler(options) {
     console.log('onmessage', data);
 
     const msg = data;
-    const sdp = msg.sdp || null;
+    const sdp = msg?.sdp;
 
     // 접속자가 보내온 offer처리
     if (sdp) {
@@ -207,22 +204,22 @@ function PeerHandler(options) {
 
       peer.addIceCandidate(candidate);
     } else {
-      //console.log()
+      // do something
     }
   }
 
   function sendData(file) {
     console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`);
 
-    statusMessage.textContent = '';
+    $status.textContent = '';
     if (file.size === 0) {
-      bitrateDiv.innerHTML = '';
-      statusMessage.textContent = 'File is empty, please select a non-empty file';
+      $bitrate.innerHTML = '';
+      $status.textContent = 'File is empty, please select a non-empty file';
       return;
     }
 
     // set file size
-    sendProgress.max = file.size;
+    $sendProgress.max = file.size;
 
     // send file info
     sendChannel.send(
@@ -245,7 +242,7 @@ function PeerHandler(options) {
       console.log('FileRead.onload ', e.target.result);
       sendChannel.send(e.target.result);
       offset += e.target.result.byteLength;
-      sendProgress.value = offset;
+      $sendProgress.value = offset;
 
       if (offset < file.size) {
         readSlice(offset);
@@ -267,12 +264,12 @@ function PeerHandler(options) {
     receiveChannel.onmessage = onReceiveMessageCallback;
 
     receivedSize = 0;
-    downloadAnchor.textContent = '';
-    downloadAnchor.removeAttribute('download');
+    $download.textContent = '';
+    $download.removeAttribute('download');
 
-    if (downloadAnchor.href) {
-      URL.revokeObjectURL(downloadAnchor.href);
-      downloadAnchor.removeAttribute('href');
+    if ($download.href) {
+      URL.revokeObjectURL($download.href);
+      $download.removeAttribute('href');
     }
   }
 
@@ -294,21 +291,21 @@ function PeerHandler(options) {
     receiveBuffer.push(event.data);
     receivedSize += event.data.byteLength;
 
-    receiveProgress.max = fileInfo.size;
-    receiveProgress.value = receivedSize;
+    $receiveProgress.max = fileInfo.size;
+    $receiveProgress.value = receivedSize;
 
     // we are assuming that our signaling protocol told
     // about the expected file size (and name, hash, etc).
     if (receivedSize === fileInfo.size) {
       console.log('Complete received file :>> ', fileInfo);
       const received = new Blob(receiveBuffer);
-      downloadAnchor.href = URL.createObjectURL(received);
-      downloadAnchor.download = fileInfo.name;
-      downloadAnchor.textContent = `Click to download '${fileInfo.name}' (${fileInfo.size.toLocaleString()} bytes)`;
-      downloadAnchor.style.display = 'block';
+      $download.href = URL.createObjectURL(received);
+      $download.download = fileInfo.name;
+      $download.textContent = `Click to download '${fileInfo.name}' (${fileInfo.size.toLocaleString()} bytes)`;
+      $download.style.display = 'block';
 
       const bitrate = Math.round((receivedSize * 8) / (new Date().getTime() - timestampStart));
-      bitrateDiv.innerHTML = `<strong>Average Bitrate:</strong> ${bitrate.toLocaleString()} kbits/sec`;
+      $bitrate.innerHTML = `<strong>Average Bitrate:</strong> ${bitrate.toLocaleString()} kbits/sec`;
 
       if (statsInterval) {
         clearInterval(statsInterval);
@@ -372,7 +369,7 @@ function PeerHandler(options) {
         // calculate current bitrate
         const bytesNow = activeCandidatePair.bytesReceived;
         const bitrate = Math.round(((bytesNow - bytesPrev) * 8) / (activeCandidatePair.timestamp - timestampPrev));
-        bitrateDiv.innerHTML = `<strong>Current Bitrate:</strong> ${bitrate.toLocaleString()} kbits/sec`;
+        $bitrate.innerHTML = `<strong>Current Bitrate:</strong> ${bitrate.toLocaleString()} kbits/sec`;
         timestampPrev = activeCandidatePair.timestamp;
         bytesPrev = bytesNow;
       }
