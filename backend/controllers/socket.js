@@ -36,25 +36,18 @@ module.exports = (http) => {
       roomId = roomName;
       socket.join(roomId); // 소켓을 특정 room에 binding합니다.
 
-      // 룸에 사용자 정보 추가, 이미 룸이 있는경우
-      if (rooms[roomId]) {
-        console.log('이미 룸이 있는 경우');
-        rooms[roomId][socket.id] = userId;
-        // 룸 생성 후 사용자 추가
-      } else {
-        console.log('룸 추가');
+      // 룸에 사용자 정보 추가
+      if (!rooms[roomId]) {
         rooms[roomId] = {};
-        rooms[roomId][socket.id] = userId;
       }
+      rooms[roomId][socket.id] = userId;
       thisRoom = rooms[roomId];
-      console.log('thisRoom', thisRoom);
 
       // 유저 정보 추가
       io.sockets.in(roomId).emit('join', roomId, {
         userId,
         participants: thisRoom,
       });
-      //console.log('ROOM LIST', io.sockets.adapter.rooms);
       console.log('ROOM LIST', rooms);
     });
 
@@ -62,8 +55,6 @@ module.exports = (http) => {
      * 메시지 핸들링
      */
     socket.on('message', (data) => {
-      //console.log('message: ' + data);
-
       if (data.to === 'all') {
         // for broadcasting without me
         socket.broadcast.to(data.roomId).emit('message', data);
