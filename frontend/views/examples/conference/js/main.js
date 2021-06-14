@@ -1,7 +1,7 @@
 import PeerHandler from './modules/peer-handler.js';
 import MediaHandler from './modules/media-handler.js';
 import { isSafari, isMobile } from '/js/helpers/env.js';
-import { setRoomToken, getRoomId, getUserId } from '/js/utils.js';
+import { setRoomToken, getRoomId, getUserId, bindClipboardClickEvent } from '/js/utils.js';
 
 /*!
  *
@@ -121,22 +121,6 @@ function send(data) {
 }
 
 /**
- * 클립보드 복사
- */
-function setClipboard() {
-  $uniqueToken.addEventListener('click', () => {
-    const link = location.href;
-
-    if (window.clipboardData) {
-      window.clipboardData.setData('text', link);
-      alert('Copy to Clipboard successful.');
-    } else {
-      window.prompt('Copy to clipboard: Ctrl+C, Enter', link); // Copy to clipboard: Ctrl+C, Enter
-    }
-  });
-}
-
-/**
  * 로컬 스트림 핸들링
  * @param stream
  */
@@ -205,10 +189,11 @@ function handleMicButton(e) {
  * 방장 시작 처리
  */
 async function handleStartRoom() {
-  const stream = await peerHandler.getUserMedia(mediaConstraints);
-
-  if (stream) {
+  try {
+    const stream = await peerHandler.getUserMedia(mediaConstraints);
     onLocalStream(stream);
+  } catch (error) {
+    console.error('handleStartRoom :>> ', error);
   }
 }
 
@@ -216,11 +201,12 @@ async function handleStartRoom() {
  * 참석자 참여 처리
  */
 async function handleJoinRoom() {
-  const stream = await peerHandler.getUserMedia(mediaConstraints);
-
-  if (stream) {
+  try {
+    const stream = await peerHandler.getUserMedia(mediaConstraints);
     onLocalStream(stream);
     peerHandler.startRtcConnection();
+  } catch (error) {
+    console.error('handleJoinRoom :>> ', error);
   }
 }
 
@@ -256,7 +242,6 @@ function bindPeerEvent() {
  */
 function initialize() {
   setRoomToken();
-  setClipboard();
   roomId = getRoomId();
   userId = getUserId();
 
@@ -264,6 +249,7 @@ function initialize() {
   bindDomEvent();
   bindSocketEvent();
   bindPeerEvent();
+  bindClipboardClickEvent($uniqueToken);
 }
 
 initialize();

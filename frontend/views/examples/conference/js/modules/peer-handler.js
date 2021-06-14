@@ -33,7 +33,7 @@ function PeerHandler(options) {
     try {
       localStream = await navigator.mediaDevices.getUserMedia(constraints);
     } catch (error) {
-      console.error('Error getUserMedia', error);
+      return new Promise((_, reject) => reject(error));
     }
 
     return localStream;
@@ -69,7 +69,7 @@ function PeerHandler(options) {
         });
       })
       .catch((error) => {
-        console.error('Error setLocalDescription', error);
+        console.error('Error createOffer', error);
       });
   }
 
@@ -78,7 +78,7 @@ function PeerHandler(options) {
    * @param peer
    * @param msg offer가 보내온 signaling massage
    */
-  function createAnswer(peer, msg) {
+  function createAnswer(peer, offerSdp) {
     console.log('createAnswer', arguments);
 
     if (localStream) {
@@ -86,7 +86,7 @@ function PeerHandler(options) {
     }
 
     peer
-      .setRemoteDescription(new RTCSessionDescription(msg.sdp))
+      .setRemoteDescription(new RTCSessionDescription(offerSdp))
       .then(() => {
         peer
           .createAnswer()
@@ -99,7 +99,9 @@ function PeerHandler(options) {
               sdp: SDP,
             });
           })
-          .catch(onSdpError);
+          .catch((error) => {
+            console.error('Error createAnswer', error);
+          });
       })
       .catch((error) => {
         console.error('Error setRemoteDescription', error);
@@ -114,7 +116,7 @@ function PeerHandler(options) {
     console.log('createPeerConnection', arguments);
 
     peer = new RTCPeerConnection(peerConnectionConfig);
-    console.log('new peer', peer);
+    console.log('New peer ', peer);
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
@@ -175,13 +177,6 @@ function PeerHandler(options) {
     };
 
     return peer;
-  }
-
-  /**
-   * onSdpError
-   */
-  function onSdpError() {
-    console.log('onSdpError', arguments);
   }
 
   /**
@@ -248,33 +243,33 @@ function PeerHandler(options) {
    * @param data
    */
   function signaling(data) {
-    console.log('onmessage', data);
+    console.log('signaling', data);
 
-    const msg = data;
-    const sdp = msg.sdp || null;
+    const sdp = data?.sdp;
+    const candidate = data?.candidate;
 
     // 접속자가 보내온 offer처리
     if (sdp) {
       if (sdp.type === 'offer') {
         peer = createPeerConnection();
-        createAnswer(peer, msg);
+        createAnswer(peer, sdp);
 
         // offer에 대한 응답 처리
       } else if (sdp.type === 'answer') {
-        peer.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+        peer.setRemoteDescription(new RTCSessionDescription(sdp));
       }
 
       // offer or answer cadidate처리
-    } else if (msg.candidate) {
-      const candidate = new RTCIceCandidate({
-        sdpMid: msg.id,
-        sdpMLineIndex: msg.label,
-        candidate: msg.candidate,
+    } else if (candidate) {
+      const iceCandidate = new RTCIceCandidate({
+        sdpMid: data.id,
+        sdpMLineIndex: data.label,
+        candidate: candidate,
       });
 
-      peer.addIceCandidate(candidate);
+      peer.addIceCandidate(iceCandidate);
     } else {
-      //console.log()
+      // do something
     }
   }
 

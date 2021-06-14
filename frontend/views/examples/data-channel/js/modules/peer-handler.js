@@ -50,7 +50,7 @@ function PeerHandler(options) {
         });
       })
       .catch((error) => {
-        console.error('Error setLocalDescription', error);
+        console.error('Error createOffer', error);
       });
   }
 
@@ -76,7 +76,9 @@ function PeerHandler(options) {
               sdp: SDP,
             });
           })
-          .catch(onErrorSdp);
+          .catch((error) => {
+            console.error('Error createAnswer', error);
+          });
       })
       .catch((error) => {
         console.error('Error setRemoteDescription', error);
@@ -132,13 +134,6 @@ function PeerHandler(options) {
     };
 
     return peer;
-  }
-
-  /**
-   * onErrorSdp
-   */
-  function onErrorSdp() {
-    console.log('onErrorSdp', arguments);
   }
 
   /**
@@ -208,7 +203,6 @@ function PeerHandler(options) {
     });
 
     const readSlice = (offset) => {
-      console.log('readSlice', offset);
       const slice = file.slice(offset, offset + CHUNK_SIZE);
       fileReader.readAsArrayBuffer(slice);
     };
