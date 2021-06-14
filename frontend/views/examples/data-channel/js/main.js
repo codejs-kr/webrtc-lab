@@ -4,9 +4,10 @@ import { setRoomToken, getRoomId, getUserId } from '/js/utils.js';
 /*!
  *
  * WebRTC Lab
- * @author dodortus (dodortus@gmail.com / codejs.co.kr)
- *
+ * @author dodortus (dodortus@gmail.com)
+ * @homepage https://github.com/dodortus/webrtc-lab
  */
+
 const socket = io();
 const peerHandler = new PeerHandler({ send });
 
@@ -52,14 +53,10 @@ function onDetectUser() {
  * @param userList
  */
 function onJoin(roomId, { userId: joinedUserId, participants }) {
-  console.log('onJoin', roomId, userId, participants);
+  console.log('onJoin', roomId, joinedUserId, participants);
 
-  if (Object.size(participants) >= 2) {
+  if (Object.size(participants) >= 2 && userId !== joinedUserId) {
     onDetectUser();
-  }
-
-  if (userId !== joinedUserId) {
-    console.log('상대방 들어옴 ', joinedUserId);
     peerHandler.startRtcConnection();
   }
 }

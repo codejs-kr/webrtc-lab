@@ -1,5 +1,6 @@
 import EventEmitter from '/js/lib/eventemitter.js';
 import inherit from '/js/lib/inherit.js';
+import { RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, getDefaultIceServers } from '/js/helpers/rtc.js';
 
 /**
  * PeerHandler
@@ -10,55 +11,40 @@ function PeerHandler(options) {
   console.log('Loaded PeerHandler', arguments);
   EventEmitter.call(this);
 
-  // Cross browsing
-  const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-  const RTCSessionDescription =
-    window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
-  const RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
-
   const that = this;
   const send = options.send;
-  const iceServers = {
-    iceServers: [
-      {
-        urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-      },
-      {
-        urls: ['turn:107.150.19.220:3478'],
-        credential: 'turnserver',
-        username: 'subrosa',
-      },
-    ],
+  const peerConnectionConfig = {
+    iceServers: options.iceServers || getDefaultIceServers(),
   };
 
+  let peer = null; // peer connection instance (offer or answer peer)
   let localStream = null;
   let resolution = {
     width: 1280,
     height: 720,
   };
-  let peer = null; // offer or answer peer
-  let peerConnectionOptions = {
-    optional: [{ DtlsSrtpKeyAgreement: 'true' }],
-  };
 
   /**
-   * getUserMedia
+   * 미디어 접근 후 커넥션 요청
    */
-  async function getUserMedia(mediaOption, isOffer) {
+  async function getUserMedia(constraints) {
     console.log('getUserMedia');
 
     try {
-      localStream = await navigator.mediaDevices.getUserMedia(mediaOption);
-
-      if (isOffer) {
-        peer = createPeerConnection();
-        createOffer(peer);
-      }
+      localStream = await navigator.mediaDevices.getUserMedia(constraints);
     } catch (error) {
       console.error('Error getUserMedia', error);
     }
 
     return localStream;
+  }
+
+  /**
+   * 커넥션 오퍼 전송을 시작을 합니다.
+   */
+  function startRtcConnection() {
+    peer = createPeerConnection();
+    createOffer(peer);
   }
 
   /**
@@ -127,7 +113,7 @@ function PeerHandler(options) {
   function createPeerConnection() {
     console.log('createPeerConnection', arguments);
 
-    peer = new RTCPeerConnection(iceServers, peerConnectionOptions);
+    peer = new RTCPeerConnection(peerConnectionConfig);
     console.log('new peer', peer);
 
     peer.onicecandidate = (event) => {
@@ -296,6 +282,7 @@ function PeerHandler(options) {
    * extends
    */
   this.getUserMedia = getUserMedia;
+  this.startRtcConnection = startRtcConnection;
   this.signaling = signaling;
   this.changeResolution = changeResolution;
 }
