@@ -55,8 +55,11 @@ function onDetectUser() {
 function onJoin(roomId, { userId: joinedUserId, participants }) {
   console.log('onJoin', roomId, joinedUserId, participants);
 
-  if (Object.size(participants) >= 2 && userId !== joinedUserId) {
+  if (Object.size(participants) >= 2) {
     onDetectUser();
+  }
+
+  if (userId !== joinedUserId) {
     peerHandler.startRtcConnection();
   }
 }
