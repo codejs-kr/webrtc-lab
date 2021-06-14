@@ -1,3 +1,7 @@
+import EventEmitter from '/js/lib/eventemitter.js';
+import inherit from '/js/lib/inherit.js';
+import { RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, getDefaultIceServers } from '/js/helpers/rtc.js';
+
 /**
  * PeerHandler
  * @param options
@@ -7,230 +11,78 @@ function PeerHandler(options) {
   console.log('Loaded PeerHandler', arguments);
   EventEmitter.call(this);
 
-  // Cross browsing
-  navigator.getUserMedia = navigator.getUserMedia || navigator.mozGetUserMedia || navigator.webkitGetUserMedia;
-  const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-  const RTCSessionDescription =
-    window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
-  const RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
-  const browserVersion = DetectRTC.browser.version;
-  const isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // 15버전 이상
-  const isH264 = location.href.match('h264');
-
   const that = this;
   const send = options.send;
-  const iceServers = {
-    // 'iceTransportPolicy': 'relay',
-    iceServers: [
-      {
-        urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-      },
-      {
-        urls: ['turn:107.150.19.220:3478'],
-        credential: 'turnserver',
-        username: 'subrosa',
-      },
-    ],
+  const peerConnectionConfig = {
+    iceServers: options.iceServers || getDefaultIceServers(),
   };
 
-  let localStream = null;
-  let channel = null;
-  let receiveBuffer = [];
-  let peer = null; // offer or answer peer
-  let peerConnectionOptions = {
-    optional: [
-      {
-        DtlsSrtpKeyAgreement: 'true',
-      },
-    ],
-  };
-  let mediaConstraints = {
-    mandatory: {
-      OfferToReceiveAudio: true,
-      OfferToReceiveVideo: true,
-    },
-  };
+  const CHUNK_SIZE = 16384; // 16kb (1024 * 16)
+  const BINARY_TYPE = 'arraybuffer';
+  let peer = null; // peer connection instance (offer or answer peer)
+  let sendChannel = null;
+  let receiveChannel = null;
+  let fileReader = null;
 
-  // edge is not supported
-  if (isEdge) {
-    peerConnectionOptions = {};
-    mediaConstraints = {};
+  /**
+   * 커넥션 오퍼 전송을 시작을 합니다.
+   */
+  function startRtcConnection() {
+    peer = createPeerConnection();
+    createOffer(peer);
   }
 
   /**
-   * getUserMedia
+   * offer SDP를 생성 후 전송합니다.
    */
-  function getUserMedia(mediaOption, callback, isOffer) {
-    console.log('getUserMedia');
-
-    navigator.getUserMedia(
-      mediaOption,
-      function(stream) {
-        localStream = stream;
-        callback && callback(localStream);
-
-        if (isOffer) {
-          createPeerConnection();
-          createOffer();
-        }
-      },
-      function(error) {
-        console.error('Error getUserMedia', error);
-      }
-    );
-  }
-
-  /**
-   * SDP 변경
-   * @param SDP
-   * @returns {*}
-   */
-  function editSDP(SDP) {
-    console.log('editSDP', SDP);
-
-    SDP.sdp = SDP.sdp.replace('96 98 100', '100 96 98'); // for chrome 57 <
-    SDP.sdp = SDP.sdp.replace('96 97 98 99 100 101 102', '100 101 102 96 97 98 99'); // for chrome 65 <
-
-    console.log('return editSDP', SDP);
-    return SDP;
-  }
-
-  //function sendFile() {
-  //  console.log('sendFile');
-  //
-  //  const fileInput = document.querySelector('#file-input');
-  //  const file = fileInput.files[0];
-  //
-  //  if (file) {
-  //    const fileReader = new FileReader();
-  //    console.log(`File is ${[file.name, file.size, file.type, file.lastModified].join(' ')}`, fileReader);
-  //    fileReader.onload = function(e) {
-  //      console.log('전송', e.target.result);
-  //      channel.send(e.target.result);
-  //    };
-  //  }
-  //}
-  //$('#btn-send').click(sendFile);
-
-  function onDataMessage(event) {
-    console.log('확인 channel.onmessage', event.data);
-
-    $('ul').append(`<li>${event.data}</li>`);
-  }
-
-  /**
-   * Offer 데이터 채널 생성
-   * @param peer
-   */
-  function createOfferDataChannel(peer) {
-    channel = peer.createDataChannel('chat');
-    console.log('확인 channel', channel);
-
-    channel.onopen = function(event) {
-      console.log('확인 channel.onopen', event);
-      channel.send('Hi!');
-    };
-
-    channel.onclose = function() {
-      console.log('확인 channel.onclose');
-    };
-
-    channel.onerror = function(error) {
-      console.log('확인 channel.onerror', error);
-    };
-
-    channel.onmessage = onDataMessage;
-  }
-
-  /**
-   * Answer 데이터 채널
-   * @param peer
-   */
-  function createAnswerDataChannel(peer) {
-    console.log('createAnswerDataChannel', peer);
-
-    peer.ondatachannel = function(event) {
-      console.log('확인 peer.ondatachannel', event);
-      channel = event.channel;
-
-      channel.onopen = function(event) {
-        console.log('확인 channel.onopen', event);
-        channel.send('Hi Back!');
-      };
-
-      channel.onclose = function() {
-        console.log('확인 channel.onclose');
-      };
-
-      channel.onerror = function(error) {
-        console.log('확인 channel.onerror', error);
-      };
-
-      channel.onmessage = onDataMessage;
-    };
-  }
-
-  /**
-   * offer SDP를 생성 한다.
-   */
-  function createOffer() {
+  function createOffer(peer) {
     console.log('createOffer', arguments);
 
-    createOfferDataChannel(peer);
-
-    peer.addStream(localStream); // addStream 제외시 recvonly로 SDP 생성됨
-    peer.createOffer(
-      function(SDP) {
-        if (isH264) {
-          SDP = editSDP(SDP);
-        }
-
+    peer
+      .createOffer()
+      .then((SDP) => {
         peer.setLocalDescription(SDP);
-        console.log('Sending offer description', SDP);
+        console.log('Send offer sdp to peer', SDP);
+
         send({
           to: 'all',
           sdp: SDP,
         });
-      },
-      onSdpError,
-      mediaConstraints
-    );
+      })
+      .catch((error) => {
+        console.error('Error createOffer', error);
+      });
   }
 
   /**
-   * offer에 대한 응답 SDP를 생성 한다.
+   * offer에 대한 응답 SDP를 생성 후 전송합니다.
+   * @param peer
    * @param msg offer가 보내온 signaling massage
    */
-  function createAnswer(msg) {
+  function createAnswer(peer, offerSdp) {
     console.log('createAnswer', arguments);
 
-    // createAnswerDataChannel(peer);
-
-    peer.addStream(localStream);
-    peer.setRemoteDescription(
-      new RTCSessionDescription(msg.sdp),
-      function() {
-        peer.createAnswer(
-          function(SDP) {
-            if (isH264) {
-              SDP = editSDP(SDP);
-            }
+    peer
+      .setRemoteDescription(new RTCSessionDescription(offerSdp))
+      .then(() => {
+        peer
+          .createAnswer()
+          .then((SDP) => {
             peer.setLocalDescription(SDP);
-            console.log('Sending answer to peer.', SDP);
+            console.log('Send answer sdp to peer', SDP);
 
             send({
               to: 'all',
               sdp: SDP,
             });
-          },
-          onSdpError,
-          mediaConstraints
-        );
-      },
-      function() {
-        console.error('setRemoteDescription', arguments);
-      }
-    );
+          })
+          .catch((error) => {
+            console.error('Error createAnswer', error);
+          });
+      })
+      .catch((error) => {
+        console.error('Error setRemoteDescription', error);
+      });
   }
 
   /**
@@ -240,10 +92,18 @@ function PeerHandler(options) {
   function createPeerConnection() {
     console.log('createPeerConnection', arguments);
 
-    peer = new RTCPeerConnection(iceServers, peerConnectionOptions);
-    console.log('new Peer', peer);
+    peer = new RTCPeerConnection(peerConnectionConfig);
+    console.log('New peer ', peer);
+    sendChannel = peer.createDataChannel('sendDataChannel');
+    sendChannel.binaryType = BINARY_TYPE;
+    console.log('Created send data channel');
 
-    peer.onicecandidate = function(event) {
+    sendChannel.addEventListener('open', onSendChannelStateChange);
+    sendChannel.addEventListener('close', onSendChannelStateChange);
+    sendChannel.addEventListener('error', onErrorDataChannel);
+    peer.addEventListener('datachannel', bindReceiveChannel);
+
+    peer.onicecandidate = (event) => {
       if (event.candidate) {
         send({
           to: 'all',
@@ -256,40 +116,24 @@ function PeerHandler(options) {
       }
     };
 
-    peer.onaddstream = function(event) {
-      console.log('Adding remote strem', event);
-      that.emit('addRemoteStream', event.stream);
-    };
-
-    peer.onremovestream = function(event) {
-      console.log('Removing remote stream', event);
-      that.emit('removeRemoteStream', event.stream);
-    };
-
-    peer.onnegotiationneeded = function(event) {
+    peer.onnegotiationneeded = (event) => {
       console.log('onnegotiationneeded', event);
     };
 
-    peer.onsignalingstatechange = function(event) {
+    peer.onsignalingstatechange = (event) => {
       console.log('onsignalingstatechange', event);
     };
 
-    peer.oniceconnectionstatechange = function(event) {
+    peer.oniceconnectionstatechange = (event) => {
       console.log(
-        'oniceconnectionstatechange',
-        'iceGatheringState: ' + peer.iceGatheringState,
-        '/ iceConnectionState: ' + peer.iceConnectionState
+        'oniceConnectionStateChange',
+        `iceGatheringState: ${peer.iceGatheringState} / iceConnectionState: ${peer.iceConnectionState}`
       );
 
-      that.emit('iceconnectionStateChange', event);
+      that.emit('iceConnectionStateChange', event);
     };
-  }
 
-  /**
-   * onSdpError
-   */
-  function onSdpError() {
-    console.log('onSdpError', arguments);
+    return peer;
   }
 
   /**
@@ -297,41 +141,107 @@ function PeerHandler(options) {
    * @param data
    */
   function signaling(data) {
-    console.log('onmessage', data);
+    console.log('signaling', data);
 
-    const msg = data;
-    const sdp = msg.sdp || null;
+    const sdp = data?.sdp;
+    const candidate = data?.candidate;
 
     // 접속자가 보내온 offer처리
     if (sdp) {
       if (sdp.type === 'offer') {
-        createPeerConnection();
-        createAnswer(msg);
+        peer = createPeerConnection();
+        createAnswer(peer, sdp);
 
         // offer에 대한 응답 처리
       } else if (sdp.type === 'answer') {
-        peer.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+        peer.setRemoteDescription(new RTCSessionDescription(sdp));
       }
 
       // offer or answer cadidate처리
-    } else if (msg.candidate) {
-      const candidate = new RTCIceCandidate({
-        sdpMid: msg.id,
-        sdpMLineIndex: msg.label,
-        candidate: msg.candidate,
+    } else if (candidate) {
+      const iceCandidate = new RTCIceCandidate({
+        sdpMid: data.id,
+        sdpMLineIndex: data.label,
+        candidate: candidate,
       });
 
-      peer.addIceCandidate(candidate);
+      peer.addIceCandidate(iceCandidate);
     } else {
-      //console.log()
+      // do something
     }
+  }
+
+  /**
+   * 파일 정보를 데이터 채널을 통해 전송합니다
+   */
+  function sendData(file) {
+    // send file info
+    sendChannel.send(
+      JSON.stringify({
+        fileInfo: {
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        },
+      })
+    );
+
+    // slice file and send file data
+    let offset = 0;
+    fileReader = new FileReader();
+    fileReader.addEventListener('error', (error) => console.error('Error reading file:', error));
+    fileReader.addEventListener('abort', (event) => console.log('File reading aborted:', event));
+    fileReader.addEventListener('load', (e) => {
+      console.log('FileRead.onload', e.target.result);
+      sendChannel.send(e.target.result);
+      offset += e.target.result.byteLength;
+      that.emit('sendDataChannelProgress', offset);
+
+      if (offset < file.size) {
+        readSlice(offset);
+      }
+    });
+
+    const readSlice = (offset) => {
+      const slice = file.slice(offset, offset + CHUNK_SIZE);
+      fileReader.readAsArrayBuffer(slice);
+    };
+    readSlice(0);
+  }
+
+  function bindReceiveChannel(event) {
+    console.log('bindReceiveChannel', event.channel);
+
+    receiveChannel = event.channel;
+    receiveChannel.onmessage = (event) => {
+      that.emit('receiveDataChannel', event);
+    };
+  }
+
+  function onSendChannelStateChange(event) {
+    console.log('onSendChannelStateChange ', event);
+    that.emit('sendChannelStateChange', event);
+  }
+
+  function onErrorDataChannel(error) {
+    console.log('onErrorDataChannel ', error);
+    that.emit('errorDataChannel', error);
+  }
+
+  function getPeer() {
+    console.log('getPeer', peer);
+    return peer;
   }
 
   /**
    * extends
    */
-  this.getUserMedia = getUserMedia;
+  this.startRtcConnection = startRtcConnection;
   this.signaling = signaling;
+  this.sendData = sendData;
+  this.getPeer = getPeer;
 }
 
 inherit(EventEmitter, PeerHandler);
+
+export default PeerHandler;

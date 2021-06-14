@@ -1,5 +1,6 @@
 import EventEmitter from '/js/lib/eventemitter.js';
 import inherit from '/js/lib/inherit.js';
+import { RTCPeerConnection, RTCSessionDescription, RTCIceCandidate, getDefaultIceServers } from '/js/helpers/rtc.js';
 
 /**
  * PeerHandler
@@ -10,55 +11,40 @@ function PeerHandler(options) {
   console.log('Loaded PeerHandler', arguments);
   EventEmitter.call(this);
 
-  // Cross browsing
-  const RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-  const RTCSessionDescription =
-    window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
-  const RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate || window.webkitRTCIceCandidate;
-
   const that = this;
   const send = options.send;
-  const iceServers = {
-    iceServers: [
-      {
-        urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302', 'stun:stun2.l.google.com:19302'],
-      },
-      {
-        urls: ['turn:107.150.19.220:3478'],
-        credential: 'turnserver',
-        username: 'subrosa',
-      },
-    ],
+  const peerConnectionConfig = {
+    iceServers: options.iceServers || getDefaultIceServers(),
   };
 
+  let peer = null; // peer connection instance (offer or answer peer)
   let localStream = null;
   let resolution = {
     width: 1280,
     height: 720,
   };
-  let peer = null; // offer or answer peer
-  let peerConnectionOptions = {
-    optional: [{ DtlsSrtpKeyAgreement: 'true' }],
-  };
 
   /**
-   * getUserMedia
+   * 미디어 접근 후 커넥션 요청
    */
-  async function getUserMedia(mediaOption, isOffer) {
+  async function getUserMedia(constraints) {
     console.log('getUserMedia');
 
     try {
-      localStream = await navigator.mediaDevices.getUserMedia(mediaOption);
-
-      if (isOffer) {
-        peer = createPeerConnection();
-        createOffer(peer);
-      }
+      localStream = await navigator.mediaDevices.getUserMedia(constraints);
     } catch (error) {
-      console.error('Error getUserMedia', error);
+      return new Promise((_, reject) => reject(error));
     }
 
     return localStream;
+  }
+
+  /**
+   * 커넥션 오퍼 전송을 시작을 합니다.
+   */
+  function startRtcConnection() {
+    peer = createPeerConnection();
+    createOffer(peer);
   }
 
   /**
@@ -83,7 +69,7 @@ function PeerHandler(options) {
         });
       })
       .catch((error) => {
-        console.error('Error setLocalDescription', error);
+        console.error('Error createOffer', error);
       });
   }
 
@@ -92,7 +78,7 @@ function PeerHandler(options) {
    * @param peer
    * @param msg offer가 보내온 signaling massage
    */
-  function createAnswer(peer, msg) {
+  function createAnswer(peer, offerSdp) {
     console.log('createAnswer', arguments);
 
     if (localStream) {
@@ -100,7 +86,7 @@ function PeerHandler(options) {
     }
 
     peer
-      .setRemoteDescription(new RTCSessionDescription(msg.sdp))
+      .setRemoteDescription(new RTCSessionDescription(offerSdp))
       .then(() => {
         peer
           .createAnswer()
@@ -113,7 +99,9 @@ function PeerHandler(options) {
               sdp: SDP,
             });
           })
-          .catch(onSdpError);
+          .catch((error) => {
+            console.error('Error createAnswer', error);
+          });
       })
       .catch((error) => {
         console.error('Error setRemoteDescription', error);
@@ -127,8 +115,8 @@ function PeerHandler(options) {
   function createPeerConnection() {
     console.log('createPeerConnection', arguments);
 
-    peer = new RTCPeerConnection(iceServers, peerConnectionOptions);
-    console.log('new peer', peer);
+    peer = new RTCPeerConnection(peerConnectionConfig);
+    console.log('New peer ', peer);
 
     peer.onicecandidate = (event) => {
       if (event.candidate) {
@@ -189,13 +177,6 @@ function PeerHandler(options) {
     };
 
     return peer;
-  }
-
-  /**
-   * onSdpError
-   */
-  function onSdpError() {
-    console.log('onSdpError', arguments);
   }
 
   /**
@@ -262,33 +243,33 @@ function PeerHandler(options) {
    * @param data
    */
   function signaling(data) {
-    console.log('onmessage', data);
+    console.log('signaling', data);
 
-    const msg = data;
-    const sdp = msg.sdp || null;
+    const sdp = data?.sdp;
+    const candidate = data?.candidate;
 
     // 접속자가 보내온 offer처리
     if (sdp) {
       if (sdp.type === 'offer') {
         peer = createPeerConnection();
-        createAnswer(peer, msg);
+        createAnswer(peer, sdp);
 
         // offer에 대한 응답 처리
       } else if (sdp.type === 'answer') {
-        peer.setRemoteDescription(new RTCSessionDescription(msg.sdp));
+        peer.setRemoteDescription(new RTCSessionDescription(sdp));
       }
 
       // offer or answer cadidate처리
-    } else if (msg.candidate) {
-      const candidate = new RTCIceCandidate({
-        sdpMid: msg.id,
-        sdpMLineIndex: msg.label,
-        candidate: msg.candidate,
+    } else if (candidate) {
+      const iceCandidate = new RTCIceCandidate({
+        sdpMid: data.id,
+        sdpMLineIndex: data.label,
+        candidate: candidate,
       });
 
-      peer.addIceCandidate(candidate);
+      peer.addIceCandidate(iceCandidate);
     } else {
-      //console.log()
+      // do something
     }
   }
 
@@ -296,6 +277,7 @@ function PeerHandler(options) {
    * extends
    */
   this.getUserMedia = getUserMedia;
+  this.startRtcConnection = startRtcConnection;
   this.signaling = signaling;
   this.changeResolution = changeResolution;
 }

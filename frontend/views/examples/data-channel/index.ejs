@@ -1,39 +1,44 @@
 <% include ../../partials/header %>
-<link href="css/main.css" rel="stylesheet" type="text/css">
+  <link href="css/main.css" rel="stylesheet" type="text/css">
 
-<div id="content">
-  <div class="wrap">
-    <section id="share-wrap">
-      <a href="#" id="unique-token">Share this room link</a>
-    </section>
+  <div id="content">
+    <div class="wrap">
+      <section id="connection-status">
+        <p class="description">URL을 상대방에게 전달하여 P2P로 파일을 전송할 수 있습니다</p>
+        <div class="people-one">
+          <span>🐱</span>
+          <p>혼자예요</p>
+        </div>
+        <div class="people-two">
+          <span>😺 😺</span>
+          <p>둘이예요</p>
+        </div>
+      </section>
 
-    <section id="enter-wrap">
-      <div id="create-wrap">
-        <p>회의를 시작하시겠습니까?</p>
-        <button id="btn-start">Start</button>
-      </div>
-      <div id="wait-wrap"></div>
-    </section>
+      <section id="file-wrap">
+        <div class="buttons">
+          <input type="file" id="file" /><br />
+          <button id="btn-send" disabled>Send</button>
+        </div>
 
-    <section id="video-wrap" class="room-component">
-      <div class="buttons">
-        <button id="btn-camera">Camera Pause</button>
-        <button id="btn-mic">Mic Mute</button>
-      </div>
-    </section>
+        <div class="progress">
+          <div class="label">Send progress: </div>
+          <progress id="send-progress" max="0" value="0"></progress>
+        </div>
 
-    <section id="file-wrap" class="room-component">
-      <input type="file" id="file-input" /><br>
-      <button id="btn-send">Send file</button>
+        <div class="progress">
+          <div class="label">Receive progress: </div>
+          <progress id="receive-progress" max="0" value="0"></progress>
+        </div>
 
-      <ul id="chat"></ul>
-    </section>
+        <div id="bitrate"></div>
+        <a id="download"></a>
+        <span id="status"></span>
+      </section>
+    </div>
   </div>
-</div>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
-<script src="js/modules/peer-handler.js"></script>
-<script src="js/modules/media-handler.js"></script>
-<script src="js/main.js"></script>
-<% include ../../partials/footer %>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.4.0/socket.io.js"></script>
+  <script type="module" src="js/main.js"></script>
+  <% include ../../partials/footer %>

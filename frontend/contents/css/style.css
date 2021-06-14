@@ -133,10 +133,10 @@ button:hover {
   background-color: #cf402f;
 }
 button[disabled] {
-  color: #ccc;
+  background-color: #c4918b;
 }
 button[disabled]:hover {
-  background-color: #d84a38;
+  cursor: default;
 }
 video {
   margin: 0 0 20px 0;

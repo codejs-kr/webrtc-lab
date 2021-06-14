@@ -1,18 +1,7 @@
-/*!
- *
- * WebRTC Lab
- * @author dodortus (dodortus@gmail.com)
- * @homepage codejs.co.kr
- */
+import { isSupportedBrowser, checkHasWebCam, changeHTTPS } from './helpers/env.js';
 
 $(function () {
-  const browserVersion = DetectRTC.browser.version;
-  const isFirefox = DetectRTC.browser.isFirefox;
-  const isChrome = DetectRTC.browser.isChrome;
-  const isOpera = DetectRTC.browser.isOpera;
-  const isEdge = DetectRTC.browser.isEdge && browserVersion >= 15063; // edge 15버전 이상
-  const isSafari = DetectRTC.browser.isSafari && browserVersion >= 11; // safari 11버전 이상
-  const checkPage = location.href.match(/conference|get-user-media|filter|capture/);
+  const isNeedCheckPage = location.href.match(/conference|get-user-media|filter|capture/);
   const $commentTarget = $('#content .wrap:eq(0)');
 
   function showMessage(message) {
@@ -27,12 +16,6 @@ $(function () {
     return showMessage('예제는 캠이 있어야 작동합니다.');
   }
 
-  function changeHTTPS() {
-    if (location.protocol === 'http:') {
-      location.protocol = 'https:';
-    }
-  }
-
   function init() {
     // https 설정
     if (!location.href.match('localhost')) {
@@ -40,14 +23,14 @@ $(function () {
     }
 
     // webrtc 미지원 브라우저 체크
-    if (checkPage && !isFirefox && !isChrome && !isOpera && !isEdge && !isSafari) {
+    if (isNeedCheckPage && !isSupportedBrowser) {
       showNotSupportBrowserMessage();
       return false;
     }
 
     // 캠 체크, 체크 텀이 필요함
     setTimeout(function () {
-      if (checkPage && !DetectRTC.hasWebcam) {
+      if (isNeedCheckPage && !checkHasWebCam()) {
         showNeedCamMessage();
       }
     }, 300);

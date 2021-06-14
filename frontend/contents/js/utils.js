@@ -1,10 +1,23 @@
-Object.size = function(obj) {
-  let size = 0;
+export const setRoomToken = () => {
+  const hashValue = (Math.random() * new Date().getTime()).toString(32).toUpperCase().replace(/\./g, '-');
 
-  for (let key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      size++;
-    }
+  if (location.hash.length < 2) {
+    location.hash = '#' + hashValue;
   }
-  return size;
+};
+
+export const getRoomId = () => location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
+
+export const getUserId = () => Math.round(Math.random() * 99999);
+
+export const bindClipboardClickEvent = ($target) => {
+  $target.addEventListener('click', () => {
+    const link = location.href;
+    if (window.clipboardData) {
+      window.clipboardData.setData('text', link);
+      alert('Copy to Clipboard successful.');
+    } else {
+      window.prompt('Copy to clipboard: Ctrl+C, Enter', link); // Copy to clipboard: Ctrl+C, Enter
+    }
+  });
 };

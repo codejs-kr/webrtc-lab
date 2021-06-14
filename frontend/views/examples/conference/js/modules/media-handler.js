@@ -77,6 +77,20 @@ function MediaHandler() {
   }
 
   /**
+   * 비디오 엘리먼트를 생성 후 반환합니다.
+   * @param id
+   * @returns
+   */
+  function createVideoEl(id) {
+    const $video = document.createElement('video');
+    $video.id = id || 'new-video';
+    $video.muted = true;
+    $video.autoplay = true;
+
+    return $video;
+  }
+
+  /**
    * extends
    */
   this.setVideoStream = setVideoStream;
@@ -85,6 +99,7 @@ function MediaHandler() {
   this.muteAudio = muteAudio;
   this.unmuteAudio = unmuteAudio;
   this.playForIOS = playForIOS;
+  this.createVideoEl = createVideoEl;
 }
 
 export default MediaHandler;
