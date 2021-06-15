@@ -35,7 +35,7 @@ function error(err) {
 async function startMedia() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
+      audio: false,
       video: true,
     });
     success(stream);
