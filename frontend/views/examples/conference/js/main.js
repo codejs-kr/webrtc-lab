@@ -67,8 +67,8 @@ function onDetectUser() {
  * @param roomId
  * @param userList
  */
-function onJoin(roomId, { userId: joinedUserId, participants }) {
-  console.log('onJoin', roomId, joinedUserId, participants);
+function onJoin(roomId, { userInfo, participants }) {
+  console.log('onJoin', roomId, userInfo, participants);
 
   if (Object.size(participants) >= 2) {
     onDetectUser();
@@ -79,10 +79,10 @@ function onJoin(roomId, { userId: joinedUserId, participants }) {
  * 이탈자 핸들링
  * @param userId
  */
-function onLeave(userId) {
+function onLeave({ userInfo }) {
   console.log('onLeave', arguments);
 
-  if (remoteUserId === userId) {
+  if (remoteUserId === userInfo.userId) {
     document.querySelector('#remote-video').remove();
     $body.classList.remove('connected');
     $body.classList.add('wait');
@@ -224,7 +224,7 @@ function bindDomEvent() {
  * 웹소켓 이벤트 바인딩
  */
 function bindSocketEvent() {
-  socket.emit('enter', roomId, userId);
+  socket.emit('enter', roomId, { userId });
   socket.on('join', onJoin);
   socket.on('leave', onLeave);
   socket.on('message', onMessage);
